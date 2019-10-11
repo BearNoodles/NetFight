@@ -157,10 +157,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h" />
+    <ClCompile Include="Fighter.cpp" />
+    <ClCompile Include="NetFight.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NetFight.cpp" />
+    <ClInclude Include="Fighter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
