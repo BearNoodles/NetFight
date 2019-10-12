@@ -158,10 +158,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Fighter.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="NetFight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Fighter.h" />
+    <ClInclude Include="Input.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

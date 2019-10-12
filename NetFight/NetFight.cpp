@@ -13,15 +13,15 @@ int screenWidth = 1000;
 int screenHeight = 600;
 
 sf::Time timeFromClock;
-float frameTime;
+sf::Time frameTime;
 float timeUntilFrameUpdate;
 
-
+int frameCount = 0;
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 	window.setKeyRepeatEnabled(false);
-	window.setFramerateLimit(FPS);
+	//window.setFramerateLimit(FPS);
 
 	player1 = new Fighter(sf::Vector2f(200.0f, 350.0f));
 	player2 = new Fighter(sf::Vector2f(700.0f, 350.0f));
@@ -46,17 +46,17 @@ int main()
 			}
 		}
 
-		timeFromClock = frameClock.restart();
-		frameTime += timeFromClock.asSeconds();
 
-		if (frameTime > timeUntilFrameUpdate)
+		frameTime = frameClock.getElapsedTime();
+
+		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
+			frameClock.restart();
 			player1->UpdateFrame();
 			player2->UpdateFrame();
-
-			frameTime -= timeUntilFrameUpdate;
+			frameCount++;
 		}
-
+		std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
 
 		window.clear();
 
@@ -65,6 +65,12 @@ int main()
 		window.draw(player2->GetHurtbox());
 
 		window.display();
+
+		if (frameCount == 100)
+		{
+			std::cout << "Final Position: " << player1->GetHurtbox().getPosition().x;
+			std::cout << "Final Position: " << player1->GetHurtbox().getPosition().x;
+		}
 	}
 
 	//return 0;
