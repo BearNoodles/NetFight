@@ -3,11 +3,14 @@
 
 #include <iostream>
 #include "Fighter.h"
+#include "Input.h"
 
 #define FPS 60
 
 Fighter* player1;
 Fighter* player2;
+
+Input inputHandler;
 
 int screenWidth = 1000;
 int screenHeight = 600;
@@ -49,9 +52,15 @@ int main()
 
 		frameTime = frameClock.getElapsedTime();
 
+
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
 			frameClock.restart();
+
+			inputHandler.SetCurrentFrame(frameCount);
+			inputHandler.UpdateInputs(frameCount);
+
+			player1->SetInput(inputHandler.GetInput(frameCount));
 			player1->UpdateFrame();
 			player2->UpdateFrame();
 			frameCount++;
@@ -66,11 +75,11 @@ int main()
 
 		window.display();
 
-		if (frameCount == 100)
+		/*if (frameCount == 100)
 		{
 			std::cout << "Final Position: " << player1->GetHurtbox().getPosition().x;
 			std::cout << "Final Position: " << player1->GetHurtbox().getPosition().x;
-		}
+		}*/
 	}
 
 	//return 0;

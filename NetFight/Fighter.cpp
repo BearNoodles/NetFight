@@ -12,11 +12,11 @@ Fighter::Fighter(sf::Vector2f position)
 
 void Fighter::UpdateFrame()
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	if (m_currentInput.inputs[2])
 	{
 		m_position.x -= 1;
 	}
-	else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	else if (m_currentInput.inputs[3])
 	{
 		m_position.x += 1;
 	}
@@ -27,6 +27,11 @@ void Fighter::UpdateFrame()
 sf::RectangleShape Fighter::GetHurtbox()
 {
 	return m_hurtBox;
+}
+
+void Fighter::SetInput(FrameInput input)
+{
+	m_currentInput = input;
 }
 
 Fighter::~Fighter()

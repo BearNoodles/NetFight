@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include "Input.h"
 
 //struct fighterStruct
 //{
@@ -18,12 +19,18 @@ public:
 
 	sf::RectangleShape GetHurtbox();
 
+	void SetInput(FrameInput input);
+
 protected:
 
 	sf::RectangleShape m_hurtBox;
 	//sf::RectangleShape m_hitBoxes[5];
 
 	sf::Vector2f m_position;
+
+	int m_playerID;
+
+	FrameInput m_currentInput;
 
 
 

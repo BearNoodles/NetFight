@@ -1,4 +1,5 @@
 #pragma once
+#include "SFML/Graphics.hpp"
 
 struct FrameInput
 {
@@ -13,8 +14,20 @@ public:
 
 	void SetInput(FrameInput frameInput);
 
+	FrameInput GetInput(int frameNo);
+
+	void UpdateInputs(int frameNo);
+
+	void UpdateAll();
+
+	void SetCurrentFrame(int frame);
+
 protected:
-	FrameInput player1Inputs[1000];
-	FrameInput player2Inputs[1000];
+	std::vector<FrameInput>* player1Inputs;
+	std::vector<FrameInput>* player2Inputs;
+
+	int m_currentFrame;
+
+	FrameInput noInput;
 };
 
