@@ -12,8 +12,10 @@ Input::Input()
 	player1Inputs = new std::vector<FrameInput>();
 	for (int i = 0; i < 100; i++)
 	{
+		noInput.frameNumber = i;
 		player1Inputs->push_back(noInput);
 	}
+	noInput.frameNumber = -1;
 	m_currentFrame = 0;
 }
 //FIX ALL OF THIS
@@ -26,7 +28,14 @@ void Input::SetInput(FrameInput frameInput)
 
 FrameInput Input::GetInput(int frameNo)
 {
-	return player1Inputs->back();
+	for (std::vector<FrameInput>::iterator it = player1Inputs->begin(); it != player1Inputs->end(); ++it)
+	{
+		if (it->frameNumber == frameNo)
+		{
+			return *it;
+		}
+	}
+	return noInput;
 }
 
 void Input::UpdateInputs(int frameNo)
@@ -34,10 +43,8 @@ void Input::UpdateInputs(int frameNo)
 	FrameInput tempInput;
 	tempInput.frameNumber = frameNo;
 	
-	player1Inputs->erase(player1Inputs->begin());
-	
 
-	for (bool b: tempInput.inputs)
+	for (auto &b: tempInput.inputs)
 	{
 		b = false;
 	}
@@ -65,8 +72,22 @@ void Input::UpdateInputs(int frameNo)
 	{
 		tempInput.inputs[3] = true;
 	}
+	
+	if (player1Inputs->back().frameNumber < tempInput.frameNumber)
+	{
+		player1Inputs->erase(player1Inputs->begin());
+		player1Inputs->push_back(tempInput);
+		return;
+	}
 
-	player1Inputs->push_back(tempInput);
+	for (std::vector<FrameInput>::reverse_iterator it = player1Inputs->rbegin(); it != player1Inputs->rend(); ++it)
+	{
+		if (tempInput.frameNumber == it->frameNumber)
+		{
+			*it = tempInput;
+			return;
+		}
+	}
 }
 
 void Input::UpdateAll()

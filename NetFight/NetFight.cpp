@@ -71,6 +71,10 @@ int main()
 
 
 		window.draw(player1->GetHurtbox());
+		if (player1->IsHitboxActive())
+		{
+			window.draw(player1->GetActiveHitbox());
+		}
 		window.draw(player2->GetHurtbox());
 
 		window.display();
