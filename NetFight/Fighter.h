@@ -13,7 +13,7 @@
 class Fighter
 {
 public:
-	Fighter(sf::Vector2f position);
+	Fighter(sf::Vector2f position, int playerNumber, int screenWidth);
 	~Fighter();
 
 	void UpdateFrame();
@@ -24,9 +24,17 @@ public:
 
 	sf::RectangleShape GetActiveHitbox();
 
+	Action GetCurrentAction();
+
 	void SetInput(FrameInput input);
 
 	bool IsHitboxActive();
+
+	bool CheckForHit(sf::RectangleShape* opponentHitbox);
+
+	void HandleCollision(Action opponentAttack);
+
+	void RemoveActiveHitbox();
 
 protected:
 
@@ -44,16 +52,24 @@ protected:
 
 	FrameInput m_currentInput;
 
+	//MAKE STATIC?
 	CharacterData m_characterData;
+	CharacterStruct m_characterActions;
+
+	Action m_currentAction;
 
 	enum State
 	{
-		idle, startup, active, recovery
+		idle, attacking, hit
 	};
 
-	int m_currentActionFrame;
+	int m_actionFrame;
+	int m_hitStunFrames;
 	State m_attackState;
 	void ChangeState(State attackState);
 
+	int m_direction;
+
+	int m_screenWidth;
 };
 

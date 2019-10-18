@@ -25,6 +25,9 @@ public:
 
 	void LoadCharacter1();
 
+	CharacterStruct GetCharacterStruct();
+	
+protected:
 	CharacterStruct m_characterStruct;
 };
 

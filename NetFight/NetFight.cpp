@@ -26,8 +26,8 @@ int main()
 	window.setKeyRepeatEnabled(false);
 	//window.setFramerateLimit(FPS);
 
-	player1 = new Fighter(sf::Vector2f(200.0f, 350.0f));
-	player2 = new Fighter(sf::Vector2f(700.0f, 350.0f));
+	player1 = new Fighter(sf::Vector2f(200.0f, 350.0f), 1, screenWidth);
+	player2 = new Fighter(sf::Vector2f(700.0f, 350.0f), 2, screenWidth);
 
 	timeUntilFrameUpdate = 1.0f / 60.0f;
 
@@ -61,21 +61,35 @@ int main()
 			inputHandler.UpdateInputs(frameCount);
 
 			player1->SetInput(inputHandler.GetInput(frameCount));
+
+			bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
+			bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
+			if (player1Hit)
+			{
+				player2->RemoveActiveHitbox();
+				player1->HandleCollision(player2->GetCurrentAction());
+			}
+			if (player2Hit)
+			{
+				player1->RemoveActiveHitbox();
+				player2->HandleCollision(player1->GetCurrentAction());
+			}
+
 			player1->UpdateFrame();
 			player2->UpdateFrame();
 			frameCount++;
 		}
-		std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
+		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
 
 		window.clear();
 
 
 		window.draw(player1->GetHurtbox());
+		window.draw(player2->GetHurtbox());
 		if (player1->IsHitboxActive())
 		{
 			window.draw(player1->GetActiveHitbox());
 		}
-		window.draw(player2->GetHurtbox());
 
 		window.display();
 
