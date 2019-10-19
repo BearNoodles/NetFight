@@ -66,12 +66,12 @@ int main()
 			bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
 			if (player1Hit)
 			{
-				player2->RemoveActiveHitbox();
+				player2->HitLanded();
 				player1->HandleCollision(player2->GetCurrentAction());
 			}
 			if (player2Hit)
 			{
-				player1->RemoveActiveHitbox();
+				player1->HitLanded();
 				player2->HandleCollision(player1->GetCurrentAction());
 			}
 

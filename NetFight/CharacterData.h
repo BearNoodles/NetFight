@@ -5,6 +5,7 @@ struct Action
 {
 	int blockstun, hitstun;
 	int startupFrames, activeFrames, recoveryFrames, framesX, framesY, framesT;
+	int blockPushback, hitPushback, pushbackFames, selfHitPushback, selfBlockPushback, selfPushbackFrames;
 	sf::Vector2f startupMove, activeMove, recoveryMove;
 	sf::RectangleShape activeHitbox, startupHurtbox, activeHurtbox, recoveryHurtbox;
 	//Texture2D txr;

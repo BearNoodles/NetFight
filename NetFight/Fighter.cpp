@@ -6,7 +6,7 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 {
 	m_position = position;
 	m_hurtbox.setSize(sf::Vector2f(100, 200));
-	m_hurtbox.setFillColor(sf::Color::Green);
+	ChangeState(idle);
 	//m_activeHitbox = nullptr;
 	m_activeHitbox = nullptr;
 	m_hitboxPosition = sf::Vector2f(0, 0);
@@ -18,11 +18,13 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 
 	m_attackState = idle;
 
-	m_hitStunFrames = 0;
+	m_stunFrames = 0;
 
 	m_direction = (playerNumber * -2) + 3;
 
 	m_screenWidth = screenwidth;
+
+	m_hitLanded = false;
 }
 
 void Fighter::UpdateFrame()
@@ -32,11 +34,17 @@ void Fighter::UpdateFrame()
 	if (m_attackState == attacking)
 	{
 		m_actionFrame++;
+
+		if (m_hitLanded && m_pushbackFrame < m_currentAction.selfBlockPushback)
+		{
+			m_pushbackFrame++;
+			m_position.x -= m_direction * m_currentAction.selfHitPushback;
+		}
 		
 		if (m_actionFrame >= m_currentAction.recoveryFrames + m_currentAction.activeFrames + m_currentAction.startupFrames)
 		{
-			m_attackState = idle;
-			m_actionFrame = 0;
+			ChangeState(idle);
+			m_hitLanded = false;
 		}
 		else if (m_actionFrame == m_currentAction.activeFrames + m_currentAction.startupFrames)
 		{
@@ -50,7 +58,7 @@ void Fighter::UpdateFrame()
 		}
 	}
 
-	else if (m_attackState == hit)
+	else if (m_attackState == hit || m_attackState == block)
 	{
 		if (m_activeHitbox != nullptr)
 		{
@@ -59,16 +67,16 @@ void Fighter::UpdateFrame()
 
 		m_actionFrame++;
 
-		//ADD PUSHBACK TO ATTACKING PLAYER
-		if(m_position.x > 0 && m_position.x < m_screenWidth - m_hurtbox.getSize().x)
-			m_position.x -= 3 * m_direction;
 
-		if (m_actionFrame >= m_hitStunFrames)
+		if (!(IsCornered()) && m_pushbackFrame < m_hitBy.pushbackFames)
 		{
-			m_attackState = idle;
-			m_actionFrame = 0;
+			m_position.x -= m_pushback * m_direction;
 		}
 
+		if (m_actionFrame >= m_stunFrames)
+		{
+			ChangeState(idle);
+		}
 	}
 
 	else
@@ -85,7 +93,7 @@ void Fighter::UpdateFrame()
 		if (m_currentInput.inputs[0])
 		{
 			m_currentAction = m_characterActions.attack1;
-			m_attackState = attacking;
+			ChangeState(attacking);
 		}
 
 
@@ -97,11 +105,24 @@ void Fighter::UpdateFrame()
 	m_hurtbox.setPosition(m_position);
 }
 
+//POSSIBLY MAKE A BOOL SO OPPONENT KNOWS IF THE ATTACK WAS BLOCKED OR NOT
 void Fighter::HandleCollision(Action opponentAttack)
 {
-	m_attackState = hit;
-	m_actionFrame = 0;
-	m_hitStunFrames = opponentAttack.hitstun;
+	m_hitBy = opponentAttack;
+
+	if ((m_attackState == idle || m_attackState == block) && ((m_direction == 1 && m_currentInput.inputs[2]) || (m_direction == -1 && m_currentInput.inputs[3])))
+	{
+		ChangeState(block);
+		m_stunFrames = opponentAttack.blockstun;
+		m_pushback = opponentAttack.blockPushback;
+	}
+	else
+	{
+		ChangeState(hit);
+		m_stunFrames = opponentAttack.hitstun;
+		m_pushback = opponentAttack.hitPushback;
+	}
+
 }
 
 bool Fighter::CheckForHit(sf::RectangleShape* opponentHitbox)
@@ -110,16 +131,21 @@ bool Fighter::CheckForHit(sf::RectangleShape* opponentHitbox)
 	{
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	
+	return false;
 }
 
 void Fighter::RemoveActiveHitbox()
 {
 	m_activeHitbox = nullptr;
 	m_isHitboxActive = false;
+}
+
+void Fighter::HitLanded()
+{
+	RemoveActiveHitbox();
+	m_pushbackFrame = 0;
+	m_hitLanded = true;
 }
 
 sf::RectangleShape Fighter::GetHurtbox()
@@ -159,9 +185,33 @@ bool Fighter::IsHitboxActive()
 	return m_isHitboxActive;
 }
 
+bool Fighter::IsCornered()
+{
+	return (m_position.x <= 0 || m_position.x >= m_screenWidth - m_hurtbox.getSize().x);
+}
+
 void Fighter::ChangeState(State attackState)
 {
 	m_attackState = attackState;
+	m_actionFrame = 0;
+	switch (m_attackState)
+	{
+		case idle:
+			m_hurtbox.setFillColor(sf::Color::Green);
+			break;
+		case attacking:
+			m_hurtbox.setFillColor(sf::Color::Magenta);
+			break;
+		case hit:
+			m_hurtbox.setFillColor(sf::Color::Yellow);
+			break;
+		case block:
+			m_hurtbox.setFillColor(sf::Color::Blue);
+			break;
+		default: 
+			m_hurtbox.setFillColor(sf::Color::Green);
+			break;
+	}
 }
 
 Fighter::~Fighter()

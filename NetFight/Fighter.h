@@ -36,6 +36,10 @@ public:
 
 	void RemoveActiveHitbox();
 
+	void HitLanded();
+
+	bool IsCornered();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
@@ -60,16 +64,25 @@ protected:
 
 	enum State
 	{
-		idle, attacking, hit
+		idle, attacking, hit, block
 	};
 
+	Action m_hitBy;
+
 	int m_actionFrame;
-	int m_hitStunFrames;
+	int m_stunFrames;
+	int m_pushback;
 	State m_attackState;
 	void ChangeState(State attackState);
 
 	int m_direction;
 
 	int m_screenWidth;
+
+	bool m_hitLanded;
+
+	int m_pushbackFrame;
+
+	bool m_isBlocking;
 };
 
