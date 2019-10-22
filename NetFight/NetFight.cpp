@@ -75,6 +75,15 @@ int main()
 				player2->HandleCollision(player1->GetCurrentAction());
 			}
 
+			if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
+			{
+				player1->WalkPush();
+			}
+			if (player2->CheckPushing(player1->GetHurtbox()) && player2->IsCornered())
+			{
+				player2->WalkPush();
+			}
+
 			player1->UpdateFrame();
 			player2->UpdateFrame();
 			frameCount++;

@@ -40,11 +40,17 @@ public:
 
 	bool IsCornered();
 
+	bool CheckPushing(sf::RectangleShape opponentHurtbox);
+
+	void WalkPush();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
 	sf::RectangleShape* m_activeHitbox;
 	//sf::RectangleShape m_hitboxes[5];
+
+	int m_walkSpeed;
 
 	sf::Vector2f m_hitboxPosition;
 
@@ -64,7 +70,7 @@ protected:
 
 	enum State
 	{
-		idle, attacking, hit, block
+		idle, attacking, hit, block, jump
 	};
 
 	Action m_hitBy;
@@ -74,6 +80,13 @@ protected:
 	int m_pushback;
 	State m_attackState;
 	void ChangeState(State attackState);
+
+	void StartJump(int direction);
+	void UpdateJump();
+	sf::Vector2i m_jumpSpeed;
+	sf::Vector2i m_initialJumpSpeed;
+
+	int m_floorPosition;
 
 	int m_direction;
 

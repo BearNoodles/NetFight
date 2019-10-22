@@ -12,6 +12,8 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 	m_hitboxPosition = sf::Vector2f(0, 0);
 	m_isHitboxActive = false;
 
+	m_walkSpeed = 6;
+
 	m_characterData.LoadCharacter1();
 
 	m_characterActions = m_characterData.GetCharacterStruct();
@@ -25,6 +27,12 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 	m_screenWidth = screenwidth;
 
 	m_hitLanded = false;
+
+	m_jumpSpeed = sf::Vector2i(0, 0);
+
+	m_initialJumpSpeed = sf::Vector2i(m_walkSpeed, 20);
+
+	m_floorPosition = position.y + m_hurtbox.getSize().y;
 }
 
 void Fighter::UpdateFrame()
@@ -78,22 +86,39 @@ void Fighter::UpdateFrame()
 			ChangeState(idle);
 		}
 	}
+	
+	else if (m_attackState == jump)
+	{
+		UpdateJump();
+	}
 
 	else
 	{
 		if (m_currentInput.inputs[2] && m_position.x > 0)
 		{
-			m_position.x -= 10 * m_direction;
+			m_position.x -= m_walkSpeed * m_direction;
 		}
 		else if (m_currentInput.inputs[3] && m_position.x < m_screenWidth - m_hurtbox.getSize().x)
 		{
-			m_position.x += 10 * m_direction;
+			m_position.x += m_walkSpeed * m_direction;
 		}
 
 		if (m_currentInput.inputs[0])
 		{
-			m_currentAction = m_characterActions.attack1;
-			ChangeState(attacking);
+			/*m_currentAction = m_characterActions.attack1;
+			ChangeState(attacking);*/
+			if (m_currentInput.inputs[2])
+			{
+				StartJump(-1);
+			}
+			else if (m_currentInput.inputs[3])
+			{
+				StartJump(1);
+			}
+			else
+			{
+				StartJump(0);
+			}
 		}
 
 
@@ -211,6 +236,43 @@ void Fighter::ChangeState(State attackState)
 		default: 
 			m_hurtbox.setFillColor(sf::Color::Green);
 			break;
+	}
+}
+
+bool Fighter::CheckPushing(sf::RectangleShape opponentHurtbox)
+{
+	if (m_hurtbox.getGlobalBounds().intersects(opponentHurtbox.getGlobalBounds()))
+	{
+		WalkPush();
+		return true;
+	}
+	return false;
+}
+
+void Fighter::WalkPush()
+{
+	if (!IsCornered())
+	{
+		m_position.x -= (m_walkSpeed / 2) * m_direction;
+	}
+}
+
+void Fighter::StartJump(int direction)
+{
+	m_attackState = jump;
+	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
+}
+
+void Fighter::UpdateJump()
+{
+	m_position.x += m_jumpSpeed.x;
+	m_position.y += m_jumpSpeed.y;
+	m_jumpSpeed.y++;
+	if (m_position.y >= m_floorPosition - m_hurtbox.getSize().y)
+	{
+		m_attackState = idle;
+		m_position.y = m_floorPosition - m_hurtbox.getSize().y;
+		//m_verticalSpeed = 0;
 	}
 }
 
