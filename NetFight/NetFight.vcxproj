@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="CharacterData.cpp" />
     <ClCompile Include="Fighter.cpp" />
+    <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="HealthBar.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="NetFight.cpp" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="CharacterData.h" />
     <ClInclude Include="Fighter.h" />
+    <ClInclude Include="GameStateManager.h" />
     <ClInclude Include="HealthBar.h" />
     <ClInclude Include="Input.h" />
   </ItemGroup>

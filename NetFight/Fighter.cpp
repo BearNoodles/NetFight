@@ -34,7 +34,7 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 
 	m_floorPosition = position.y + m_hurtbox.getSize().y;
 
-	m_maxHealth = 1000.0f;
+	m_maxHealth = 1000;
 	m_currentHealth = m_maxHealth;
 }
 
@@ -285,7 +285,7 @@ void Fighter::UpdateJump()
 	}
 }
 
-float Fighter::GetHealth()
+int Fighter::GetHealth()
 {
 	return m_currentHealth;
 }

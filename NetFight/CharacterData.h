@@ -13,6 +13,11 @@ struct Action
 	//SoundEffect sound;
 };
 
+enum State
+{
+	idle, attacking, hit, block, jump
+};
+
 struct CharacterStruct
 {
 	Action attack1;

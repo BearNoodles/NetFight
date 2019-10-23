@@ -10,6 +10,12 @@
 //
 //	sf::Vector2f m_position;
 //};
+
+//enum State
+//{
+//	idle, attacking, hit, block, jump
+//};
+
 class Fighter
 {
 public:
@@ -44,7 +50,7 @@ public:
 
 	void WalkPush();
 
-	float GetHealth();
+	int GetHealth();
 
 protected:
 
@@ -54,8 +60,8 @@ protected:
 
 	sf::RectangleShape m_healthBar;
 
-	float m_maxHealth;
-	float m_currentHealth;
+	int m_maxHealth;
+	int m_currentHealth;
 
 	int m_walkSpeed;
 
@@ -75,10 +81,10 @@ protected:
 
 	Action m_currentAction;
 
-	enum State
+	/*enum State
 	{
 		idle, attacking, hit, block, jump
-	};
+	};*/
 
 	Action m_hitBy;
 

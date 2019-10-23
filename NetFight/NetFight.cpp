@@ -5,14 +5,19 @@
 #include "Fighter.h"
 #include "Input.h"
 #include "HealthBar.h"
+#include "GameStateManager.h"
 
 #define FPS 60
+
+GameStateManager stateManager;
+GameState currentState;
 
 Fighter* player1;
 Fighter* player2;
 
 HealthBar* healthBar1;
 HealthBar* healthBar2;
+
 
 Input inputHandler;
 
@@ -59,7 +64,7 @@ int main()
 
 		frameTime = frameClock.getElapsedTime();
 
-
+		//Advance frame
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
 			frameClock.restart();
