@@ -44,11 +44,18 @@ public:
 
 	void WalkPush();
 
+	float GetHealth();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
 	sf::RectangleShape* m_activeHitbox;
 	//sf::RectangleShape m_hitboxes[5];
+
+	sf::RectangleShape m_healthBar;
+
+	float m_maxHealth;
+	float m_currentHealth;
 
 	int m_walkSpeed;
 

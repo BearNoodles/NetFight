@@ -4,11 +4,15 @@
 #include <iostream>
 #include "Fighter.h"
 #include "Input.h"
+#include "HealthBar.h"
 
 #define FPS 60
 
 Fighter* player1;
 Fighter* player2;
+
+HealthBar* healthBar1;
+HealthBar* healthBar2;
 
 Input inputHandler;
 
@@ -28,6 +32,9 @@ int main()
 
 	player1 = new Fighter(sf::Vector2f(200.0f, 350.0f), 1, screenWidth);
 	player2 = new Fighter(sf::Vector2f(700.0f, 350.0f), 2, screenWidth);
+
+	healthBar1 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(75, 30));
+	healthBar2 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(550, 30));
 
 	timeUntilFrameUpdate = 1.0f / 60.0f;
 
@@ -99,6 +106,14 @@ int main()
 		{
 			window.draw(player1->GetActiveHitbox());
 		}
+
+		healthBar1->UpdateHealth(player1->GetHealth());
+		healthBar2->UpdateHealth(player2->GetHealth());
+
+		window.draw(healthBar1->GetHealthBarBack());
+		window.draw(healthBar1->GetHealthBar());
+		window.draw(healthBar2->GetHealthBarBack());
+		window.draw(healthBar2->GetHealthBar());
 
 		window.display();
 

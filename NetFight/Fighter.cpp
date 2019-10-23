@@ -33,6 +33,9 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 	m_initialJumpSpeed = sf::Vector2i(m_walkSpeed, 20);
 
 	m_floorPosition = position.y + m_hurtbox.getSize().y;
+
+	m_maxHealth = 1000.0f;
+	m_currentHealth = m_maxHealth;
 }
 
 void Fighter::UpdateFrame()
@@ -121,6 +124,11 @@ void Fighter::UpdateFrame()
 			}
 		}
 
+		if (m_currentInput.inputs[1])
+		{
+			m_currentAction = m_characterActions.attack1;
+			ChangeState(attacking);
+		}
 
 		//sf::Vector2f pos = m_position + m_hitboxPosition;
 		//m_activeHitbox->setPosition(pos);
@@ -146,6 +154,7 @@ void Fighter::HandleCollision(Action opponentAttack)
 		ChangeState(hit);
 		m_stunFrames = opponentAttack.hitstun;
 		m_pushback = opponentAttack.hitPushback;
+		m_currentHealth -= m_hitBy.damage;
 	}
 
 }
@@ -274,6 +283,11 @@ void Fighter::UpdateJump()
 		m_position.y = m_floorPosition - m_hurtbox.getSize().y;
 		//m_verticalSpeed = 0;
 	}
+}
+
+float Fighter::GetHealth()
+{
+	return m_currentHealth;
 }
 
 Fighter::~Fighter()

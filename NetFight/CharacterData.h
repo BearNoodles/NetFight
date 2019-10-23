@@ -3,6 +3,7 @@
 
 struct Action
 {
+	int damage;
 	int blockstun, hitstun;
 	int startupFrames, activeFrames, recoveryFrames, framesX, framesY, framesT;
 	int blockPushback, hitPushback, pushbackFames, selfHitPushback, selfBlockPushback, selfPushbackFrames;
