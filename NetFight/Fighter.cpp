@@ -18,7 +18,7 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 
 	m_characterActions = m_characterData.GetCharacterStruct();
 
-	m_attackState = idle;
+	m_playerState = idle;
 
 	m_stunFrames = 0;
 
@@ -42,7 +42,7 @@ void Fighter::UpdateFrame()
 {
 	//CHANGE UPDATE TO ITERATE THROUGH CURRENTATTACKFRAME IF NOT IDLE
 	//AND CHECK HOW MANY FRAMES THE CURRENT ATTACK STATE HAS FROM THE CHARACTRE DATA STRUCT
-	if (m_attackState == attacking)
+	if (m_playerState == attacking)
 	{
 		m_actionFrame++;
 
@@ -69,7 +69,7 @@ void Fighter::UpdateFrame()
 		}
 	}
 
-	else if (m_attackState == hit || m_attackState == block)
+	else if (m_playerState == hit || m_playerState == block)
 	{
 		if (m_activeHitbox != nullptr)
 		{
@@ -90,7 +90,7 @@ void Fighter::UpdateFrame()
 		}
 	}
 	
-	else if (m_attackState == jump)
+	else if (m_playerState == jump)
 	{
 		UpdateJump();
 	}
@@ -143,7 +143,7 @@ void Fighter::HandleCollision(Action opponentAttack)
 {
 	m_hitBy = opponentAttack;
 
-	if ((m_attackState == idle || m_attackState == block) && ((m_direction == 1 && m_currentInput.inputs[2]) || (m_direction == -1 && m_currentInput.inputs[3])))
+	if ((m_playerState == idle || m_playerState == block) && ((m_direction == 1 && m_currentInput.inputs[2]) || (m_direction == -1 && m_currentInput.inputs[3])))
 	{
 		ChangeState(block);
 		m_stunFrames = opponentAttack.blockstun;
@@ -224,11 +224,11 @@ bool Fighter::IsCornered()
 	return (m_position.x <= 0 || m_position.x >= m_screenWidth - m_hurtbox.getSize().x);
 }
 
-void Fighter::ChangeState(State attackState)
+void Fighter::ChangeState(PlayerState playerState)
 {
-	m_attackState = attackState;
+	m_playerState = playerState;
 	m_actionFrame = 0;
-	switch (m_attackState)
+	switch (m_playerState)
 	{
 		case idle:
 			m_hurtbox.setFillColor(sf::Color::Green);
@@ -268,7 +268,7 @@ void Fighter::WalkPush()
 
 void Fighter::StartJump(int direction)
 {
-	m_attackState = jump;
+	m_playerState = jump;
 	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
 }
 
@@ -279,7 +279,7 @@ void Fighter::UpdateJump()
 	m_jumpSpeed.y++;
 	if (m_position.y >= m_floorPosition - m_hurtbox.getSize().y)
 	{
-		m_attackState = idle;
+		m_playerState = idle;
 		m_position.y = m_floorPosition - m_hurtbox.getSize().y;
 		//m_verticalSpeed = 0;
 	}
@@ -288,6 +288,54 @@ void Fighter::UpdateJump()
 int Fighter::GetHealth()
 {
 	return m_currentHealth;
+}
+
+void Fighter::SetFighterState(GameState gameState)
+{
+	if (m_playerID == 1)
+	{
+		m_currentAction = gameState.player1Action;
+		m_actionFrame = gameState.player1ActionFrame;
+		m_currentHealth = gameState.player1Health;
+		m_position = gameState.player1Position;
+		m_playerState = gameState.player1State;
+		m_isHitboxActive = gameState.player1IsHitboxActive;
+
+		m_currentInput = gameState.player1CurrentInput;
+		m_hitBy = gameState.player1HitBy;
+		m_stunFrames = gameState.player1StunFrames;
+		m_pushback = gameState.player1Pushback;
+		m_jumpSpeed = gameState.player1JumpSpeed;
+		m_direction = gameState.player1Direction;
+		m_isBlocking = gameState.player1IsBlocking;
+		m_pushbackFrame = gameState.player1PushbackFrame;
+	}
+}
+
+GameState Fighter::GetFighterState()
+{
+	GameState currentState;
+
+	if (m_playerID == 1)
+	{
+		currentState.player1Action = m_currentAction;
+		currentState.player1ActionFrame = m_actionFrame;
+		currentState.player1Health = m_currentHealth;
+		currentState.player1Position = m_position;
+		currentState.player1State = m_playerState;
+		currentState.player1IsHitboxActive = m_isHitboxActive;
+		
+		currentState.player1CurrentInput = m_currentInput;
+		currentState.player1HitBy = m_hitBy;
+		currentState.player1StunFrames = m_stunFrames;
+		currentState.player1Pushback = m_pushback;
+		currentState.player1JumpSpeed = m_jumpSpeed;
+		currentState.player1Direction = m_direction;
+		currentState.player1IsBlocking = m_isBlocking;
+		currentState.player1PushbackFrame = m_pushbackFrame;
+	}
+
+	return currentState;
 }
 
 Fighter::~Fighter()

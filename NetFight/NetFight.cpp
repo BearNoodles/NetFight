@@ -98,9 +98,23 @@ int main()
 
 			player1->UpdateFrame();
 			player2->UpdateFrame();
+
+			currentState.frame = frameCount;
+			currentState.time = 99;
+
+			stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
+
 			frameCount++;
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			player1->SetFighterState(stateManager.GetState(frameCount - 20));
+			player2->SetFighterState(stateManager.GetState(frameCount - 20));
+			frameCount = stateManager.GetState(frameCount - 20).frame;
+			//time = stateManager.GetState(frameCount - 20).time;
+		}
 
 		window.clear();
 

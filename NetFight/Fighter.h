@@ -2,6 +2,7 @@
 #include "SFML/Graphics.hpp"
 #include "Input.h"
 #include "CharacterData.h"
+#include "GameStateManager.h"
 
 //struct fighterStruct
 //{
@@ -52,6 +53,9 @@ public:
 
 	int GetHealth();
 
+	void SetFighterState(GameState gameState);
+	GameState GetFighterState();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
@@ -91,8 +95,8 @@ protected:
 	int m_actionFrame;
 	int m_stunFrames;
 	int m_pushback;
-	State m_attackState;
-	void ChangeState(State attackState);
+	PlayerState m_playerState;
+	void ChangeState(PlayerState playerState);
 
 	void StartJump(int direction);
 	void UpdateJump();

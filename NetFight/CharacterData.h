@@ -13,7 +13,7 @@ struct Action
 	//SoundEffect sound;
 };
 
-enum State
+enum PlayerState
 {
 	idle, attacking, hit, block, jump
 };
