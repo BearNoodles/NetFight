@@ -26,6 +26,20 @@ void Input::SetInput(FrameInput frameInput)
 	//player1Inputs->insert(player1Inputs->at(frameInput.frameNumber), frameInput);
 }
 
+void Input::SetCurrentInput(int frame)
+{
+	while (player1Inputs->back().frameNumber > frame)
+	{
+		if (player1Inputs->back().frameNumber == -1)
+		{
+			return;
+		}
+		player1Inputs->pop_back();
+		player1Inputs->insert(player1Inputs->begin(), noInput);
+	}
+}
+
+
 FrameInput Input::GetInput(int frameNo)
 {
 	for (std::vector<FrameInput>::iterator it = player1Inputs->begin(); it != player1Inputs->end(); ++it)

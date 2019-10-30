@@ -6,7 +6,10 @@ GameStateManager::GameStateManager()
 {
 	m_gameStateVector = new std::vector<GameState>();
 	m_emptyState.frame = -1; 
-	m_gameStateVector->push_back(m_emptyState);
+	for (int i = 0; i < 100; i++)
+	{
+		m_gameStateVector->push_back(m_emptyState);
+	}
 }
 
 
@@ -23,14 +26,15 @@ void GameStateManager::SaveState(GameState state)
 		return;
 	}
 
-	for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
-	{
-		if (state.frame == it->frame)
-		{
-			*it = state;
-			return;
-		}
-	}
+	//Shouldnt need this
+	//for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
+	//{
+	//	if (state.frame == it->frame)
+	//	{
+	//		*it = state;
+	//		return;
+	//	}
+	//}
 }
 
 GameState GameStateManager::GetState(int frame)
@@ -44,6 +48,20 @@ GameState GameStateManager::GetState(int frame)
 	}
 	return m_emptyState;
 }
+
+void GameStateManager::SetCurrentState(int frame)
+{
+	while (m_gameStateVector->back().frame > frame)
+	{
+		if (m_gameStateVector->back().frame == -1)
+		{
+			return;
+		}
+		m_gameStateVector->pop_back();
+		m_gameStateVector->insert(m_gameStateVector->begin(), m_emptyState);
+	}
+}
+
 
 void GameStateManager::CreateNewGameState(GameState player1State, GameState player2State, GameState gameState)
 {
@@ -83,5 +101,5 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 
 	newGameState.time = gameState.time;
 
-	SaveState(gameState);
+	SaveState(newGameState);
 }

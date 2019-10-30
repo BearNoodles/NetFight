@@ -11,6 +11,7 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 	m_activeHitbox = nullptr;
 	m_hitboxPosition = sf::Vector2f(0, 0);
 	m_isHitboxActive = false;
+	m_playerID = playerNumber;
 
 	m_walkSpeed = 6;
 
@@ -294,11 +295,12 @@ void Fighter::SetFighterState(GameState gameState)
 {
 	if (m_playerID == 1)
 	{
+		ChangeState(gameState.player1State);
+
 		m_currentAction = gameState.player1Action;
 		m_actionFrame = gameState.player1ActionFrame;
 		m_currentHealth = gameState.player1Health;
 		m_position = gameState.player1Position;
-		m_playerState = gameState.player1State;
 		m_isHitboxActive = gameState.player1IsHitboxActive;
 
 		m_currentInput = gameState.player1CurrentInput;
@@ -309,6 +311,26 @@ void Fighter::SetFighterState(GameState gameState)
 		m_direction = gameState.player1Direction;
 		m_isBlocking = gameState.player1IsBlocking;
 		m_pushbackFrame = gameState.player1PushbackFrame;
+	}
+
+	else if (m_playerID == 2)
+	{
+		ChangeState(gameState.player1State);
+
+		m_currentAction = gameState.player2Action;
+		m_actionFrame = gameState.player2ActionFrame;
+		m_currentHealth = gameState.player2Health;
+		m_position = gameState.player2Position;
+		m_isHitboxActive = gameState.player2IsHitboxActive;
+
+		m_currentInput = gameState.player2CurrentInput;
+		m_hitBy = gameState.player2HitBy;
+		m_stunFrames = gameState.player2StunFrames;
+		m_pushback = gameState.player2Pushback;
+		m_jumpSpeed = gameState.player2JumpSpeed;
+		m_direction = gameState.player2Direction;
+		m_isBlocking = gameState.player2IsBlocking;
+		m_pushbackFrame = gameState.player2PushbackFrame;
 	}
 }
 
@@ -324,7 +346,7 @@ GameState Fighter::GetFighterState()
 		currentState.player1Position = m_position;
 		currentState.player1State = m_playerState;
 		currentState.player1IsHitboxActive = m_isHitboxActive;
-		
+
 		currentState.player1CurrentInput = m_currentInput;
 		currentState.player1HitBy = m_hitBy;
 		currentState.player1StunFrames = m_stunFrames;
@@ -333,6 +355,25 @@ GameState Fighter::GetFighterState()
 		currentState.player1Direction = m_direction;
 		currentState.player1IsBlocking = m_isBlocking;
 		currentState.player1PushbackFrame = m_pushbackFrame;
+	}
+
+	else if (m_playerID == 2)
+	{
+		currentState.player2Action = m_currentAction;
+		currentState.player2ActionFrame = m_actionFrame;
+		currentState.player2Health = m_currentHealth;
+		currentState.player2Position = m_position;
+		currentState.player2State = m_playerState;
+		currentState.player2IsHitboxActive = m_isHitboxActive;
+
+		currentState.player2CurrentInput = m_currentInput;
+		currentState.player2HitBy = m_hitBy;
+		currentState.player2StunFrames = m_stunFrames;
+		currentState.player2Pushback = m_pushback;
+		currentState.player2JumpSpeed = m_jumpSpeed;
+		currentState.player2Direction = m_direction;
+		currentState.player2IsBlocking = m_isBlocking;
+		currentState.player2PushbackFrame = m_pushbackFrame;
 	}
 
 	return currentState;

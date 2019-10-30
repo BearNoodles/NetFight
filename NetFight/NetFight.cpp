@@ -15,6 +15,9 @@ GameState currentState;
 Fighter* player1;
 Fighter* player2;
 
+Input player1Input;
+Input player2Input;
+
 HealthBar* healthBar1;
 HealthBar* healthBar2;
 
@@ -28,7 +31,13 @@ sf::Time timeFromClock;
 sf::Time frameTime;
 float timeUntilFrameUpdate;
 
+bool s = true;
+
 int frameCount = 0;
+sf::Clock frameClock;
+
+void SimulateFrame();
+
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
@@ -43,7 +52,7 @@ int main()
 
 	timeUntilFrameUpdate = 1.0f / 60.0f;
 
-	sf::Clock frameClock;
+	frameClock.restart();
 	
 
 	while (window.isOpen())
@@ -67,7 +76,18 @@ int main()
 		//Advance frame
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
-			frameClock.restart();
+			//RESET FRAMECLOCK HERE?
+
+			inputHandler.SetCurrentFrame(frameCount);
+			inputHandler.UpdateInputs(frameCount);
+
+			//MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
+			player1Input = inputHandler.GetCurrentInput();
+			player2Input = inputHandler.GetCurrentInput();
+
+			//UPDATE WITH PLAYER INPUTS
+			SimulateFrame();
+			/*frameClock.restart();
 
 			inputHandler.SetCurrentFrame(frameCount);
 			inputHandler.UpdateInputs(frameCount);
@@ -104,16 +124,25 @@ int main()
 
 			stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
-			frameCount++;
+			frameCount++;*/
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 		{
-			player1->SetFighterState(stateManager.GetState(frameCount - 20));
-			player2->SetFighterState(stateManager.GetState(frameCount - 20));
-			frameCount = stateManager.GetState(frameCount - 20).frame;
-			//time = stateManager.GetState(frameCount - 20).time;
+			s = true;
+		}
+		
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && s)
+		{
+			frameCount -= 20;
+			stateManager.SetCurrentState(frameCount);
+			player2->SetFighterState(stateManager.GetState(frameCount));
+			player1->SetFighterState(stateManager.GetState(frameCount));
+			inputHandler.SetCurrentFrame(frameCount);
+			//frameCount = stateManager.GetState(frameCount).frame;
+			//time = stateManager.GetState(frameCount).time;
+			s = false;
 		}
 
 		window.clear();
@@ -143,7 +172,50 @@ int main()
 		}*/
 	}
 
+
 	//return 0;
+}
+
+void SimulateFrame()
+{
+	frameClock.restart();
+
+	inputHandler.SetCurrentFrame(frameCount);
+	inputHandler.UpdateInputs(frameCount);
+
+	player1->SetInput(inputHandler.GetInput(frameCount));
+
+	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
+	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
+	if (player1Hit)
+	{
+		player2->HitLanded();
+		player1->HandleCollision(player2->GetCurrentAction());
+	}
+	if (player2Hit)
+	{
+		player1->HitLanded();
+		player2->HandleCollision(player1->GetCurrentAction());
+	}
+
+	if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
+	{
+		player1->WalkPush();
+	}
+	if (player2->CheckPushing(player1->GetHurtbox()) && player2->IsCornered())
+	{
+		player2->WalkPush();
+	}
+
+	player1->UpdateFrame();
+	player2->UpdateFrame();
+
+	currentState.frame = frameCount;
+	currentState.time = 99;
+
+	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
+
+	frameCount++;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
