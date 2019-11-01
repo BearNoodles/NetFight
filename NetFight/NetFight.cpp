@@ -2,12 +2,17 @@
 //
 
 #include <iostream>
+#include <SFML/Network.hpp>
+#include <list>
 #include "Fighter.h"
 #include "Input.h"
 #include "HealthBar.h"
 #include "GameStateManager.h"
+#include "Message.h"
 
 #define FPS 60
+
+int myID;
 
 GameStateManager stateManager;
 GameState currentState;
@@ -15,8 +20,8 @@ GameState currentState;
 Fighter* player1;
 Fighter* player2;
 
-Input player1Input;
-Input player2Input;
+FrameInput player1Input;
+FrameInput player2Input;
 
 HealthBar* healthBar1;
 HealthBar* healthBar2;
@@ -36,10 +41,28 @@ bool s = true;
 int frameCount = 0;
 sf::Clock frameClock;
 
+bool msgReady;
+
 void SimulateFrame();
+void HostOrClient(); 
+bool InitHost();
+bool InitClient();
+bool WaitForPlayers();
+
+std::list<Message> messages;
+
+sf::UdpSocket socket;
+sf::IpAddress hostIP = "127.0.0.1";
+unsigned short hostPort = 54444;
+
+sf::IpAddress clientIP;
+unsigned short clientPort;
 
 int main()
 {
+	socket.setBlocking(false);
+
+
 	sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 	window.setKeyRepeatEnabled(false);
 	//window.setFramerateLimit(FPS);
@@ -51,6 +74,27 @@ int main()
 	healthBar2 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(550, 30));
 
 	timeUntilFrameUpdate = 1.0f / 60.0f;
+
+	while (window.isOpen())
+	{
+		window.clear();
+		window.display();
+		//Setup or join a game
+		HostOrClient();
+		break;
+	}
+
+	while (true)
+	{
+		if (WaitForPlayers())
+		{
+			break;
+		}
+		window.clear();
+		window.display();
+	}
+
+	msgReady = false;
 
 	frameClock.restart();
 	
@@ -82,8 +126,8 @@ int main()
 			inputHandler.UpdateInputs(frameCount);
 
 			//MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
-			player1Input = inputHandler.GetCurrentInput();
-			player2Input = inputHandler.GetCurrentInput();
+			player1Input = inputHandler.GetInput(frameCount);
+			player2Input = inputHandler.GetInput(frameCount);
 
 			//UPDATE WITH PLAYER INPUTS
 			SimulateFrame();
@@ -139,7 +183,8 @@ int main()
 			stateManager.SetCurrentState(frameCount);
 			player2->SetFighterState(stateManager.GetState(frameCount));
 			player1->SetFighterState(stateManager.GetState(frameCount));
-			inputHandler.SetCurrentFrame(frameCount);
+			
+			//inputHandler.SetCurrentFrame(frameCount);
 			//frameCount = stateManager.GetState(frameCount).frame;
 			//time = stateManager.GetState(frameCount).time;
 			s = false;
@@ -216,6 +261,248 @@ void SimulateFrame()
 	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
 	frameCount++;
+}
+
+void HostOrClient()
+{
+
+	while (true)
+	{
+		std::string choice;
+		std::cout << "Type 1 to start a new game or enter IP of host (press 2 for default host)" << std::endl;
+		std::cin >> choice;
+
+		if (choice == "1")
+		{
+			if (!InitHost())
+			{
+				std::cout << "Error starting as host, try again" << std::endl;
+				continue;
+			}
+			break;
+		}
+		else if (choice == "2")
+		{
+			if (!InitClient())
+			{
+				std::cout << "Error connecting to host, try again" << std::endl;
+				continue;
+			}
+			break;
+		}
+		else
+		{
+			hostIP = choice;
+
+			std::cout << "Enter port number of host" << std::endl;
+			unsigned short portChoice;
+			std::cin >> portChoice;
+			hostPort = portChoice;
+			if (!InitClient())
+			{
+				std::cout << "Error connecting to host, try again" << std::endl;
+				continue;
+			}
+			break;
+		}
+	}
+}
+
+bool InitHost()
+{
+
+	// bind the socket to a port
+	if (socket.bind(hostPort) != sf::Socket::Done)
+	{
+		return false;
+	}
+
+
+	myID = 1;
+	//playerCount = myID;
+	//sf::Vector2f startPos(playerCount * startPosX, startPosY);
+
+	//INIT FIGHTER?
+	//myPlayer.Init(texture, startPos, playerColours[playerCount], playerCount);
+	return true;
+}
+
+bool InitClient()
+{
+	int counter = 0;
+	// bind the socket to a port
+	if (socket.bind(sf::Socket::AnyPort) != sf::Socket::Done)
+	{
+		// error...
+	}
+
+	while (true)
+	{
+		if (counter > 10000)
+		{
+			std::cout << "Could not connect to host" << std::endl;
+			return false;
+		}
+		std::string s = "hello";
+
+		sf::Packet packet;
+		packet << s;
+
+		if (socket.send(packet, hostIP, hostPort) != sf::Socket::Done)
+		{
+			// error...
+			//send failed try it again
+			std::cout << "Send greeting failed, retrying" << std::endl;
+			counter++;
+			continue;
+		}
+		counter = 0;
+		packet.clear();
+		break;
+	}
+	while (true)
+	{
+		if (counter > 10000)
+		{
+			std::cout << "Could not connect to host" << std::endl;
+			return false;
+		}
+		std::string r;
+		sf::Packet packet;
+		if (socket.receive(packet, hostIP, hostPort) != sf::Socket::Done)
+		{
+			// error...
+			//receive failed send hello again
+			std::cout << "Receive failed, retrying" << std::endl;
+			counter++;
+			continue;
+		}
+
+		packet >> r;
+
+		if (std::stoi(r) > 1)
+		{
+			myID = std::stoi(r);
+			break;
+		}
+		else
+		{
+			std::cout << "Didnt receive number > 1, retrying" << std::endl;
+		}
+	}
+
+	//sf::Vector2f startPos(playerCount * startPosX, startPosY);
+
+	//myPlayer.Init(texture, startPos, playerColours[playerCount], playerCount);
+	//startPos = sf::Vector2f((playerCount - 1) * startPosX, startPosY);
+	//opponent.Init(texture, startPos, playerColours[playerCount - 1], playerCount - 1);
+
+	return true;
+}
+
+bool WaitForPlayers()
+{
+	//TODO draw other players while waiting
+	if (myID == 1)
+	{
+		//start game if host presses space
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+		{
+			std::string s = "begin";
+			sf::Packet packet;
+			packet << s;
+
+			if (socket.send(packet, clientIP, clientPort) != sf::Socket::Done)
+			{
+				// error...
+				//send failed try it again
+				std::cout << "Send begin failed, try again" << std::endl;
+				return false;
+			}
+			return true;
+		}
+		sf::IpAddress senderIP;
+		unsigned short senderPort;
+		sf::Packet packet;
+		std::string greeting;
+
+		if (socket.receive(packet, senderIP, senderPort) != sf::Socket::Done)
+		{
+			// error...
+			//std::cout << "no messages yet" << std::endl;
+			return false;
+		}
+
+		if (packet >> greeting)
+		{
+			//good
+		}
+		else
+		{
+			std::cout << "couldnt read packet" << std::endl;
+			return false;
+		}
+
+		if (greeting == "hello")
+		{
+			clientIP = senderIP;
+			clientPort = senderPort;
+			packet.clear();
+
+			//std::string s = std::to_string(playerCount + 1);
+			std::string s = std::to_string(1 + 1);
+			packet << s;
+			int counter = 0;
+			while (true)
+			{
+				if (counter > 10000)
+				{
+					std::cout << "Error, could not connect to client" << std::endl;
+					break;
+				}
+				if (socket.send(packet, clientIP, clientPort) != sf::Socket::Done)
+				{
+					// error...
+					//recieve failed send hello again
+					std::cout << "playerCount send failed, rety" << std::endl;
+					counter++;
+					continue;
+				}
+				//playerCount++;
+				//sf::Vector2f startPos(startPosX * playerCount, startPosY);
+				//Player tempPlayer(texture, startPos, playerColours[playerCount], playerCount);
+				//playerList.push_back(tempPlayer);
+
+				//opponent.Init(texture, startPos, playerColours[playerCount], playerCount);
+				std::cout << "Player has joined, press space to begin" << std::endl;
+
+				break;
+			}
+
+		}
+	}
+
+	else
+	{
+		sf::IpAddress hostIP;
+		unsigned short hostPort;
+		sf::Packet packet;
+		std::string beginMessage;
+		if (socket.receive(packet, hostIP, hostPort) != sf::Socket::Done)
+		{
+			// error...
+			//recieve failed send hello again
+			//std::cout << "no messages yet" << std::endl;
+			return false;
+		}
+
+		packet >> beginMessage;
+		if (beginMessage == "begin")
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

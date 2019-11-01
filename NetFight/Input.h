@@ -18,6 +18,8 @@ public:
 
 	void SetCurrentInput(int frame);
 
+	FrameInput GetCurrentInput(int frame);
+
 	void UpdateInputs(int frameNo);
 
 	void UpdateAll();

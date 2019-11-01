@@ -39,10 +39,15 @@ void Input::SetCurrentInput(int frame)
 	}
 }
 
+//FrameInput Input::GetCurrentInput(int frame)
+//{
+//	return noInput;
+//}
+
 
 FrameInput Input::GetInput(int frameNo)
 {
-	for (std::vector<FrameInput>::iterator it = player1Inputs->begin(); it != player1Inputs->end(); ++it)
+	for (std::vector<FrameInput>::reverse_iterator it = player1Inputs->rbegin(); it != player1Inputs->rend(); ++it)
 	{
 		if (it->frameNumber == frameNo)
 		{
