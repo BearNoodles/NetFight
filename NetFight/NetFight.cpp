@@ -9,6 +9,7 @@
 #include "HealthBar.h"
 #include "GameStateManager.h"
 #include "Message.h"
+#include "ggponet.h"
 
 #define FPS 60
 
@@ -17,6 +18,7 @@ int myID;
 GameStateManager stateManager;
 GameState currentState;
 
+GGPOPlayer *players;
 Fighter* player1;
 Fighter* player2;
 
@@ -43,11 +45,21 @@ sf::Clock frameClock;
 
 bool msgReady;
 
-void SimulateFrame();
+void RunFrame();
 void HostOrClient(); 
 bool InitHost();
 bool InitClient();
 bool WaitForPlayers();
+
+void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
+bool BeginGame();
+void InitSpectator(int localport, int num_players, char *host_ip, int host_port);
+void VectorWar_DrawCurrentFrame();
+void AdvanceFrame(int inputs[], int disconnect_flags);
+//void VectorWar_RunFrame(HWND hwnd);
+void Idle(int time);
+void DisconnectPlayer(int player);
+void Exit();
 
 std::list<Message> messages;
 
@@ -57,6 +69,9 @@ unsigned short hostPort = 54444;
 
 sf::IpAddress clientIP;
 unsigned short clientPort;
+
+
+GGPOSession *ggpo = NULL;
 
 int main()
 {
@@ -94,6 +109,8 @@ int main()
 		window.display();
 	}
 
+	
+
 	msgReady = false;
 
 	frameClock.restart();
@@ -130,7 +147,7 @@ int main()
 			player2Input = inputHandler.GetInput(frameCount);
 
 			//UPDATE WITH PLAYER INPUTS
-			SimulateFrame();
+			RunFrame();
 			/*frameClock.restart();
 
 			inputHandler.SetCurrentFrame(frameCount);
@@ -221,7 +238,7 @@ int main()
 	//return 0;
 }
 
-void SimulateFrame()
+void RunFrame()
 {
 	frameClock.restart();
 
@@ -261,6 +278,32 @@ void SimulateFrame()
 	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
 	frameCount++;
+
+
+	GGPOErrorCode result = GGPO_OK;
+	int disconnect_flags;
+	int inputs[2] = { 0 };
+
+	if (ngs.local_player_handle != GGPO_INVALID_HANDLE) {
+		int input = ReadInputs(hwnd);
+#if defined(SYNC_TEST)
+		input = rand(); // test: use random inputs to demonstrate sync testing
+#endif
+		result = ggpo_add_local_input(ggpo, ngs.local_player_handle, &input, sizeof(input));
+	}
+
+	// synchronize these inputs with ggpo.  If we have enough input to proceed
+	// ggpo will modify the input list with the correct inputs to use and
+	// return 1.
+	if (GGPO_SUCCEEDED(result)) {
+		result = ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * MAX_SHIPS, &disconnect_flags);
+		if (GGPO_SUCCEEDED(result)) {
+			// inputs[0] and inputs[1] contain the inputs for p1 and p2.  Advance
+			// the game by 1 frame using those inputs.
+			VectorWar_AdvanceFrame(inputs, disconnect_flags);
+		}
+	}
+	VectorWar_DrawCurrentFrame();
 }
 
 void HostOrClient()
@@ -504,6 +547,79 @@ bool WaitForPlayers()
 	}
 	return false;
 }
+
+void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators)
+{
+	GGPOErrorCode result;
+
+	// Fill in a ggpo callbacks structure to pass to start_session.
+	GGPOSessionCallbacks cb = { 0 };
+	cb.begin_game = BeginGameCallback;
+	cb.advance_frame = AdvanceFrameCallback;
+	cb.load_game_state = vw_load_game_state_callback;
+	cb.save_game_state = vw_save_game_state_callback;
+	cb.free_buffer = vw_free_buffer;
+	cb.on_event = vw_on_event_callback;
+	cb.log_game_state = vw_log_game_state;
+
+	/* Start a new session */
+	result = ggpo_start_session(&ggpo,         // the new session object
+		&cb,           // our callbacks
+		"test_app",    // application name
+		2,             // 2 players
+		sizeof(int),   // size of an input packet
+		8001);         // our local udp port
+}
+
+bool __cdecl BeginGameCallback(const char *name)
+{
+	return true;
+}
+
+void InitSpectator(int localport, int num_players, char *host_ip, int host_port)
+{
+
+}
+
+void VectorWar_DrawCurrentFrame()
+{
+
+}
+
+bool __cdecl AdvanceFrameCallback(int inputs[], int disconnect_flags)
+{
+	int inputs[2] = { 0 };
+	int disconnect_flags;
+
+	// Make sure we fetch new inputs from GGPO and use those to update
+	// the game state instead of reading from the keyboard.
+	ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
+	AdvanceFrame(inputs, disconnect_flags);
+	return true;
+}
+
+void AdvanceFrame(int inputs[], int disconnect_flags)
+{
+
+}
+
+void Idle(int time)
+{
+
+}
+
+void DisconnectPlayer(int player)
+{
+
+}
+
+void Exit()
+{
+
+}
+
+
+
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu

@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.705
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetFight", "NetFight\NetFight.vcxproj", "{C17D5213-039F-4370-B6FB-17ACCC6BAAEC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GGPO", "..\ggpo\build\src\GGPO.vcxproj", "{F0CBAA90-BB2E-3EC4-8240-2450B399061E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,12 @@ Global
 		{C17D5213-039F-4370-B6FB-17ACCC6BAAEC}.Release|x64.Build.0 = Release|x64
 		{C17D5213-039F-4370-B6FB-17ACCC6BAAEC}.Release|x86.ActiveCfg = Release|Win32
 		{C17D5213-039F-4370-B6FB-17ACCC6BAAEC}.Release|x86.Build.0 = Release|Win32
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E}.Debug|x64.ActiveCfg = Debug|x64
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E}.Debug|x64.Build.0 = Debug|x64
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E}.Debug|x86.ActiveCfg = Debug|x64
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E}.Release|x64.ActiveCfg = Release|x64
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E}.Release|x64.Build.0 = Release|x64
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
