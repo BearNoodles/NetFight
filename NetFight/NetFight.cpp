@@ -10,13 +10,17 @@
 #include "GameStateManager.h"
 #include "Message.h"
 #include "ggponet.h"
+#include "nongamestate.h"
 
 #define FPS 60
+#define FRAME_DELAY 2
 
 int myID;
 
 GameStateManager stateManager;
 GameState currentState;
+
+NonGameState ngs = { 0 };
 
 GGPOPlayer *players;
 Fighter* player1;
@@ -53,13 +57,34 @@ bool WaitForPlayers();
 
 void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
 bool BeginGame();
-void InitSpectator(int localport, int num_players, char *host_ip, int host_port);
-void VectorWar_DrawCurrentFrame();
+//void InitSpectator(int localport, int num_players, char *host_ip, int host_port);
+void DrawCurrentFrame();
 void AdvanceFrame(int inputs[], int disconnect_flags);
 //void VectorWar_RunFrame(HWND hwnd);
 void Idle(int time);
 void DisconnectPlayer(int player);
 void Exit();
+
+
+bool __cdecl BeginGameCallback(const char *name);
+
+bool __cdecl AdvanceFrameCallback(int flags);
+
+bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len);
+
+bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checksum, int frame);
+
+void __cdecl FreeBuffer(void *buffer);
+
+bool __cdecl OnEventCallback(GGPOEvent *info);
+
+bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len);
+
+int fletcher32_checksum(short *data, size_t len);
+
+
+
+FrameInput ReadInputs();
 
 std::list<Message> messages;
 
@@ -73,12 +98,15 @@ unsigned short clientPort;
 
 GGPOSession *ggpo = NULL;
 
+sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
+
+
 int main()
 {
 	socket.setBlocking(false);
 
 
-	sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
+	//sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 	window.setKeyRepeatEnabled(false);
 	//window.setFramerateLimit(FPS);
 
@@ -137,55 +165,9 @@ int main()
 		//Advance frame
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
-			//RESET FRAMECLOCK HERE?
-
-			inputHandler.SetCurrentFrame(frameCount);
-			inputHandler.UpdateInputs(frameCount);
-
-			//MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
-			player1Input = inputHandler.GetInput(frameCount);
-			player2Input = inputHandler.GetInput(frameCount);
-
-			//UPDATE WITH PLAYER INPUTS
+			
 			RunFrame();
-			/*frameClock.restart();
-
-			inputHandler.SetCurrentFrame(frameCount);
-			inputHandler.UpdateInputs(frameCount);
-
-			player1->SetInput(inputHandler.GetInput(frameCount));
-
-			bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
-			bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
-			if (player1Hit)
-			{
-				player2->HitLanded();
-				player1->HandleCollision(player2->GetCurrentAction());
-			}
-			if (player2Hit)
-			{
-				player1->HitLanded();
-				player2->HandleCollision(player1->GetCurrentAction());
-			}
-
-			if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
-			{
-				player1->WalkPush();
-			}
-			if (player2->CheckPushing(player1->GetHurtbox()) && player2->IsCornered())
-			{
-				player2->WalkPush();
-			}
-
-			player1->UpdateFrame();
-			player2->UpdateFrame();
-
-			currentState.frame = frameCount;
-			currentState.time = 99;
-
-			stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
-
-			frameCount++;*/
+			
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
 		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
@@ -207,7 +189,7 @@ int main()
 			s = false;
 		}
 
-		window.clear();
+		/*window.clear();
 
 
 		window.draw(player1->GetHurtbox());
@@ -225,7 +207,7 @@ int main()
 		window.draw(healthBar2->GetHealthBarBack());
 		window.draw(healthBar2->GetHealthBar());
 
-		window.display();
+		window.display();*/
 
 		/*if (frameCount == 100)
 		{
@@ -242,50 +224,12 @@ void RunFrame()
 {
 	frameClock.restart();
 
-	inputHandler.SetCurrentFrame(frameCount);
-	inputHandler.UpdateInputs(frameCount);
-
-	player1->SetInput(inputHandler.GetInput(frameCount));
-
-	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
-	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
-	if (player1Hit)
-	{
-		player2->HitLanded();
-		player1->HandleCollision(player2->GetCurrentAction());
-	}
-	if (player2Hit)
-	{
-		player1->HitLanded();
-		player2->HandleCollision(player1->GetCurrentAction());
-	}
-
-	if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
-	{
-		player1->WalkPush();
-	}
-	if (player2->CheckPushing(player1->GetHurtbox()) && player2->IsCornered())
-	{
-		player2->WalkPush();
-	}
-
-	player1->UpdateFrame();
-	player2->UpdateFrame();
-
-	currentState.frame = frameCount;
-	currentState.time = 99;
-
-	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
-
-	frameCount++;
-
-
 	GGPOErrorCode result = GGPO_OK;
 	int disconnect_flags;
 	int inputs[2] = { 0 };
 
-	if (ngs.local_player_handle != GGPO_INVALID_HANDLE) {
-		int input = ReadInputs(hwnd);
+	if (currentState.localPlayerHandle != GGPO_INVALID_HANDLE) {
+		FrameInput input = ReadInputs(); // SET INPUTS
 #if defined(SYNC_TEST)
 		input = rand(); // test: use random inputs to demonstrate sync testing
 #endif
@@ -296,14 +240,14 @@ void RunFrame()
 	// ggpo will modify the input list with the correct inputs to use and
 	// return 1.
 	if (GGPO_SUCCEEDED(result)) {
-		result = ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * MAX_SHIPS, &disconnect_flags);
+		result = ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
 		if (GGPO_SUCCEEDED(result)) {
 			// inputs[0] and inputs[1] contain the inputs for p1 and p2.  Advance
 			// the game by 1 frame using those inputs.
-			VectorWar_AdvanceFrame(inputs, disconnect_flags);
+			AdvanceFrame(inputs, disconnect_flags);
 		}
 	}
-	VectorWar_DrawCurrentFrame();
+	DrawCurrentFrame();
 }
 
 void HostOrClient()
@@ -362,11 +306,6 @@ bool InitHost()
 
 
 	myID = 1;
-	//playerCount = myID;
-	//sf::Vector2f startPos(playerCount * startPosX, startPosY);
-
-	//INIT FIGHTER?
-	//myPlayer.Init(texture, startPos, playerColours[playerCount], playerCount);
 	return true;
 }
 
@@ -433,12 +372,6 @@ bool InitClient()
 			std::cout << "Didnt receive number > 1, retrying" << std::endl;
 		}
 	}
-
-	//sf::Vector2f startPos(playerCount * startPosX, startPosY);
-
-	//myPlayer.Init(texture, startPos, playerColours[playerCount], playerCount);
-	//startPos = sf::Vector2f((playerCount - 1) * startPosX, startPosY);
-	//opponent.Init(texture, startPos, playerColours[playerCount - 1], playerCount - 1);
 
 	return true;
 }
@@ -511,12 +444,6 @@ bool WaitForPlayers()
 					counter++;
 					continue;
 				}
-				//playerCount++;
-				//sf::Vector2f startPos(startPosX * playerCount, startPosY);
-				//Player tempPlayer(texture, startPos, playerColours[playerCount], playerCount);
-				//playerList.push_back(tempPlayer);
-
-				//opponent.Init(texture, startPos, playerColours[playerCount], playerCount);
 				std::cout << "Player has joined, press space to begin" << std::endl;
 
 				break;
@@ -556,19 +483,42 @@ void Init(int localport, int num_players, GGPOPlayer *players, int num_spectator
 	GGPOSessionCallbacks cb = { 0 };
 	cb.begin_game = BeginGameCallback;
 	cb.advance_frame = AdvanceFrameCallback;
-	cb.load_game_state = vw_load_game_state_callback;
-	cb.save_game_state = vw_save_game_state_callback;
-	cb.free_buffer = vw_free_buffer;
-	cb.on_event = vw_on_event_callback;
-	cb.log_game_state = vw_log_game_state;
+	cb.load_game_state = LoadGameStateCallback;
+	cb.save_game_state = SaveGameStateCallback;
+	cb.free_buffer = FreeBuffer;
+	cb.on_event = OnEventCallback;
+	cb.log_game_state = LogGameState;
 
 	/* Start a new session */
 	result = ggpo_start_session(&ggpo,         // the new session object
 		&cb,           // our callbacks
-		"test_app",    // application name
+		"NetFight",    // application name
 		2,             // 2 players
 		sizeof(int),   // size of an input packet
 		8001);         // our local udp port
+
+					   // automatically disconnect clients after 3000 ms and start our count-down timer
+					   // for disconnects after 1000 ms.   To completely disable disconnects, simply use
+					   // a value of 0 for ggpo_set_disconnect_timeout.
+	ggpo_set_disconnect_timeout(ggpo, 3000);
+	ggpo_set_disconnect_notify_start(ggpo, 1000);
+
+	int i;
+	for (i = 0; i < num_players + num_spectators; i++) {
+		GGPOPlayerHandle handle;
+		result = ggpo_add_player(ggpo, players + i, &handle);
+		ngs.players[i].handle = handle;
+		ngs.players[i].type = players[i].type;
+		if (players[i].type == GGPO_PLAYERTYPE_LOCAL) {
+			ngs.players[i].connect_progress = 100;
+			ngs.local_player_handle = handle;
+			ngs.SetConnectState(handle, Connecting);
+			ggpo_set_frame_delay(ggpo, handle, FRAME_DELAY);
+		}
+		else {
+			ngs.players[i].connect_progress = 0;
+		}
+	}
 }
 
 bool __cdecl BeginGameCallback(const char *name)
@@ -576,17 +526,7 @@ bool __cdecl BeginGameCallback(const char *name)
 	return true;
 }
 
-void InitSpectator(int localport, int num_players, char *host_ip, int host_port)
-{
-
-}
-
-void VectorWar_DrawCurrentFrame()
-{
-
-}
-
-bool __cdecl AdvanceFrameCallback(int inputs[], int disconnect_flags)
+bool __cdecl AdvanceFrameCallback(int flags)
 {
 	int inputs[2] = { 0 };
 	int disconnect_flags;
@@ -598,14 +538,133 @@ bool __cdecl AdvanceFrameCallback(int inputs[], int disconnect_flags)
 	return true;
 }
 
+bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len)
+{
+	memcpy(&currentState, buffer, len);
+	return true;
+}
+
+bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checksum, int frame)
+{
+	*len = sizeof(currentState);
+	*buffer = (unsigned char *)malloc(*len);
+	if (!*buffer) {
+		return false;
+	}
+	memcpy(*buffer, &currentState, *len);
+	*checksum = fletcher32_checksum((short *)*buffer, *len / 2);
+	return true;
+}
+
+void __cdecl FreeBuffer(void *buffer)
+{
+	free(buffer);
+}
+
+bool __cdecl OnEventCallback(GGPOEvent *info)
+{
+	int progress;
+	switch (info->code) {
+	case GGPO_EVENTCODE_CONNECTED_TO_PEER:
+		ngs.SetConnectState(info->u.connected.player, Synchronizing);
+		break;
+	case GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER:
+		progress = 100 * info->u.synchronizing.count / info->u.synchronizing.total;
+		ngs.UpdateConnectProgress(info->u.synchronizing.player, progress);
+		break;
+	case GGPO_EVENTCODE_SYNCHRONIZED_WITH_PEER:
+		ngs.UpdateConnectProgress(info->u.synchronizing.player, 100);
+		break;
+	case GGPO_EVENTCODE_RUNNING:
+		ngs.SetConnectState(Running);
+		//renderer->SetStatusText("");
+		break;
+	case GGPO_EVENTCODE_CONNECTION_INTERRUPTED:
+		//ngs.SetDisconnectTimeout(info->u.connection_interrupted.player,
+			//timeGetTime(),
+			//info->u.connection_interrupted.disconnect_timeout);
+		break;
+	case GGPO_EVENTCODE_CONNECTION_RESUMED:
+		ngs.SetConnectState(info->u.connection_resumed.player, Running);
+		break;
+	case GGPO_EVENTCODE_DISCONNECTED_FROM_PEER:
+		ngs.SetConnectState(info->u.disconnected.player, Disconnected);
+		break;
+	case GGPO_EVENTCODE_TIMESYNC:
+		//Sleep(1000 * info->u.timesync.frames_ahead / 60);
+		break;
+	}
+	return true;
+}
+
+bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
+{
+	return true;
+}
+
 void AdvanceFrame(int inputs[], int disconnect_flags)
 {
+	inputHandler.SetCurrentFrame(frameCount);
+	inputHandler.UpdateInputs(frameCount);
 
+	player1->SetInput(inputHandler.GetInput(frameCount));
+
+	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
+	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
+	if (player1Hit)
+	{
+		player2->HitLanded();
+		player1->HandleCollision(player2->GetCurrentAction());
+	}
+	if (player2Hit)
+	{
+		player1->HitLanded();
+		player2->HandleCollision(player1->GetCurrentAction());
+	}
+
+	if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
+	{
+		player1->WalkPush();
+	}
+	if (player2->CheckPushing(player1->GetHurtbox()) && player2->IsCornered())
+	{
+		player2->WalkPush();
+	}
+
+	player1->UpdateFrame();
+	player2->UpdateFrame();
+
+	currentState.frame = frameCount;
+	currentState.time = 99;
+
+	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
+
+	frameCount++;
+
+	// update the checksums to display in the top of the window.  this
+	// helps to detect desyncs.
+	ngs.now.framenumber = currentState.frame;
+	ngs.now.checksum = fletcher32_checksum((short *)&currentState, sizeof(currentState) / 2);
+	if ((currentState.frame % 90) == 0) {
+		ngs.periodic = ngs.now;
+	}
+
+	// Notify ggpo that we've moved forward exactly 1 frame.
+	ggpo_advance_frame(ggpo);
+
+	// Update the performance monitor display.
+	GGPOPlayerHandle handles[MAX_PLAYERS];
+	int count = 0;
+	for (int i = 0; i < ngs.num_players; i++) {
+		if (ngs.players[i].type == GGPO_PLAYERTYPE_REMOTE) {
+			handles[count++] = ngs.players[i].handle;
+		}
+	}
 }
 
 void Idle(int time)
 {
-
+	ggpo_idle(ggpo, time);
 }
 
 void DisconnectPlayer(int player)
@@ -613,21 +672,65 @@ void DisconnectPlayer(int player)
 
 }
 
+void DrawCurrentFrame()
+{
+	window.clear();
+
+
+	window.draw(player1->GetHurtbox());
+	window.draw(player2->GetHurtbox());
+	if (player1->IsHitboxActive())
+	{
+		window.draw(player1->GetActiveHitbox());
+	}
+
+	healthBar1->UpdateHealth(player1->GetHealth());
+	healthBar2->UpdateHealth(player2->GetHealth());
+
+	window.draw(healthBar1->GetHealthBarBack());
+	window.draw(healthBar1->GetHealthBar());
+	window.draw(healthBar2->GetHealthBarBack());
+	window.draw(healthBar2->GetHealthBar());
+
+	window.display();
+}
+
+
 void Exit()
 {
 
 }
 
+FrameInput ReadInputs()
+{
+	FrameInput inputs;
+	inputHandler.SetCurrentFrame(frameCount);
+	inputHandler.UpdateInputs(frameCount);
 
+	//MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
+	inputs = inputHandler.GetInput(frameCount);
+	//player2Input = inputHandler.GetInput(frameCount);
 
+	return inputs;
+}
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+int fletcher32_checksum(short *data, size_t len)
+{
+	int sum1 = 0xffff, sum2 = 0xffff;
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+	while (len) {
+		unsigned tlen = len > 360 ? 360 : len;
+		len -= tlen;
+		do {
+			sum1 += *data++;
+			sum2 += sum1;
+		} while (--tlen);
+		sum1 = (sum1 & 0xffff) + (sum1 >> 16);
+		sum2 = (sum2 & 0xffff) + (sum2 >> 16);
+	}
+
+	/* Second reduction step to reduce sums to 16 bits */
+	sum1 = (sum1 & 0xffff) + (sum1 >> 16);
+	sum2 = (sum2 & 0xffff) + (sum2 >> 16);
+	return sum2 << 16 | sum1;
+}

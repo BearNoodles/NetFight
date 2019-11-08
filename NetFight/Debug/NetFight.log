@@ -1,4 +1,13 @@
 ﻿  NetFight.cpp
-m:\honours\netfight\netfight\netfight.cpp(203): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-m:\honours\netfight\netfight\netfight.cpp(204): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  NetFight.vcxproj -> M:\Honours\NetFight\Debug\NetFight.exe
+m:\honours\netfight\netfight\netfight.cpp(687): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+m:\honours\netfight\netfight\netfight.cpp(688): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_start_session referenced in function "void __cdecl Init(int,int,struct GGPOPlayer *,int)" (?Init@@YAXHHPAUGGPOPlayer@@H@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_add_player referenced in function "void __cdecl Init(int,int,struct GGPOPlayer *,int)" (?Init@@YAXHHPAUGGPOPlayer@@H@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_set_frame_delay referenced in function "void __cdecl Init(int,int,struct GGPOPlayer *,int)" (?Init@@YAXHHPAUGGPOPlayer@@H@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_idle referenced in function "void __cdecl Idle(int)" (?Idle@@YAXH@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_add_local_input referenced in function "void __cdecl RunFrame(void)" (?RunFrame@@YAXXZ)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_synchronize_input referenced in function "bool __cdecl AdvanceFrameCallback(int)" (?AdvanceFrameCallback@@YA_NH@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_advance_frame referenced in function "void __cdecl AdvanceFrame(int * const,int)" (?AdvanceFrame@@YAXQAHH@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_set_disconnect_timeout referenced in function "void __cdecl Init(int,int,struct GGPOPlayer *,int)" (?Init@@YAXHHPAUGGPOPlayer@@H@Z)
+NetFight.obj : error LNK2019: unresolved external symbol _ggpo_set_disconnect_notify_start referenced in function "void __cdecl Init(int,int,struct GGPOPlayer *,int)" (?Init@@YAXHHPAUGGPOPlayer@@H@Z)
+M:\Honours\NetFight\Debug\NetFight.exe : fatal error LNK1120: 9 unresolved externals

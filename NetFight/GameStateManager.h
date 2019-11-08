@@ -50,6 +50,8 @@ struct GameState
 	bool player2IsBlocking;
 
 	float time;
+
+	int localPlayerHandle;
 };
 class GameStateManager
 {
