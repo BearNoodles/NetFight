@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.705
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetFight", "NetFight\NetFight.vcxproj", "{C17D5213-039F-4370-B6FB-17ACCC6BAAEC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F0CBAA90-BB2E-3EC4-8240-2450B399061E} = {F0CBAA90-BB2E-3EC4-8240-2450B399061E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GGPO", "..\ggpo\build\src\GGPO.vcxproj", "{F0CBAA90-BB2E-3EC4-8240-2450B399061E}"
 EndProject

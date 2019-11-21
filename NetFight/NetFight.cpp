@@ -9,8 +9,8 @@
 #include "HealthBar.h"
 #include "GameStateManager.h"
 #include "Message.h"
-#include "ggponet.h"
-#include "nongamestate.h"
+//#include "ggponet.h"
+//#include "nongamestate.h"
 
 #define FPS 60
 #define FRAME_DELAY 2
@@ -20,9 +20,9 @@ int myID;
 GameStateManager stateManager;
 GameState currentState;
 
-NonGameState ngs = { 0 };
+//NonGameState ngs = { 0 };
 
-GGPOPlayer *players;
+//GGPOPlayer *players;
 Fighter* player1;
 Fighter* player2;
 
@@ -55,11 +55,12 @@ bool InitHost();
 bool InitClient();
 bool WaitForPlayers();
 
-void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
+//void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
 bool BeginGame();
 //void InitSpectator(int localport, int num_players, char *host_ip, int host_port);
 void DrawCurrentFrame();
-void AdvanceFrame(int inputs[], int disconnect_flags);
+//void AdvanceFrame(int inputs[], int disconnect_flags);
+void AdvanceFrame();
 //void VectorWar_RunFrame(HWND hwnd);
 void Idle(int time);
 void DisconnectPlayer(int player);
@@ -76,7 +77,7 @@ bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checks
 
 void __cdecl FreeBuffer(void *buffer);
 
-bool __cdecl OnEventCallback(GGPOEvent *info);
+//bool __cdecl OnEventCallback(GGPOEvent *info);
 
 bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len);
 
@@ -96,7 +97,7 @@ sf::IpAddress clientIP;
 unsigned short clientPort;
 
 
-GGPOSession *ggpo = NULL;
+//GGPOSession *ggpo = NULL;
 
 sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
@@ -223,30 +224,33 @@ int main()
 void RunFrame()
 {
 	frameClock.restart();
-
-	GGPOErrorCode result = GGPO_OK;
-	int disconnect_flags;
-	int inputs[2] = { 0 };
-
-	if (currentState.localPlayerHandle != GGPO_INVALID_HANDLE) {
-		FrameInput input = ReadInputs(); // SET INPUTS
-#if defined(SYNC_TEST)
-		input = rand(); // test: use random inputs to demonstrate sync testing
-#endif
-		result = ggpo_add_local_input(ggpo, ngs.local_player_handle, &input, sizeof(input));
-	}
-
-	// synchronize these inputs with ggpo.  If we have enough input to proceed
-	// ggpo will modify the input list with the correct inputs to use and
-	// return 1.
-	if (GGPO_SUCCEEDED(result)) {
-		result = ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
-		if (GGPO_SUCCEEDED(result)) {
-			// inputs[0] and inputs[1] contain the inputs for p1 and p2.  Advance
-			// the game by 1 frame using those inputs.
-			AdvanceFrame(inputs, disconnect_flags);
-		}
-	}
+	
+//	GGPOErrorCode result = GGPO_OK;
+//	int disconnect_flags;
+//	int inputs[2] = { 0 };
+//
+//	if (currentState.localPlayerHandle != GGPO_INVALID_HANDLE) {
+//		FrameInput input = ReadInputs(); // SET INPUTS
+//#if defined(SYNC_TEST)
+//		input = rand(); // test: use random inputs to demonstrate sync testing
+//#endif
+//		result = ggpo_add_local_input(ggpo, ngs.local_player_handle, &input, sizeof(input));
+//	}
+//
+//	// synchronize these inputs with ggpo.  If we have enough input to proceed
+//	// ggpo will modify the input list with the correct inputs to use and
+//	// return 1.
+//	if (GGPO_SUCCEEDED(result)) {
+//		result = ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
+//		if (GGPO_SUCCEEDED(result)) {
+//			// inputs[0] and inputs[1] contain the inputs for p1 and p2.  Advance
+//			// the game by 1 frame using those inputs.
+//			AdvanceFrame(inputs, disconnect_flags);
+//		}
+//	}
+	FrameInput inputs = ReadInputs();
+	//AdvanceFrame(inputs, disconnect_flags);
+	AdvanceFrame();
 	DrawCurrentFrame();
 }
 
@@ -475,68 +479,68 @@ bool WaitForPlayers()
 	return false;
 }
 
-void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators)
-{
-	GGPOErrorCode result;
-
-	// Fill in a ggpo callbacks structure to pass to start_session.
-	GGPOSessionCallbacks cb = { 0 };
-	cb.begin_game = BeginGameCallback;
-	cb.advance_frame = AdvanceFrameCallback;
-	cb.load_game_state = LoadGameStateCallback;
-	cb.save_game_state = SaveGameStateCallback;
-	cb.free_buffer = FreeBuffer;
-	cb.on_event = OnEventCallback;
-	cb.log_game_state = LogGameState;
-
-	/* Start a new session */
-	result = ggpo_start_session(&ggpo,         // the new session object
-		&cb,           // our callbacks
-		"NetFight",    // application name
-		2,             // 2 players
-		sizeof(int),   // size of an input packet
-		8001);         // our local udp port
-
-					   // automatically disconnect clients after 3000 ms and start our count-down timer
-					   // for disconnects after 1000 ms.   To completely disable disconnects, simply use
-					   // a value of 0 for ggpo_set_disconnect_timeout.
-	ggpo_set_disconnect_timeout(ggpo, 3000);
-	ggpo_set_disconnect_notify_start(ggpo, 1000);
-
-	int i;
-	for (i = 0; i < num_players + num_spectators; i++) {
-		GGPOPlayerHandle handle;
-		result = ggpo_add_player(ggpo, players + i, &handle);
-		ngs.players[i].handle = handle;
-		ngs.players[i].type = players[i].type;
-		if (players[i].type == GGPO_PLAYERTYPE_LOCAL) {
-			ngs.players[i].connect_progress = 100;
-			ngs.local_player_handle = handle;
-			ngs.SetConnectState(handle, Connecting);
-			ggpo_set_frame_delay(ggpo, handle, FRAME_DELAY);
-		}
-		else {
-			ngs.players[i].connect_progress = 0;
-		}
-	}
-}
+//void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators)
+//{
+//	GGPOErrorCode result;
+//
+//	// Fill in a ggpo callbacks structure to pass to start_session.
+//	GGPOSessionCallbacks cb = { 0 };
+//	cb.begin_game = BeginGameCallback;
+//	cb.advance_frame = AdvanceFrameCallback;
+//	cb.load_game_state = LoadGameStateCallback;
+//	cb.save_game_state = SaveGameStateCallback;
+//	cb.free_buffer = FreeBuffer;
+//	cb.on_event = OnEventCallback;
+//	cb.log_game_state = LogGameState;
+//
+//	/* Start a new session */
+//	result = ggpo_start_session(&ggpo,         // the new session object
+//		&cb,           // our callbacks
+//		"NetFight",    // application name
+//		2,             // 2 players
+//		sizeof(int),   // size of an input packet
+//		8001);         // our local udp port
+//
+//					   // automatically disconnect clients after 3000 ms and start our count-down timer
+//					   // for disconnects after 1000 ms.   To completely disable disconnects, simply use
+//					   // a value of 0 for ggpo_set_disconnect_timeout.
+//	ggpo_set_disconnect_timeout(ggpo, 3000);
+//	ggpo_set_disconnect_notify_start(ggpo, 1000);
+//
+//	int i;
+//	for (i = 0; i < num_players + num_spectators; i++) {
+//		GGPOPlayerHandle handle;
+//		result = ggpo_add_player(ggpo, players + i, &handle);
+//		ngs.players[i].handle = handle;
+//		ngs.players[i].type = players[i].type;
+//		if (players[i].type == GGPO_PLAYERTYPE_LOCAL) {
+//			ngs.players[i].connect_progress = 100;
+//			ngs.local_player_handle = handle;
+//			ngs.SetConnectState(handle, Connecting);
+//			ggpo_set_frame_delay(ggpo, handle, FRAME_DELAY);
+//		}
+//		else {
+//			ngs.players[i].connect_progress = 0;
+//		}
+//	}
+//}
 
 bool __cdecl BeginGameCallback(const char *name)
 {
 	return true;
 }
 
-bool __cdecl AdvanceFrameCallback(int flags)
-{
-	int inputs[2] = { 0 };
-	int disconnect_flags;
-
-	// Make sure we fetch new inputs from GGPO and use those to update
-	// the game state instead of reading from the keyboard.
-	ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
-	AdvanceFrame(inputs, disconnect_flags);
-	return true;
-}
+//bool __cdecl AdvanceFrameCallback(int flags)
+//{
+//	int inputs[2] = { 0 };
+//	int disconnect_flags;
+//
+//	// Make sure we fetch new inputs from GGPO and use those to update
+//	// the game state instead of reading from the keyboard.
+//	ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
+//	AdvanceFrame(inputs, disconnect_flags);
+//	return true;
+//}
 
 bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len)
 {
@@ -561,48 +565,49 @@ void __cdecl FreeBuffer(void *buffer)
 	free(buffer);
 }
 
-bool __cdecl OnEventCallback(GGPOEvent *info)
-{
-	int progress;
-	switch (info->code) {
-	case GGPO_EVENTCODE_CONNECTED_TO_PEER:
-		ngs.SetConnectState(info->u.connected.player, Synchronizing);
-		break;
-	case GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER:
-		progress = 100 * info->u.synchronizing.count / info->u.synchronizing.total;
-		ngs.UpdateConnectProgress(info->u.synchronizing.player, progress);
-		break;
-	case GGPO_EVENTCODE_SYNCHRONIZED_WITH_PEER:
-		ngs.UpdateConnectProgress(info->u.synchronizing.player, 100);
-		break;
-	case GGPO_EVENTCODE_RUNNING:
-		ngs.SetConnectState(Running);
-		//renderer->SetStatusText("");
-		break;
-	case GGPO_EVENTCODE_CONNECTION_INTERRUPTED:
-		//ngs.SetDisconnectTimeout(info->u.connection_interrupted.player,
-			//timeGetTime(),
-			//info->u.connection_interrupted.disconnect_timeout);
-		break;
-	case GGPO_EVENTCODE_CONNECTION_RESUMED:
-		ngs.SetConnectState(info->u.connection_resumed.player, Running);
-		break;
-	case GGPO_EVENTCODE_DISCONNECTED_FROM_PEER:
-		ngs.SetConnectState(info->u.disconnected.player, Disconnected);
-		break;
-	case GGPO_EVENTCODE_TIMESYNC:
-		//Sleep(1000 * info->u.timesync.frames_ahead / 60);
-		break;
-	}
-	return true;
-}
+//bool __cdecl OnEventCallback(GGPOEvent *info)
+//{
+//	int progress;
+//	switch (info->code) {
+//	case GGPO_EVENTCODE_CONNECTED_TO_PEER:
+//		ngs.SetConnectState(info->u.connected.player, Synchronizing);
+//		break;
+//	case GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER:
+//		progress = 100 * info->u.synchronizing.count / info->u.synchronizing.total;
+//		ngs.UpdateConnectProgress(info->u.synchronizing.player, progress);
+//		break;
+//	case GGPO_EVENTCODE_SYNCHRONIZED_WITH_PEER:
+//		ngs.UpdateConnectProgress(info->u.synchronizing.player, 100);
+//		break;
+//	case GGPO_EVENTCODE_RUNNING:
+//		ngs.SetConnectState(Running);
+//		//renderer->SetStatusText("");
+//		break;
+//	case GGPO_EVENTCODE_CONNECTION_INTERRUPTED:
+//		//ngs.SetDisconnectTimeout(info->u.connection_interrupted.player,
+//			//timeGetTime(),
+//			//info->u.connection_interrupted.disconnect_timeout);
+//		break;
+//	case GGPO_EVENTCODE_CONNECTION_RESUMED:
+//		ngs.SetConnectState(info->u.connection_resumed.player, Running);
+//		break;
+//	case GGPO_EVENTCODE_DISCONNECTED_FROM_PEER:
+//		ngs.SetConnectState(info->u.disconnected.player, Disconnected);
+//		break;
+//	case GGPO_EVENTCODE_TIMESYNC:
+//		//Sleep(1000 * info->u.timesync.frames_ahead / 60);
+//		break;
+//	}
+//	return true;
+//}
 
 bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
 {
 	return true;
 }
 
-void AdvanceFrame(int inputs[], int disconnect_flags)
+//void AdvanceFrame(int inputs[], int disconnect_flags)
+void AdvanceFrame()
 {
 	inputHandler.SetCurrentFrame(frameCount);
 	inputHandler.UpdateInputs(frameCount);
@@ -643,28 +648,28 @@ void AdvanceFrame(int inputs[], int disconnect_flags)
 
 	// update the checksums to display in the top of the window.  this
 	// helps to detect desyncs.
-	ngs.now.framenumber = currentState.frame;
-	ngs.now.checksum = fletcher32_checksum((short *)&currentState, sizeof(currentState) / 2);
-	if ((currentState.frame % 90) == 0) {
+	//ngs.now.framenumber = currentState.frame;
+	//ngs.now.checksum = fletcher32_checksum((short *)&currentState, sizeof(currentState) / 2);
+	/*if ((currentState.frame % 90) == 0) {
 		ngs.periodic = ngs.now;
-	}
+	}*/
 
 	// Notify ggpo that we've moved forward exactly 1 frame.
-	ggpo_advance_frame(ggpo);
+	//ggpo_advance_frame(ggpo);
 
 	// Update the performance monitor display.
-	GGPOPlayerHandle handles[MAX_PLAYERS];
-	int count = 0;
+	//GGPOPlayerHandle handles[MAX_PLAYERS];
+	/*int count = 0;
 	for (int i = 0; i < ngs.num_players; i++) {
 		if (ngs.players[i].type == GGPO_PLAYERTYPE_REMOTE) {
 			handles[count++] = ngs.players[i].handle;
 		}
-	}
+	}*/
 }
 
 void Idle(int time)
 {
-	ggpo_idle(ggpo, time);
+	//ggpo_idle(ggpo, time);
 }
 
 void DisconnectPlayer(int player)
