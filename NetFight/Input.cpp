@@ -109,6 +109,28 @@ void Input::UpdateInputs(int frameNo)
 	}
 }
 
+void Input::UpdateNoInputs(int frameNo)
+{
+	FrameInput tempInput = noInput;
+	tempInput.frameNumber = frameNo;
+
+	if (player1Inputs->back().frameNumber < tempInput.frameNumber)
+	{
+		player1Inputs->erase(player1Inputs->begin());
+		player1Inputs->push_back(tempInput);
+		return;
+	}
+
+	for (std::vector<FrameInput>::reverse_iterator it = player1Inputs->rbegin(); it != player1Inputs->rend(); ++it)
+	{
+		if (tempInput.frameNumber == it->frameNumber)
+		{
+			*it = tempInput;
+			return;
+		}
+	}
+}
+
 void Input::UpdateAll()
 {
 	

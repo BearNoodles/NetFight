@@ -26,6 +26,10 @@ GameState currentState;
 Fighter* player1;
 Fighter* player2;
 
+int thisPlayer;
+
+bool focus = true;
+
 FrameInput player1Input;
 FrameInput player2Input;
 
@@ -42,7 +46,7 @@ sf::Time timeFromClock;
 sf::Time frameTime;
 float timeUntilFrameUpdate;
 
-bool s = true;
+bool sButt = true;
 
 int frameCount = 0;
 sf::Clock frameClock;
@@ -158,6 +162,12 @@ int main()
 				std::cout << "new width: " << event.size.width << std::endl;
 				std::cout << "new height: " << event.size.height << std::endl;
 			}
+
+			if (event.type == sf::Event::LostFocus)
+				focus = false;
+
+			if (event.type == sf::Event::GainedFocus)
+				focus = true;
 		}
 
 
@@ -173,11 +183,11 @@ int main()
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
 		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 		{
-			s = true;
+			sButt = true;
 		}
 		
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && s)
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && sButt && focus)
 		{
 			frameCount -= 20;
 			stateManager.SetCurrentState(frameCount);
@@ -187,7 +197,7 @@ int main()
 			//inputHandler.SetCurrentFrame(frameCount);
 			//frameCount = stateManager.GetState(frameCount).frame;
 			//time = stateManager.GetState(frameCount).time;
-			s = false;
+			sButt = false;
 		}
 
 		/*window.clear();
@@ -248,7 +258,10 @@ void RunFrame()
 //			AdvanceFrame(inputs, disconnect_flags);
 //		}
 //	}
-	FrameInput inputs = ReadInputs();
+	if (focus)
+	{
+		FrameInput inputs = ReadInputs();
+	}
 	//AdvanceFrame(inputs, disconnect_flags);
 	AdvanceFrame();
 	DrawCurrentFrame();
@@ -265,6 +278,8 @@ void HostOrClient()
 
 		if (choice == "1")
 		{
+			thisPlayer = 1;
+
 			if (!InitHost())
 			{
 				std::cout << "Error starting as host, try again" << std::endl;
@@ -274,6 +289,8 @@ void HostOrClient()
 		}
 		else if (choice == "2")
 		{
+			thisPlayer = 2;
+
 			if (!InitClient())
 			{
 				std::cout << "Error connecting to host, try again" << std::endl;
@@ -610,7 +627,15 @@ bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
 void AdvanceFrame()
 {
 	inputHandler.SetCurrentFrame(frameCount);
-	inputHandler.UpdateInputs(frameCount);
+
+	if (focus)
+	{
+		inputHandler.UpdateInputs(frameCount);
+	}
+	else
+	{
+		inputHandler.UpdateNoInputs(frameCount);
+	}
 
 	player1->SetInput(inputHandler.GetInput(frameCount));
 

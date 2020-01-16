@@ -21,6 +21,7 @@ public:
 	FrameInput GetCurrentInput(int frame);
 
 	void UpdateInputs(int frameNo);
+	void UpdateNoInputs(int frameNo);
 
 	void UpdateAll();
 
