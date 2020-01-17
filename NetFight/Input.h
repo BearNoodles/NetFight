@@ -12,16 +12,20 @@ public:
 	Input();
 	~Input();
 
+	FrameInput ReadLocalInput(int frameNo);
+
 	void SetInput(FrameInput frameInput);
 
 	FrameInput GetInput(int frameNo);
+
+	FrameInput GetNoInput(int frameNo);
 
 	void SetCurrentInput(int frame);
 
 	FrameInput GetCurrentInput(int frame);
 
-	void UpdateInputs(int frameNo);
-	void UpdateNoInputs(int frameNo);
+	void UpdateInputP1(FrameInput p1Input);
+	void UpdateInputP2(FrameInput p2Input);
 
 	void UpdateAll();
 

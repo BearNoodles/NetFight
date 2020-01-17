@@ -100,11 +100,11 @@ void Fighter::UpdateFrame()
 	{
 		if (m_currentInput.inputs[2] && m_position.x > 0)
 		{
-			m_position.x -= m_walkSpeed * m_direction;
+			m_position.x -= m_walkSpeed;// *m_direction;
 		}
 		else if (m_currentInput.inputs[3] && m_position.x < m_screenWidth - m_hurtbox.getSize().x)
 		{
-			m_position.x += m_walkSpeed * m_direction;
+			m_position.x += m_walkSpeed;// *m_direction;
 		}
 
 		if (m_currentInput.inputs[0])
@@ -270,7 +270,8 @@ void Fighter::WalkPush()
 void Fighter::StartJump(int direction)
 {
 	m_playerState = jump;
-	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
+	//m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
+	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * direction, -m_initialJumpSpeed.y);
 }
 
 void Fighter::UpdateJump()

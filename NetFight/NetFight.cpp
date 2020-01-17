@@ -89,7 +89,7 @@ int fletcher32_checksum(short *data, size_t len);
 
 
 
-FrameInput ReadInputs();
+void ReadInputs();
 
 std::list<Message> messages;
 
@@ -258,10 +258,7 @@ void RunFrame()
 //			AdvanceFrame(inputs, disconnect_flags);
 //		}
 //	}
-	if (focus)
-	{
-		FrameInput inputs = ReadInputs();
-	}
+	ReadInputs();
 	//AdvanceFrame(inputs, disconnect_flags);
 	AdvanceFrame();
 	DrawCurrentFrame();
@@ -626,19 +623,6 @@ bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
 //void AdvanceFrame(int inputs[], int disconnect_flags)
 void AdvanceFrame()
 {
-	inputHandler.SetCurrentFrame(frameCount);
-
-	if (focus)
-	{
-		inputHandler.UpdateInputs(frameCount);
-	}
-	else
-	{
-		inputHandler.UpdateNoInputs(frameCount);
-	}
-
-	player1->SetInput(inputHandler.GetInput(frameCount));
-
 	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
 	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
 	if (player1Hit)
@@ -731,17 +715,56 @@ void Exit()
 
 }
 
-FrameInput ReadInputs()
+void ReadInputs()
 {
-	FrameInput inputs;
+	//FrameInput inputs;
+	//inputHandler.SetCurrentFrame(frameCount);
+	//inputHandler.UpdateInputs(frameCount);
+
+	//if (thisPlayer == 1)
+	//{
+	//	player1Input = inputHandler.ReadLocalInput();
+	//}
+	////MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
+	//inputs = inputHandler.GetInput(frameCount);
+	////player2Input = inputHandler.GetInput(frameCount);
+	//
+	//return inputs;
+
 	inputHandler.SetCurrentFrame(frameCount);
-	inputHandler.UpdateInputs(frameCount);
 
-	//MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
-	inputs = inputHandler.GetInput(frameCount);
-	//player2Input = inputHandler.GetInput(frameCount);
+	if (thisPlayer == 1)
+	{
+		if (focus)
+		{
+			player1Input = inputHandler.ReadLocalInput(frameCount);
+		}
+		else
+		{
+			player1Input = inputHandler.GetNoInput(frameCount);
+		}
 
-	return inputs;
+		//Get received input
+		player2Input = inputHandler.GetNoInput(frameCount);
+	}
+
+	else
+	{
+		if (focus)
+		{
+			player2Input = inputHandler.ReadLocalInput(frameCount);
+		}
+		else
+		{
+			player2Input = inputHandler.GetNoInput(frameCount);
+		}
+
+		//Get received input
+		player1Input = inputHandler.GetNoInput(frameCount);
+	}
+	
+	player1->SetInput(player1Input);
+	player2->SetInput(player2Input);
 }
 
 int fletcher32_checksum(short *data, size_t len)
