@@ -9,6 +9,7 @@
 #include "HealthBar.h"
 #include "GameStateManager.h"
 #include "Message.h"
+#include "MessageHandler.h"
 //#include "ggponet.h"
 //#include "nongamestate.h"
 
@@ -92,6 +93,8 @@ int fletcher32_checksum(short *data, size_t len);
 void ReadInputs();
 
 std::list<Message> messages;
+
+MessageHandler messageHandler;
 
 sf::UdpSocket socket;
 sf::IpAddress hostIP = "127.0.0.1";
@@ -178,7 +181,6 @@ int main()
 		{
 			
 			RunFrame();
-			
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
 		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
@@ -745,7 +747,7 @@ void ReadInputs()
 		}
 
 		//Get received input
-		player2Input = inputHandler.GetNoInput(frameCount);
+		player2Input = messageHandler.ReceiveFrameInput();
 	}
 
 	else

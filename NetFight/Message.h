@@ -2,9 +2,8 @@
 #define MESSAGE_H
 
 struct Message {
-	int id;
-	float x, y, dirx, diry;
-	float timeSent;
+	bool inputs[7];
+	int frame;
 };
 
 #endif
