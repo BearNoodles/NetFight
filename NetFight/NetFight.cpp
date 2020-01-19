@@ -290,6 +290,8 @@ void HostOrClient()
 		{
 			thisPlayer = 2;
 
+			messageHandler.Initialise(hostIP, hostPort);
+
 			if (!InitClient())
 			{
 				std::cout << "Error connecting to host, try again" << std::endl;
@@ -441,6 +443,8 @@ bool WaitForPlayers()
 
 		if (greeting == "hello")
 		{
+			messageHandler.Initialise(senderIP, senderPort);
+
 			clientIP = senderIP;
 			clientPort = senderPort;
 			packet.clear();
