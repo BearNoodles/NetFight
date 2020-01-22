@@ -18,6 +18,8 @@ public:
 
 	FrameInput GetInput(int frameNo);
 
+	std::vector<FrameInput>* GetAllInputs(int player);
+
 	FrameInput GetNoInput(int frameNo);
 
 	void SetCurrentInput(int frame);

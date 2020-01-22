@@ -8,7 +8,7 @@ Input::Input()
 	}
 	noInput.frameNumber = -1;
 	player1Inputs = new std::vector<FrameInput>();
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		noInput.frameNumber = i;
 		player1Inputs->push_back(noInput);
@@ -140,6 +140,18 @@ void Input::UpdateInputP2(FrameInput p2Input)
 	}
 }
 
+
+std::vector<FrameInput>* Input::GetAllInputs(int player)
+{
+	if (player == 1)
+	{
+		return player1Inputs;
+	}
+	else
+	{
+		return player2Inputs;
+	}
+}
 //void Input::UpdateNoInputs(int frameNo)
 //{
 //	FrameInput tempInput = noInput;
