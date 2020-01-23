@@ -16,7 +16,7 @@ public:
 
 	void SetInput(FrameInput frameInput);
 
-	FrameInput GetInput(int frameNo);
+	FrameInput GetFrameInput(int frameNo);
 
 	std::vector<FrameInput>* GetAllInputs(int player);
 
@@ -34,8 +34,8 @@ public:
 	void SetCurrentFrame(int frame);
 
 protected:
-	std::vector<FrameInput>* player1Inputs;
-	std::vector<FrameInput>* player2Inputs;
+	std::vector<FrameInput>* localInputs;
+	std::vector<FrameInput>* opponentInputs;
 
 	int m_currentFrame;
 

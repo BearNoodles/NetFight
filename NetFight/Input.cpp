@@ -7,16 +7,18 @@ Input::Input()
 		b = false;
 	}
 	noInput.frameNumber = -1;
-	player1Inputs = new std::vector<FrameInput>();
+	opponentInputs = new std::vector<FrameInput>();
 	for (int i = 0; i < 10; i++)
 	{
 		noInput.frameNumber = i;
-		player1Inputs->push_back(noInput);
+		opponentInputs->push_back(noInput);
 	}
 	noInput.frameNumber = -1;
 	m_currentFrame = 0;
 }
 //FIX ALL OF THIS
+
+//AAALLL OF IT
 
 
 FrameInput Input::ReadLocalInput(int frameNo)
@@ -64,14 +66,14 @@ void Input::SetInput(FrameInput frameInput)
 
 void Input::SetCurrentInput(int frame)
 {
-	while (player1Inputs->back().frameNumber > frame)
+	while (opponentInputs->back().frameNumber > frame)
 	{
-		if (player1Inputs->back().frameNumber == -1)
+		if (opponentInputs->back().frameNumber == -1)
 		{
 			return;
 		}
-		player1Inputs->pop_back();
-		player1Inputs->insert(player1Inputs->begin(), noInput);
+		opponentInputs->pop_back();
+		opponentInputs->insert(opponentInputs->begin(), noInput);
 	}
 }
 
@@ -81,9 +83,9 @@ void Input::SetCurrentInput(int frame)
 //}
 
 
-FrameInput Input::GetInput(int frameNo)
+FrameInput Input::GetFrameInput(int frameNo)
 {
-	for (std::vector<FrameInput>::reverse_iterator it = player1Inputs->rbegin(); it != player1Inputs->rend(); ++it)
+	for (std::vector<FrameInput>::reverse_iterator it = opponentInputs->rbegin(); it != opponentInputs->rend(); ++it)
 	{
 		if (it->frameNumber == frameNo)
 		{
@@ -104,14 +106,14 @@ FrameInput Input::GetNoInput(int frameNo)
 
 void Input::UpdateInputP1(FrameInput p1Input)
 {
-	if (player1Inputs->back().frameNumber < p1Input.frameNumber)
+	if (opponentInputs->back().frameNumber < p1Input.frameNumber)
 	{
-		player1Inputs->erase(player1Inputs->begin());
-		player1Inputs->push_back(p1Input);
+		opponentInputs->erase(opponentInputs->begin());
+		opponentInputs->push_back(p1Input);
 		return;
 	}
 
-	for (std::vector<FrameInput>::reverse_iterator it = player1Inputs->rbegin(); it != player1Inputs->rend(); ++it)
+	for (std::vector<FrameInput>::reverse_iterator it = opponentInputs->rbegin(); it != opponentInputs->rend(); ++it)
 	{
 		if (p1Input.frameNumber == it->frameNumber)
 		{
@@ -123,14 +125,14 @@ void Input::UpdateInputP1(FrameInput p1Input)
 
 void Input::UpdateInputP2(FrameInput p2Input)
 {
-	if (player2Inputs->back().frameNumber < p2Input.frameNumber)
+	if (localInputs->back().frameNumber < p2Input.frameNumber)
 	{
-		player2Inputs->erase(player2Inputs->begin());
-		player2Inputs->push_back(p2Input);
+		localInputs->erase(localInputs->begin());
+		localInputs->push_back(p2Input);
 		return;
 	}
 
-	for (std::vector<FrameInput>::reverse_iterator it = player2Inputs->rbegin(); it != player2Inputs->rend(); ++it)
+	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
 	{
 		if (p2Input.frameNumber == it->frameNumber)
 		{
@@ -145,11 +147,11 @@ std::vector<FrameInput>* Input::GetAllInputs(int player)
 {
 	if (player == 1)
 	{
-		return player1Inputs;
+		return opponentInputs;
 	}
 	else
 	{
-		return player2Inputs;
+		return localInputs;
 	}
 }
 //void Input::UpdateNoInputs(int frameNo)

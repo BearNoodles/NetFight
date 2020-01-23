@@ -517,7 +517,7 @@ bool ReadInputs()
 		}
 
 		//Get received input
-		player2Input = messageHandler.ReceiveFrameInput();
+		player2Input = inputHandler.GetFrameInput(frameCount);
 	}
 
 	else
@@ -532,7 +532,7 @@ bool ReadInputs()
 		}
 
 		//Get received input
-		player1Input = inputHandler.GetNoInput(frameCount);
+		player1Input = inputHandler.GetFrameInput(frameCount);
 	}
 	
 	player1->SetInput(player1Input);

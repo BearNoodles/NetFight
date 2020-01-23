@@ -18,6 +18,8 @@ public:
 	void SendFrameInput(FrameInput input);
 	FrameInput ReceiveFrameInput(int frame);
 
+	void SetMinimumFrame(int minFrame);
+
 private:
 
 	//sf::IpAddress opponentIP;
@@ -27,5 +29,10 @@ private:
 	unsigned short opponentPort;
 
 	std::list<Message> messages;
+	int maxMessagesSize;
+
+	void AddMessage(Message toAdd);
+
+	int minimumFrame;
 };
 
