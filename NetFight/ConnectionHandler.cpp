@@ -37,7 +37,8 @@ int ConnectionHandler::HostOrClient()
 		{
 			ID = 2;
 
-
+			opponentIP = "127.0.0.1";
+			opponentPort = 54444;
 			if (!InitClient())
 			{
 				std::cout << "Error connecting to host, try again" << std::endl;
@@ -87,6 +88,7 @@ bool ConnectionHandler::InitClient()
 	if (socket.bind(sf::Socket::AnyPort) != sf::Socket::Done)
 	{
 		// error...
+		std::cout << "Bind Failed" << std::endl;
 	}
 
 	while (true)

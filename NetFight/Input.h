@@ -16,22 +16,24 @@ public:
 
 	void SetInput(FrameInput frameInput);
 
-	FrameInput GetFrameInput(int frameNo);
+	FrameInput GetOpponentInput(int frameNo);
+	FrameInput GetLocalInput(int frameNo);
+
+	void SetOpponentInput(FrameInput input);
+	void SetLocalInput(FrameInput input);
 
 	std::vector<FrameInput>* GetAllInputs(int player);
 
 	FrameInput GetNoInput(int frameNo);
 
-	void SetCurrentInput(int frame);
 
 	FrameInput GetCurrentInput(int frame);
-
-	void UpdateInputP1(FrameInput p1Input);
-	void UpdateInputP2(FrameInput p2Input);
 
 	void UpdateAll();
 
 	void SetCurrentFrame(int frame);
+
+	bool BothInputsReady(int frame);
 
 protected:
 	std::vector<FrameInput>* localInputs;

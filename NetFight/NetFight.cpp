@@ -53,6 +53,8 @@ bool sButt = true;
 int frameCount = 0;
 sf::Clock frameClock;
 
+
+sf::Time messageTimer;
 bool msgReady;
 
 void RunFrame();
@@ -85,9 +87,11 @@ bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len);
 
 int fletcher32_checksum(short *data, size_t len);
 
-
-
-bool ReadInputs();
+bool HandleInputs();
+void SetLocalInputs();
+void SendInputs();
+void UpdateInputs();
+void ReadInputs();
 
 std::list<Message> messages;
 
@@ -172,12 +176,16 @@ int main()
 		}
 
 
+
+		//SEND MESSAGES
+
+
+
 		frameTime = frameClock.getElapsedTime();
 
 		//Advance frame
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
-			
 			RunFrame();
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
@@ -258,139 +266,98 @@ void RunFrame()
 //			AdvanceFrame(inputs, disconnect_flags);
 //		}
 //	}
-	ReadInputs();
+	if (!HandleInputs())
+	{
+		return;
+	}
 	//AdvanceFrame(inputs, disconnect_flags);
 	AdvanceFrame();
 	DrawCurrentFrame();
 }
 
-
-//void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators)
-//{
-//	GGPOErrorCode result;
-//
-//	// Fill in a ggpo callbacks structure to pass to start_session.
-//	GGPOSessionCallbacks cb = { 0 };
-//	cb.begin_game = BeginGameCallback;
-//	cb.advance_frame = AdvanceFrameCallback;
-//	cb.load_game_state = LoadGameStateCallback;
-//	cb.save_game_state = SaveGameStateCallback;
-//	cb.free_buffer = FreeBuffer;
-//	cb.on_event = OnEventCallback;
-//	cb.log_game_state = LogGameState;
-//
-//	/* Start a new session */
-//	result = ggpo_start_session(&ggpo,         // the new session object
-//		&cb,           // our callbacks
-//		"NetFight",    // application name
-//		2,             // 2 players
-//		sizeof(int),   // size of an input packet
-//		8001);         // our local udp port
-//
-//					   // automatically disconnect clients after 3000 ms and start our count-down timer
-//					   // for disconnects after 1000 ms.   To completely disable disconnects, simply use
-//					   // a value of 0 for ggpo_set_disconnect_timeout.
-//	ggpo_set_disconnect_timeout(ggpo, 3000);
-//	ggpo_set_disconnect_notify_start(ggpo, 1000);
-//
-//	int i;
-//	for (i = 0; i < num_players + num_spectators; i++) {
-//		GGPOPlayerHandle handle;
-//		result = ggpo_add_player(ggpo, players + i, &handle);
-//		ngs.players[i].handle = handle;
-//		ngs.players[i].type = players[i].type;
-//		if (players[i].type == GGPO_PLAYERTYPE_LOCAL) {
-//			ngs.players[i].connect_progress = 100;
-//			ngs.local_player_handle = handle;
-//			ngs.SetConnectState(handle, Connecting);
-//			ggpo_set_frame_delay(ggpo, handle, FRAME_DELAY);
-//		}
-//		else {
-//			ngs.players[i].connect_progress = 0;
-//		}
-//	}
-//}
-
-bool __cdecl BeginGameCallback(const char *name)
+bool HandleInputs()
 {
-	return true;
-}
+	SetLocalInputs();
+	SendInputs();
+	UpdateInputs();
 
-//bool __cdecl AdvanceFrameCallback(int flags)
-//{
-//	int inputs[2] = { 0 };
-//	int disconnect_flags;
-//
-//	// Make sure we fetch new inputs from GGPO and use those to update
-//	// the game state instead of reading from the keyboard.
-//	ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
-//	AdvanceFrame(inputs, disconnect_flags);
-//	return true;
-//}
-
-bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len)
-{
-	memcpy(&currentState, buffer, len);
-	return true;
-}
-
-bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checksum, int frame)
-{
-	*len = sizeof(currentState);
-	*buffer = (unsigned char *)malloc(*len);
-	if (!*buffer) {
+	if (!inputHandler.BothInputsReady(frameCount))
+	{
 		return false;
 	}
-	memcpy(*buffer, &currentState, *len);
-	*checksum = fletcher32_checksum((short *)*buffer, *len / 2);
+
+	ReadInputs();
+
 	return true;
 }
 
-void __cdecl FreeBuffer(void *buffer)
+void SetLocalInputs()
 {
-	free(buffer);
+	inputHandler.SetCurrentFrame(frameCount);
+	if (focus)
+	{
+		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount));
+	}
+	else
+	{
+		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount));
+	}
+
 }
 
-//bool __cdecl OnEventCallback(GGPOEvent *info)
-//{
-//	int progress;
-//	switch (info->code) {
-//	case GGPO_EVENTCODE_CONNECTED_TO_PEER:
-//		ngs.SetConnectState(info->u.connected.player, Synchronizing);
-//		break;
-//	case GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER:
-//		progress = 100 * info->u.synchronizing.count / info->u.synchronizing.total;
-//		ngs.UpdateConnectProgress(info->u.synchronizing.player, progress);
-//		break;
-//	case GGPO_EVENTCODE_SYNCHRONIZED_WITH_PEER:
-//		ngs.UpdateConnectProgress(info->u.synchronizing.player, 100);
-//		break;
-//	case GGPO_EVENTCODE_RUNNING:
-//		ngs.SetConnectState(Running);
-//		//renderer->SetStatusText("");
-//		break;
-//	case GGPO_EVENTCODE_CONNECTION_INTERRUPTED:
-//		//ngs.SetDisconnectTimeout(info->u.connection_interrupted.player,
-//			//timeGetTime(),
-//			//info->u.connection_interrupted.disconnect_timeout);
-//		break;
-//	case GGPO_EVENTCODE_CONNECTION_RESUMED:
-//		ngs.SetConnectState(info->u.connection_resumed.player, Running);
-//		break;
-//	case GGPO_EVENTCODE_DISCONNECTED_FROM_PEER:
-//		ngs.SetConnectState(info->u.disconnected.player, Disconnected);
-//		break;
-//	case GGPO_EVENTCODE_TIMESYNC:
-//		//Sleep(1000 * info->u.timesync.frames_ahead / 60);
-//		break;
-//	}
-//	return true;
-//}
-
-bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
+void SendInputs()
 {
-	return true;
+	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 2));
+	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 1));
+	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 }
+
+void UpdateInputs()
+{
+	for (int i = 0; i < 10; i++)
+	{
+		inputHandler.SetOpponentInput(messageHandler.GetFrameInput(frameCount - i));
+	}
+}
+
+void ReadInputs()
+{
+	inputHandler.SetCurrentFrame(frameCount);
+
+	if (thisPlayer == 1)
+	{
+		if (focus)
+		{
+			player1Input = inputHandler.GetLocalInput(frameCount);
+		}
+		else
+		{
+			player1Input = inputHandler.GetNoInput(frameCount);
+		}
+
+		//Get received input
+		player2Input = inputHandler.GetOpponentInput(frameCount);
+	}
+
+	else
+	{
+		if (focus)
+		{
+			player2Input = inputHandler.GetLocalInput(frameCount);
+		}
+		else
+		{
+			player2Input = inputHandler.GetNoInput(frameCount);
+		}
+
+		//Get received input
+		player1Input = inputHandler.GetOpponentInput(frameCount);
+	}
+
+	player1->SetInput(player1Input);
+	player2->SetInput(player2Input);
+}
+
 
 //void AdvanceFrame(int inputs[], int disconnect_flags)
 void AdvanceFrame()
@@ -448,15 +415,7 @@ void AdvanceFrame()
 	}*/
 }
 
-void Idle(int time)
-{
-	//ggpo_idle(ggpo, time);
-}
 
-void DisconnectPlayer(int player)
-{
-
-}
 
 void DrawCurrentFrame()
 {
@@ -487,56 +446,149 @@ void Exit()
 
 }
 
-bool ReadInputs()
+//void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators)
+//{
+//	GGPOErrorCode result;
+//
+//	// Fill in a ggpo callbacks structure to pass to start_session.
+//	GGPOSessionCallbacks cb = { 0 };
+//	cb.begin_game = BeginGameCallback;
+//	cb.advance_frame = AdvanceFrameCallback;
+//	cb.load_game_state = LoadGameStateCallback;
+//	cb.save_game_state = SaveGameStateCallback;
+//	cb.free_buffer = FreeBuffer;
+//	cb.on_event = OnEventCallback;
+//	cb.log_game_state = LogGameState;
+//
+//	/* Start a new session */
+//	result = ggpo_start_session(&ggpo,         // the new session object
+//		&cb,           // our callbacks
+//		"NetFight",    // application name
+//		2,             // 2 players
+//		sizeof(int),   // size of an input packet
+//		8001);         // our local udp port
+//
+//					   // automatically disconnect clients after 3000 ms and start our count-down timer
+//					   // for disconnects after 1000 ms.   To completely disable disconnects, simply use
+//					   // a value of 0 for ggpo_set_disconnect_timeout.
+//	ggpo_set_disconnect_timeout(ggpo, 3000);
+//	ggpo_set_disconnect_notify_start(ggpo, 1000);
+//
+//	int i;
+//	for (i = 0; i < num_players + num_spectators; i++) {
+//		GGPOPlayerHandle handle;
+//		result = ggpo_add_player(ggpo, players + i, &handle);
+//		ngs.players[i].handle = handle;
+//		ngs.players[i].type = players[i].type;
+//		if (players[i].type == GGPO_PLAYERTYPE_LOCAL) {
+//			ngs.players[i].connect_progress = 100;
+//			ngs.local_player_handle = handle;
+//			ngs.SetConnectState(handle, Connecting);
+//			ggpo_set_frame_delay(ggpo, handle, FRAME_DELAY);
+//		}
+//		else {
+//			ngs.players[i].connect_progress = 0;
+//		}
+//	}
+//}
+
+//bool __cdecl AdvanceFrameCallback(int flags)
+//{
+//	int inputs[2] = { 0 };
+//	int disconnect_flags;
+//
+//	// Make sure we fetch new inputs from GGPO and use those to update
+//	// the game state instead of reading from the keyboard.
+//	ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
+//	AdvanceFrame(inputs, disconnect_flags);
+//	return true;
+//}
+
+
+
+//bool __cdecl OnEventCallback(GGPOEvent *info)
+//{
+//	int progress;
+//	switch (info->code) {
+//	case GGPO_EVENTCODE_CONNECTED_TO_PEER:
+//		ngs.SetConnectState(info->u.connected.player, Synchronizing);
+//		break;
+//	case GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER:
+//		progress = 100 * info->u.synchronizing.count / info->u.synchronizing.total;
+//		ngs.UpdateConnectProgress(info->u.synchronizing.player, progress);
+//		break;
+//	case GGPO_EVENTCODE_SYNCHRONIZED_WITH_PEER:
+//		ngs.UpdateConnectProgress(info->u.synchronizing.player, 100);
+//		break;
+//	case GGPO_EVENTCODE_RUNNING:
+//		ngs.SetConnectState(Running);
+//		//renderer->SetStatusText("");
+//		break;
+//	case GGPO_EVENTCODE_CONNECTION_INTERRUPTED:
+//		//ngs.SetDisconnectTimeout(info->u.connection_interrupted.player,
+//			//timeGetTime(),
+//			//info->u.connection_interrupted.disconnect_timeout);
+//		break;
+//	case GGPO_EVENTCODE_CONNECTION_RESUMED:
+//		ngs.SetConnectState(info->u.connection_resumed.player, Running);
+//		break;
+//	case GGPO_EVENTCODE_DISCONNECTED_FROM_PEER:
+//		ngs.SetConnectState(info->u.disconnected.player, Disconnected);
+//		break;
+//	case GGPO_EVENTCODE_TIMESYNC:
+//		//Sleep(1000 * info->u.timesync.frames_ahead / 60);
+//		break;
+//	}
+//	return true;
+//}
+
+
+
+
+
+bool __cdecl BeginGameCallback(const char *name)
 {
-	//FrameInput inputs;
-	//inputHandler.SetCurrentFrame(frameCount);
-	//inputHandler.UpdateInputs(frameCount);
+	return true;
+}
 
-	//if (thisPlayer == 1)
-	//{
-	//	player1Input = inputHandler.ReadLocalInput();
-	//}
-	////MAKE THIS WORK (SO GGPO CAN BE PASSED (p1I, p2I, simframe))
-	//inputs = inputHandler.GetInput(frameCount);
-	////player2Input = inputHandler.GetInput(frameCount);
-	//
-	//return inputs;
 
-	inputHandler.SetCurrentFrame(frameCount);
 
-	if (thisPlayer == 1)
-	{
-		if (focus)
-		{
-			player1Input = inputHandler.ReadLocalInput(frameCount);
-		}
-		else
-		{
-			player1Input = inputHandler.GetNoInput(frameCount);
-		}
+bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
+{
+	return true;
+}
 
-		//Get received input
-		player2Input = inputHandler.GetFrameInput(frameCount);
+void Idle(int time)
+{
+	//ggpo_idle(ggpo, time);
+}
+
+void DisconnectPlayer(int player)
+{
+
+}
+
+bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len)
+{
+	memcpy(&currentState, buffer, len);
+	return true;
+}
+
+bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checksum, int frame)
+{
+	*len = sizeof(currentState);
+	*buffer = (unsigned char *)malloc(*len);
+	if (!*buffer) {
+		return false;
 	}
+	memcpy(*buffer, &currentState, *len);
+	*checksum = fletcher32_checksum((short *)*buffer, *len / 2);
+	return true;
+}
 
-	else
-	{
-		if (focus)
-		{
-			player2Input = inputHandler.ReadLocalInput(frameCount);
-		}
-		else
-		{
-			player2Input = inputHandler.GetNoInput(frameCount);
-		}
-
-		//Get received input
-		player1Input = inputHandler.GetFrameInput(frameCount);
-	}
-	
-	player1->SetInput(player1Input);
-	player2->SetInput(player2Input);
+void __cdecl FreeBuffer(void *buffer)
+{
+	free(buffer);
 }
 
 int fletcher32_checksum(short *data, size_t len)
@@ -559,3 +611,4 @@ int fletcher32_checksum(short *data, size_t len)
 	sum2 = (sum2 & 0xffff) + (sum2 >> 16);
 	return sum2 << 16 | sum1;
 }
+

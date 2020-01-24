@@ -64,18 +64,18 @@ void Input::SetInput(FrameInput frameInput)
 	//player1Inputs->insert(player1Inputs->at(frameInput.frameNumber), frameInput);
 }
 
-void Input::SetCurrentInput(int frame)
-{
-	while (opponentInputs->back().frameNumber > frame)
-	{
-		if (opponentInputs->back().frameNumber == -1)
-		{
-			return;
-		}
-		opponentInputs->pop_back();
-		opponentInputs->insert(opponentInputs->begin(), noInput);
-	}
-}
+//void Input::SetOpponentInput(int frame)
+//{
+//	while (opponentInputs->back().frameNumber > frame)
+//	{
+//		if (opponentInputs->back().frameNumber == -1)
+//		{
+//			return;
+//		}
+//		opponentInputs->pop_back();
+//		opponentInputs->insert(opponentInputs->begin(), noInput);
+//	}
+//}
 
 //FrameInput Input::GetCurrentInput(int frame)
 //{
@@ -83,9 +83,21 @@ void Input::SetCurrentInput(int frame)
 //}
 
 
-FrameInput Input::GetFrameInput(int frameNo)
+FrameInput Input::GetOpponentInput(int frameNo)
 {
 	for (std::vector<FrameInput>::reverse_iterator it = opponentInputs->rbegin(); it != opponentInputs->rend(); ++it)
+	{
+		if (it->frameNumber == frameNo)
+		{
+			return *it;
+		}
+	}
+	return noInput;
+}
+
+FrameInput Input::GetLocalInput(int frameNo)
+{
+	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
 	{
 		if (it->frameNumber == frameNo)
 		{
@@ -104,39 +116,39 @@ FrameInput Input::GetNoInput(int frameNo)
 	return tempInput;
 }
 
-void Input::UpdateInputP1(FrameInput p1Input)
+void Input::SetOpponentInput(FrameInput input)
 {
-	if (opponentInputs->back().frameNumber < p1Input.frameNumber)
+	if (opponentInputs->back().frameNumber < input.frameNumber)
 	{
 		opponentInputs->erase(opponentInputs->begin());
-		opponentInputs->push_back(p1Input);
+		opponentInputs->push_back(input);
 		return;
 	}
 
 	for (std::vector<FrameInput>::reverse_iterator it = opponentInputs->rbegin(); it != opponentInputs->rend(); ++it)
 	{
-		if (p1Input.frameNumber == it->frameNumber)
+		if (input.frameNumber == it->frameNumber)
 		{
-			*it = p1Input;
+			*it = input;
 			return;
 		}
 	}
 }
 
-void Input::UpdateInputP2(FrameInput p2Input)
+void Input::SetLocalInput(FrameInput input)
 {
-	if (localInputs->back().frameNumber < p2Input.frameNumber)
+	if (localInputs->back().frameNumber < input.frameNumber)
 	{
 		localInputs->erase(localInputs->begin());
-		localInputs->push_back(p2Input);
+		localInputs->push_back(input);
 		return;
 	}
 
 	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
 	{
-		if (p2Input.frameNumber == it->frameNumber)
+		if (input.frameNumber == it->frameNumber)
 		{
-			*it = p2Input;
+			*it = input;
 			return;
 		}
 	}
@@ -184,6 +196,16 @@ void Input::UpdateAll()
 void Input::SetCurrentFrame(int frame)
 {
 	m_currentFrame = frame;
+}
+
+bool Input::BothInputsReady(int frame)
+{
+	if (GetOpponentInput(frame).frameNumber != -1)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 

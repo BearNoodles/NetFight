@@ -22,5 +22,6 @@ private:
 	sf::UdpSocket socket;
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort;
+
 };
 

@@ -4,6 +4,7 @@
 #include "Message.h"
 #include <SFML/Network.hpp>
 #include <list>
+#include <vector>
 #include <iostream>
 
 class MessageHandler
@@ -16,9 +17,11 @@ public:
 	void Initialise(sf::IpAddress ip, unsigned short port);
 
 	void SendFrameInput(FrameInput input);
-	FrameInput ReceiveFrameInput(int frame);
+	void ReceiveInputMessages(int frame);
 
 	void SetMinimumFrame(int minFrame);
+
+	FrameInput GetFrameInput(int frame);
 
 private:
 
@@ -28,11 +31,13 @@ private:
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort;
 
-	std::list<Message> messages;
+	std::vector<Message> messages;
+	std::vector<Message> messagesEarly;
 	int maxMessagesSize;
 
 	void AddMessage(Message toAdd);
 
+	bool CheckEarlyMessages();
 	int minimumFrame;
 };
 
