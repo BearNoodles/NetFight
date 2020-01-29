@@ -85,6 +85,7 @@ bool ConnectionHandler::InitClient()
 {
 	int counter = 0;
 	// bind the socket to a port
+	//TODO: find a way to get this anyport and pass it to messagehandler
 	if (socket.bind(sf::Socket::AnyPort) != sf::Socket::Done)
 	{
 		// error...
@@ -102,6 +103,11 @@ bool ConnectionHandler::InitClient()
 
 		sf::Packet packet;
 		packet << s;
+
+
+
+		opponentIP = "127.0.0.1";
+		opponentPort = 54444;
 
 		if (socket.send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 		{
@@ -124,6 +130,8 @@ bool ConnectionHandler::InitClient()
 		}
 		std::string r;
 		sf::Packet packet;
+
+
 		if (socket.receive(packet, opponentIP, opponentPort) != sf::Socket::Done)
 		{
 			// error...
@@ -249,4 +257,14 @@ bool ConnectionHandler::WaitForPlayers()
 		}
 	}
 	return false;
+}
+
+
+sf::IpAddress ConnectionHandler::GetOpponentIP()
+{
+	return opponentIP;
+}
+unsigned short ConnectionHandler::GetOpponentPort()
+{
+	return opponentPort;
 }

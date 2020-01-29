@@ -14,7 +14,7 @@ public:
 	MessageHandler();
 	~MessageHandler();
 
-	void Initialise(sf::IpAddress ip, unsigned short port);
+	bool Initialise(sf::IpAddress ip, unsigned short opponentPort, unsigned short ownPort);
 
 	void SendFrameInput(FrameInput input);
 	void ReceiveInputMessages(int frame);

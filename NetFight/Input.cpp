@@ -8,10 +8,12 @@ Input::Input()
 	}
 	noInput.frameNumber = -1;
 	opponentInputs = new std::vector<FrameInput>();
+	localInputs = new std::vector<FrameInput>();
 	for (int i = 0; i < 10; i++)
 	{
 		noInput.frameNumber = i;
 		opponentInputs->push_back(noInput);
+		localInputs->push_back(noInput);
 	}
 	noInput.frameNumber = -1;
 	m_currentFrame = 0;

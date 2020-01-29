@@ -10,14 +10,22 @@ MessageHandler::~MessageHandler()
 
 }
 
-void MessageHandler::Initialise(sf::IpAddress ip, unsigned short port)
+bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
 {
 	opponentIP = ip;
-	opponentPort = port;
+	opponentPort = opponentPort;
 
-	minimumFrame = 0;
+	//TODO: get client port from connectionhandler
+	if (socket.bind(ownPort) != sf::Socket::Done)
+	{
+
+		std::cout << "Message Handler socket not bound" << std::endl;
+		return false;
+	}
 
 	maxMessagesSize = 1000;
+
+	return true;
 }
 
 void MessageHandler::SetMinimumFrame(int minFrame)
@@ -67,8 +75,11 @@ void MessageHandler::ReceiveInputMessages(int frame)
 	
 	//Possibly time how long each new message takes to receive to calculate the delay required?
 	//Set some kind of limit on how long the function should read messages
-	while (true)
+	int counter = 0;
+	while (counter < 10)
 	{
+
+
 		sf::Int8 frame;
 		bool inputs[7];
 		sf::Packet packet;
@@ -127,6 +138,8 @@ void MessageHandler::ReceiveInputMessages(int frame)
 			std::cout << "Couldnt receive message" << std::endl;
 		}
 	}
+
+	counter++;
 }
 
 bool MessageHandler::CheckEarlyMessages()

@@ -1,6 +1,4 @@
-﻿  ConnectionHandler.cpp
-  NetFight.cpp
-m:\honours\netfight\netfight\netfight.cpp(432): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-m:\honours\netfight\netfight\netfight.cpp(433): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Generating Code...
+﻿  NetFight.cpp
+m:\honours\netfight\netfight\netfight.cpp(437): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+m:\honours\netfight\netfight\netfight.cpp(438): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   NetFight.vcxproj -> M:\Honours\NetFight\Debug\NetFight.exe

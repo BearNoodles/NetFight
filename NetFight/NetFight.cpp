@@ -137,6 +137,7 @@ int main()
 		break;
 	}
 
+
 	while (true)
 	{
 		if (connectionHandler.WaitForPlayers())
@@ -147,7 +148,8 @@ int main()
 		window.display();
 	}
 
-	
+
+	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort());
 
 	msgReady = false;
 
@@ -279,6 +281,9 @@ bool HandleInputs()
 {
 	SetLocalInputs();
 	SendInputs();
+
+	messageHandler.ReceiveInputMessages(frameCount);
+
 	UpdateInputs();
 
 	if (!inputHandler.BothInputsReady(frameCount))

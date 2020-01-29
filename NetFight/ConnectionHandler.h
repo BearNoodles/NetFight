@@ -13,6 +13,10 @@ public:
 	int HostOrClient();
 	bool WaitForPlayers();
 
+	sf::IpAddress GetOpponentIP();
+	unsigned short GetOpponentPort();
+	unsigned short GetOwnPort();
+
 private:
 	bool InitHost();
 	bool InitClient();
@@ -21,7 +25,9 @@ private:
 
 	sf::UdpSocket socket;
 	sf::IpAddress opponentIP;
-	unsigned short opponentPort;
+	unsigned short opponentPort = 54444;
+	//TODO: get client port from sf::anyport
+	unsigned short ownPort = 54444;
 
 };
 
