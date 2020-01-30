@@ -14,7 +14,8 @@ public:
 	MessageHandler();
 	~MessageHandler();
 
-	bool Initialise(sf::IpAddress ip, unsigned short opponentPort, unsigned short ownPort);
+	//bool Initialise(sf::IpAddress ip, unsigned short opponentPort, unsigned short ownPort);
+	bool Initialise(sf::IpAddress ip, unsigned short opponentPort, sf::UdpSocket* sock);
 
 	void SendFrameInput(FrameInput input);
 	void ReceiveInputMessages(int frame);
@@ -27,7 +28,7 @@ private:
 
 	//sf::IpAddress opponentIP;
 
-	sf::UdpSocket socket;
+	sf::UdpSocket* socket;
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort;
 

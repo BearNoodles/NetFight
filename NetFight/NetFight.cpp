@@ -149,7 +149,8 @@ int main()
 	}
 
 
-	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort());
+	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
+	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
 
 	msgReady = false;
 
@@ -317,6 +318,8 @@ void SendInputs()
 	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 }
 
+
+//TODO: fix this
 void UpdateInputs()
 {
 	for (int i = 0; i < 10; i++)

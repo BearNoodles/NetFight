@@ -2,7 +2,13 @@
 #define MESSAGE_H
 
 struct Message {
-	bool inputs[7];
+	bool input1;
+	bool input2;
+	bool input3;
+	bool input4;
+	bool input5;
+	bool input6;
+	bool input7;
 	int frame;
 };
 

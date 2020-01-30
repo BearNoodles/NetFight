@@ -3,7 +3,8 @@
 
 ConnectionHandler::ConnectionHandler()
 {
-	socket.setBlocking(false);
+	socket = new sf::UdpSocket();
+	socket->setBlocking(false);
 }
 
 
@@ -71,7 +72,7 @@ bool ConnectionHandler::InitHost()
 {
 
 	// bind the socket to a port
-	if (socket.bind(opponentPort) != sf::Socket::Done)
+	if (socket->bind(opponentPort) != sf::Socket::Done)
 	{
 		return false;
 	}
@@ -86,7 +87,7 @@ bool ConnectionHandler::InitClient()
 	int counter = 0;
 	// bind the socket to a port
 	//TODO: find a way to get this anyport and pass it to messagehandler
-	if (socket.bind(sf::Socket::AnyPort) != sf::Socket::Done)
+	if (socket->bind(sf::Socket::AnyPort) != sf::Socket::Done)
 	{
 		// error...
 		std::cout << "Bind Failed" << std::endl;
@@ -109,7 +110,7 @@ bool ConnectionHandler::InitClient()
 		opponentIP = "127.0.0.1";
 		opponentPort = 54444;
 
-		if (socket.send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+		if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 		{
 			// error...
 			//send failed try it again
@@ -132,7 +133,7 @@ bool ConnectionHandler::InitClient()
 		sf::Packet packet;
 
 
-		if (socket.receive(packet, opponentIP, opponentPort) != sf::Socket::Done)
+		if (socket->receive(packet, opponentIP, opponentPort) != sf::Socket::Done)
 		{
 			// error...
 			//receive failed send hello again
@@ -171,13 +172,15 @@ bool ConnectionHandler::WaitForPlayers()
 			sf::Packet packet;
 			packet << s;
 
-			if (socket.send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+			if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 			{
 				// error...
 				//send failed try it again
 				std::cout << "Send begin failed, try again" << std::endl;
 				return false;
 			}
+
+			//socket->unbind();
 			return true;
 		}
 		sf::IpAddress senderIP;
@@ -185,7 +188,7 @@ bool ConnectionHandler::WaitForPlayers()
 		sf::Packet packet;
 		std::string greeting;
 
-		if (socket.receive(packet, senderIP, senderPort) != sf::Socket::Done)
+		if (socket->receive(packet, senderIP, senderPort) != sf::Socket::Done)
 		{
 			// error...
 			//std::cout << "no messages yet" << std::endl;
@@ -220,7 +223,7 @@ bool ConnectionHandler::WaitForPlayers()
 					std::cout << "Error, could not connect to client" << std::endl;
 					break;
 				}
-				if (socket.send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+				if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 				{
 					// error...
 					//recieve failed send hello again
@@ -242,7 +245,7 @@ bool ConnectionHandler::WaitForPlayers()
 		unsigned short hostPort;
 		sf::Packet packet;
 		std::string beginMessage;
-		if (socket.receive(packet, hostIP, hostPort) != sf::Socket::Done)
+		if (socket->receive(packet, hostIP, hostPort) != sf::Socket::Done)
 		{
 			// error...
 			//recieve failed send hello again
@@ -253,6 +256,7 @@ bool ConnectionHandler::WaitForPlayers()
 		packet >> beginMessage;
 		if (beginMessage == "begin")
 		{
+			//socket->unbind();
 			return true;
 		}
 	}
@@ -268,3 +272,14 @@ unsigned short ConnectionHandler::GetOpponentPort()
 {
 	return opponentPort;
 }
+
+unsigned short ConnectionHandler::GetOwnPort()
+{
+	return socket->getLocalPort();
+}
+
+sf::UdpSocket* ConnectionHandler::GetSocket()
+{
+	return socket;
+}
+

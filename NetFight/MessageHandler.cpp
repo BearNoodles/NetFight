@@ -10,18 +10,22 @@ MessageHandler::~MessageHandler()
 
 }
 
-bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
+//bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
+bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::UdpSocket* sock)
 {
+	socket = sock;
+	//socket.setBlocking(false);
 	opponentIP = ip;
-	opponentPort = opponentPort;
+	opponentPort = oppPort;
+
+	
 
 	//TODO: get client port from connectionhandler
-	if (socket.bind(ownPort) != sf::Socket::Done)
+	/*if (socket.bind(ownPort) != sf::Socket::Done)
 	{
-
 		std::cout << "Message Handler socket not bound" << std::endl;
 		return false;
-	}
+	}*/
 
 	maxMessagesSize = 1000;
 
@@ -37,29 +41,42 @@ void MessageHandler::SendFrameInput(FrameInput input)
 {
 
 	sf::Int8 frameSend;
-	bool inputSend[7];
+	//bool inputSend[7];
+	bool inputSend1 = input.inputs[0];
+	bool inputSend2 = input.inputs[1];
+	bool inputSend3 = input.inputs[2];
+	bool inputSend4 = input.inputs[3];
+	bool inputSend5 = input.inputs[4];
+	bool inputSend6 = input.inputs[5];
+	bool inputSend7 = input.inputs[6];
 
-	for (int i = 0; i < 7; i++)
+	/*for (int i = 0; i < 7; i++)
 	{
 		inputSend[i] = input.inputs[i];
-	}
+	}*/
+
+
 
 	frameSend = input.frameNumber;
 
 	sf::Packet packet;
-	packet << inputSend << frameSend;
+	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << frameSend;
 
-	if (socket.send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+
+	//std::cout << "Send message failed" << std::endl;
+
+	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 	{
 		// error...
 		//send failed try it again
-		std::cout << "Send message failed" << std::endl;
+		//std::cout << "Send message failed" << std::endl;
 	}
 
 }
 
 void MessageHandler::AddMessage(Message toAdd)
 {
+	//Message temp = toAdd;
 	if (messages.size() >= maxMessagesSize)
 	{
 		messages.erase(messages.begin());
@@ -81,11 +98,12 @@ void MessageHandler::ReceiveInputMessages(int frame)
 
 
 		sf::Int8 frame;
-		bool inputs[7];
+		//bool inputs[7];
+		bool input1, input2, input3, input4, input5, input6, input7;
 		sf::Packet packet;
 		sf::IpAddress address;
 		unsigned short port;
-		if (socket.receive(packet, address, port) != sf::Socket::Done)
+		if (socket->receive(packet, address, port) != sf::Socket::Done)
 		{
 			// error...
 			//recieve failed send hello again
@@ -93,30 +111,43 @@ void MessageHandler::ReceiveInputMessages(int frame)
 			check = false;
 			break;
 		}
+
+		std::cout << "MESSAGE RECIEVED" << std::endl;
+
 		if (address != opponentIP || port != opponentPort)
 		{
 			check = false;
 		}
-		if ((packet >> inputs[7] >> frame) && check)
+
+		//if ((packet >> inputs[7] >> frame) && check)
+		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> frame) && check)
 		{
 
 			if (frame < minimumFrame)
 			{
+				counter++;
 				continue;
 			}
 			
 			//good
 			Message msg;
-			for (int i = 0; i < 7; i++)
+			msg.input1 = input1;
+			msg.input2 = input2;
+			msg.input3 = input3;
+			msg.input4 = input4;
+			msg.input5 = input5;
+			msg.input6 = input6;
+			msg.input7 = input7;
+			/*for (int i = 0; i < 7; i++)
 			{
 				msg.inputs[i] = inputs[i];
-			}
+			}*/
 
 			msg.frame = frame;
 
 			if (frame == minimumFrame)
 			{
-				messages.push_back(msg);
+				AddMessage(msg);
 				minimumFrame++;
 				while (true)
 				{
@@ -137,9 +168,10 @@ void MessageHandler::ReceiveInputMessages(int frame)
 		{
 			std::cout << "Couldnt receive message" << std::endl;
 		}
+
+		counter++;
 	}
 
-	counter++;
 }
 
 bool MessageHandler::CheckEarlyMessages()
@@ -171,10 +203,18 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 		if (m.frame == frame)
 		{
 			FrameInput newInput;
-			for (int i = 0; i < 7; i++)
+			/*for (int i = 0; i < 7; i++)
 			{
 				newInput.inputs[i] = m.inputs[i];
-			}
+			}*/
+			newInput.inputs[0] = m.input1;
+			newInput.inputs[1] = m.input2;
+			newInput.inputs[2] = m.input3;
+			newInput.inputs[3] = m.input4;
+			newInput.inputs[4] = m.input5;
+			newInput.inputs[5] = m.input6;
+			newInput.inputs[6] = m.input7;
+
 			newInput.frameNumber = m.frame;
 		}
 	}

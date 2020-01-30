@@ -17,17 +17,17 @@ public:
 	unsigned short GetOpponentPort();
 	unsigned short GetOwnPort();
 
+	sf::UdpSocket* GetSocket();
+
 private:
 	bool InitHost();
 	bool InitClient();
 
 	int ID;
 
-	sf::UdpSocket socket;
+	sf::UdpSocket* socket;
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort = 54444;
-	//TODO: get client port from sf::anyport
-	unsigned short ownPort = 54444;
-
+	//unsigned short ownPort = 54444;
 };
 
