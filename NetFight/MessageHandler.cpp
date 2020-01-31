@@ -40,7 +40,7 @@ void MessageHandler::SetMinimumFrame(int minFrame)
 void MessageHandler::SendFrameInput(FrameInput input)
 {
 
-	sf::Int8 frameSend;
+	sf::Int32 frameSend;
 	//bool inputSend[7];
 	bool inputSend1 = input.inputs[0];
 	bool inputSend2 = input.inputs[1];
@@ -69,19 +69,19 @@ void MessageHandler::SendFrameInput(FrameInput input)
 	{
 		// error...
 		//send failed try it again
-		//std::cout << "Send message failed" << std::endl;
+		std::cout << "Send message failed" << std::endl;
 	}
 
 }
 
 void MessageHandler::AddMessage(Message toAdd)
 {
-	//Message temp = toAdd;
+	Message* temp = &toAdd;
 	if (messages.size() >= maxMessagesSize)
 	{
 		messages.erase(messages.begin());
 	}
-	messages.push_back(toAdd);
+	messages.push_back(*temp);
 }
 
 //FIX
@@ -97,7 +97,7 @@ void MessageHandler::ReceiveInputMessages(int frame)
 	{
 
 
-		sf::Int8 frame;
+		sf::Int32 frame;
 		//bool inputs[7];
 		bool input1, input2, input3, input4, input5, input6, input7;
 		sf::Packet packet;
@@ -202,7 +202,6 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 	{
 		if (m.frame == frame)
 		{
-			FrameInput newInput;
 			/*for (int i = 0; i < 7; i++)
 			{
 				newInput.inputs[i] = m.inputs[i];
@@ -216,6 +215,8 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 			newInput.inputs[6] = m.input7;
 
 			newInput.frameNumber = m.frame;
+
+			break;
 		}
 	}
 

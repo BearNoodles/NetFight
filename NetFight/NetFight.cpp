@@ -313,8 +313,8 @@ void SetLocalInputs()
 
 void SendInputs()
 {
-	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 2));
-	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 1));
+	//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 2));
+	//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 1));
 	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 }
 

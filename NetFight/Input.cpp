@@ -117,6 +117,7 @@ FrameInput Input::GetNoInput(int frameNo)
 	return tempInput;
 }
 
+//TODO: stop this from passing frame -1 in
 void Input::SetOpponentInput(FrameInput input)
 {
 	if (opponentInputs->back().frameNumber < input.frameNumber)
