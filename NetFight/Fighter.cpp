@@ -47,7 +47,9 @@ void Fighter::UpdateFrame()
 	{
 		m_actionFrame++;
 
-		if (m_hitLanded && m_pushbackFrame < m_currentAction.selfBlockPushback)
+		//TODO:
+		//Update this to push attacking player on block too
+		if (m_hitLanded && m_pushbackFrame < m_currentAction.selfHitPushback)
 		{
 			m_pushbackFrame++;
 			m_position.x -= m_direction * m_currentAction.selfHitPushback;
@@ -66,7 +68,7 @@ void Fighter::UpdateFrame()
 		{
 			m_activeHitbox = &m_currentAction.activeHitbox;
 			m_isHitboxActive = true;
-			m_activeHitbox->setPosition(m_position + m_activeHitbox->getPosition());
+			m_activeHitbox->setPosition(sf::Vector2f(m_position.x + m_activeHitbox->getPosition().x * m_direction, m_position.y + m_activeHitbox->getPosition().y));
 		}
 	}
 
@@ -80,9 +82,18 @@ void Fighter::UpdateFrame()
 		m_actionFrame++;
 
 
-		if (!(IsCornered()) && m_pushbackFrame < m_hitBy.pushbackFames)
+		if (!(IsCornered()) && m_pushbackFrame < m_hitBy.pushbackFrames)
 		{
-			m_position.x -= m_pushback * m_direction;
+			if (m_playerState == hit)
+			{
+				m_pushbackFrame++;
+				m_position.x -= m_direction * m_hitBy.hitPushback;
+			}
+			else if (m_playerState == block)
+			{
+				m_pushbackFrame++;
+				m_position.x -= m_direction * m_hitBy.blockPushback;
+			}
 		}
 
 		if (m_actionFrame >= m_stunFrames)
@@ -125,9 +136,15 @@ void Fighter::UpdateFrame()
 			}
 		}
 
-		if (m_currentInput.inputs[1])
+		if (m_currentInput.inputs[4])
 		{
 			m_currentAction = m_characterActions.attack1;
+			ChangeState(attacking);
+		}
+
+		else if (m_currentInput.inputs[5])
+		{
+			m_currentAction = m_characterActions.attack2;
 			ChangeState(attacking);
 		}
 
@@ -229,6 +246,7 @@ void Fighter::ChangeState(PlayerState playerState)
 {
 	m_playerState = playerState;
 	m_actionFrame = 0;
+	m_pushbackFrame = 0;
 	switch (m_playerState)
 	{
 		case idle:
@@ -276,7 +294,10 @@ void Fighter::StartJump(int direction)
 
 void Fighter::UpdateJump()
 {
-	m_position.x += m_jumpSpeed.x;
+	if ((m_jumpSpeed.x < 0 && m_position.x > 0) || (m_jumpSpeed.x > 0 && m_position.x < m_screenWidth - m_hurtbox.getSize().x))
+	{
+		m_position.x += m_jumpSpeed.x;
+	}
 	m_position.y += m_jumpSpeed.y;
 	m_jumpSpeed.y++;
 	if (m_position.y >= m_floorPosition - m_hurtbox.getSize().y)
@@ -316,7 +337,7 @@ void Fighter::SetFighterState(GameState gameState)
 
 	else if (m_playerID == 2)
 	{
-		ChangeState(gameState.player1State);
+		ChangeState(gameState.player2State);
 
 		m_currentAction = gameState.player2Action;
 		m_actionFrame = gameState.player2ActionFrame;

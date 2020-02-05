@@ -42,6 +42,11 @@ void HealthBar::UpdateHealth(float health)
 {
 	m_currentHealth = health;
 	float newHealthSize = m_currentHealth / m_healthScale;
+
+	if (newHealthSize < 0)
+	{
+		newHealthSize = 0;
+	}
 	m_healthBar.setSize(sf::Vector2f(newHealthSize, 50.0f));
 }
 

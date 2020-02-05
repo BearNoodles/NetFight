@@ -56,6 +56,16 @@ FrameInput Input::ReadLocalInput(int frameNo)
 	{
 		tempInput.inputs[3] = true;
 	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	{
+		tempInput.inputs[4] = true;
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	{
+		tempInput.inputs[5] = true;
+	}
 	
 	return tempInput;
 }

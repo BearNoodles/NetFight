@@ -1,6 +1,8 @@
-﻿  Input.cpp
-  MessageHandler.cpp
-m:\honours\netfight\netfight\messagehandler.cpp(80): warning C4018: '>=': signed/unsigned mismatch
-m:\honours\netfight\netfight\messagehandler.cpp(179): warning C4018: '<': signed/unsigned mismatch
+﻿  Fighter.cpp
+m:\honours\netfight\netfight\fighter.cpp(36): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  NetFight.cpp
+m:\honours\netfight\netfight\netfight.cpp(449): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+m:\honours\netfight\netfight\netfight.cpp(500): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+m:\honours\netfight\netfight\netfight.cpp(501): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Generating Code...
   NetFight.vcxproj -> M:\Honours\NetFight\Debug\NetFight.exe

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <SFML/Network.hpp>
 #include <list>
+#include <string>
 #include "Fighter.h"
 #include "Input.h"
 #include "HealthBar.h"
@@ -43,6 +44,16 @@ Input inputHandler;
 
 int screenWidth = 1000;
 int screenHeight = 600;
+
+int framesInSecond;
+int framesInSecondMax;
+int roundTimer;
+sf::Text roundTimeText;
+sf::Font timerFont;
+
+int delayAmount;
+sf::Text delayText;
+
 
 sf::Time timeFromClock;
 sf::Time frameTime;
@@ -113,8 +124,35 @@ sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
 int main()
 {
-	//socket.setBlocking(false);
+	framesInSecond = 0;
+	framesInSecondMax = 60;
 
+	roundTimer = 99;
+
+
+
+	if (!timerFont.loadFromFile("font.ttf"))
+	{
+		// error...
+	}
+
+	else
+	{
+		roundTimeText.setFont(timerFont);
+		delayText.setFont(timerFont);
+	}
+
+	roundTimeText.setCharacterSize(56);
+	roundTimeText.setFillColor(sf::Color::White);
+	roundTimeText.setPosition(sf::Vector2f(470, 10));
+
+	delayText.setCharacterSize(28);
+	delayText.setFillColor(sf::Color::White);
+	delayText.setPosition(sf::Vector2f(870, 100));
+
+	delayAmount = 0;
+
+	//socket.setBlocking(false);
 
 	//sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 	window.setKeyRepeatEnabled(false);
@@ -187,6 +225,8 @@ int main()
 		frameTime = frameClock.getElapsedTime();
 
 		//Advance frame
+		//TODO:
+		//Make sure both players inputs are unchangable at this point to give the network some time to sesnd and receive
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
 			RunFrame();
@@ -198,7 +238,7 @@ int main()
 		}
 		
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && sButt && focus)
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && sButt && focus)
 		{
 			frameCount -= 20;
 			stateManager.SetCurrentState(frameCount);
@@ -271,11 +311,15 @@ void RunFrame()
 //	}
 	if (!HandleInputs())
 	{
+		delayAmount++;
 		return;
 	}
 	//AdvanceFrame(inputs, disconnect_flags);
 	AdvanceFrame();
+
 	DrawCurrentFrame();
+
+	delayAmount = 0;
 }
 
 bool HandleInputs()
@@ -396,11 +440,23 @@ void AdvanceFrame()
 	player2->UpdateFrame();
 
 	currentState.frame = frameCount;
-	currentState.time = 99;
+	
+	if (framesInSecond >= framesInSecondMax)
+	{
+		framesInSecond = 0;
+		roundTimer--;
+	}
+	currentState.time = roundTimer;
+	roundTimeText.setString(std::to_string(roundTimer));
+	delayText.setString("delay: " + std::to_string(delayAmount));
 
 	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
 	frameCount++;
+
+	framesInSecond++;
+
+
 
 	// update the checksums to display in the top of the window.  this
 	// helps to detect desyncs.
@@ -436,6 +492,10 @@ void DrawCurrentFrame()
 	{
 		window.draw(player1->GetActiveHitbox());
 	}
+	if (player2->IsHitboxActive())
+	{
+		window.draw(player2->GetActiveHitbox());
+	}
 
 	healthBar1->UpdateHealth(player1->GetHealth());
 	healthBar2->UpdateHealth(player2->GetHealth());
@@ -444,6 +504,11 @@ void DrawCurrentFrame()
 	window.draw(healthBar1->GetHealthBar());
 	window.draw(healthBar2->GetHealthBarBack());
 	window.draw(healthBar2->GetHealthBar());
+
+	window.draw(roundTimeText);
+	window.draw(delayText);
+
+
 
 	window.display();
 }
