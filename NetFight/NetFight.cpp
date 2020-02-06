@@ -33,6 +33,8 @@ int thisPlayer;
 
 bool focus = true;
 
+bool dontUpdateLocal = false;
+
 FrameInput player1Input;
 FrameInput player2Input;
 
@@ -134,6 +136,7 @@ int main()
 	if (!timerFont.loadFromFile("font.ttf"))
 	{
 		// error...
+		std::cout << "Load font failed" << std::endl;
 	}
 
 	else
@@ -226,7 +229,7 @@ int main()
 
 		//Advance frame
 		//TODO:
-		//Make sure both players inputs are unchangable at this point to give the network some time to sesnd and receive
+		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
 			RunFrame();
@@ -312,8 +315,11 @@ void RunFrame()
 	if (!HandleInputs())
 	{
 		delayAmount++;
+		dontUpdateLocal = true;
 		return;
 	}
+
+	dontUpdateLocal = false;
 	//AdvanceFrame(inputs, disconnect_flags);
 	AdvanceFrame();
 
@@ -324,7 +330,11 @@ void RunFrame()
 
 bool HandleInputs()
 {
-	SetLocalInputs();
+	if (!dontUpdateLocal)
+	{
+		SetLocalInputs();
+	}
+
 	SendInputs();
 
 	messageHandler.ReceiveInputMessages(frameCount);
@@ -364,6 +374,8 @@ void SendInputs()
 
 
 //TODO: fix this
+
+//ONLY NEEDED FOR ROLLBACK, MAKE 1 FOR DELAY
 void UpdateInputs()
 {
 	for (int i = 0; i < 10; i++)

@@ -198,27 +198,47 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 		newInput.inputs[i] = false;
 	}
 	newInput.frameNumber = -1;
-	for (Message m : messages)
-	{
-		if (m.frame == frame)
-		{
-			/*for (int i = 0; i < 7; i++)
-			{
-				newInput.inputs[i] = m.inputs[i];
-			}*/
-			newInput.inputs[0] = m.input1;
-			newInput.inputs[1] = m.input2;
-			newInput.inputs[2] = m.input3;
-			newInput.inputs[3] = m.input4;
-			newInput.inputs[4] = m.input5;
-			newInput.inputs[5] = m.input6;
-			newInput.inputs[6] = m.input7;
 
-			newInput.frameNumber = m.frame;
+
+	for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
+	{
+		if (it->frame == frame)
+		{
+			newInput.inputs[0] = it->input1;
+			newInput.inputs[1] = it->input2;
+			newInput.inputs[2] = it->input3;
+			newInput.inputs[3] = it->input4;
+			newInput.inputs[4] = it->input5;
+			newInput.inputs[5] = it->input6;
+			newInput.inputs[6] = it->input7;
+
+			newInput.frameNumber = it->frame;
 
 			break;
 		}
 	}
+
+	//for (Message m : messages)
+	//{
+	//	if (m.frame == frame)
+	//	{
+	//		/*for (int i = 0; i < 7; i++)
+	//		{
+	//			newInput.inputs[i] = m.inputs[i];
+	//		}*/
+	//		newInput.inputs[0] = m.input1;
+	//		newInput.inputs[1] = m.input2;
+	//		newInput.inputs[2] = m.input3;
+	//		newInput.inputs[3] = m.input4;
+	//		newInput.inputs[4] = m.input5;
+	//		newInput.inputs[5] = m.input6;
+	//		newInput.inputs[6] = m.input7;
+
+	//		newInput.frameNumber = m.frame;
+
+	//		break;
+	//	}
+	//}
 
 	return newInput;
 }
