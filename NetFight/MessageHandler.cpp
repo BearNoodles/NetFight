@@ -108,7 +108,6 @@ void MessageHandler::ReceiveInputMessages(int frame)
 			// error...
 			//recieve failed send hello again
 			//std::cout << "no messages yet" << std::endl;
-			check = false;
 			counter++;
 			continue;
 		}
@@ -127,7 +126,7 @@ void MessageHandler::ReceiveInputMessages(int frame)
 			if (frame < minimumFrame)
 			{
 				counter++;
-				continue;
+				break;
 			}
 			
 			//good
