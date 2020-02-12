@@ -109,7 +109,8 @@ void MessageHandler::ReceiveInputMessages(int frame)
 			//recieve failed send hello again
 			//std::cout << "no messages yet" << std::endl;
 			check = false;
-			break;
+			counter++;
+			continue;
 		}
 
 		std::cout << "MESSAGE RECIEVED" << std::endl;
