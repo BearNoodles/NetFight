@@ -365,7 +365,7 @@ bool HandleInputs()
 void SetLocalInputs()
 {
 	inputHandler.SetCurrentFrame(frameCount);
-	if (focus && delayAmount < delayLimit;)
+	if (focus && delayAmount < delayLimit)
 	{
 		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount + delayAmount));
 	}
