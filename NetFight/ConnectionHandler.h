@@ -11,6 +11,7 @@ public:
 	~ConnectionHandler();
 
 	int HostOrClient();
+	bool IsRollBackOn();
 	bool WaitForPlayers();
 
 	sf::IpAddress GetOpponentIP();
@@ -24,6 +25,8 @@ private:
 	bool InitClient();
 
 	int ID;
+
+	bool rollback;
 
 	sf::UdpSocket* socket;
 	sf::IpAddress opponentIP;

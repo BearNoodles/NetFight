@@ -18,7 +18,9 @@ public:
 	bool Initialise(sf::IpAddress ip, unsigned short opponentPort, sf::UdpSocket* sock);
 
 	void SendFrameInput(FrameInput input);
-	void ReceiveInputMessages(int frame);
+	void ReceiveInputMessages();
+
+	void SendNoInput(int frame);
 
 	void SetMinimumFrame(int minFrame);
 

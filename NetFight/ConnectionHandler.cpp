@@ -5,6 +5,8 @@ ConnectionHandler::ConnectionHandler()
 {
 	socket = new sf::UdpSocket();
 	socket->setBlocking(false);
+
+	rollback = false;
 }
 
 
@@ -29,6 +31,27 @@ int ConnectionHandler::HostOrClient()
 			{
 				std::cout << "Error starting as host, try again" << std::endl;
 				continue;
+			}
+
+			while (true)
+			{
+				std::cout << "Type 1 to use rollback or press 2 to use delay" << std::endl;
+				std::cin >> choice;
+				if (choice == "1")
+				{
+					rollback = true;
+					break;
+				}
+				else if (choice == "2")
+				{
+					rollback = false;
+					break;
+				}
+				else
+				{
+					std::cout << "Enter a valid choice" << std::endl;
+					continue;
+				}
 			}
 
 			return 1;
@@ -168,7 +191,16 @@ bool ConnectionHandler::WaitForPlayers()
 		//start game if host presses space
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
-			std::string s = "begin";
+
+			std::string s;
+			if (rollback)
+			{
+				s = "rollback";
+			}
+			else
+			{
+				s = "delay";
+			}
 			sf::Packet packet;
 			packet << s;
 
@@ -254,8 +286,16 @@ bool ConnectionHandler::WaitForPlayers()
 		}
 
 		packet >> beginMessage;
-		if (beginMessage == "begin")
+		if (beginMessage == "rollback" || beginMessage == "delay")
 		{
+			if (beginMessage == "rollback")
+			{
+				rollback = true;
+			}
+			else
+			{
+				rollback = false;
+			}
 			//socket->unbind();
 			return true;
 		}
@@ -281,5 +321,10 @@ unsigned short ConnectionHandler::GetOwnPort()
 sf::UdpSocket* ConnectionHandler::GetSocket()
 {
 	return socket;
+}
+
+bool ConnectionHandler::IsRollBackOn()
+{
+	return rollback;
 }
 

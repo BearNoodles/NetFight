@@ -56,6 +56,10 @@ sf::Font timerFont;
 int delayAmount;
 sf::Text delayText;
 
+int delayLimit = 99;
+
+sf::Text frameText;
+
 
 sf::Time timeFromClock;
 sf::Time frameTime;
@@ -111,12 +115,7 @@ std::list<Message> messages;
 ConnectionHandler connectionHandler;
 MessageHandler messageHandler;
 
-//sf::UdpSocket socket;
-//sf::IpAddress hostIP = "127.0.0.1";
-//unsigned short hostPort = 54444;
-//
-//sf::IpAddress clientIP;
-//unsigned short clientPort;
+bool rollBackOn;
 
 
 //GGPOSession *ggpo = NULL;
@@ -126,6 +125,8 @@ sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
 int main()
 {
+	rollBackOn = false;
+
 	framesInSecond = 0;
 	framesInSecondMax = 60;
 
@@ -143,6 +144,7 @@ int main()
 	{
 		roundTimeText.setFont(timerFont);
 		delayText.setFont(timerFont);
+		frameText.setFont(timerFont);
 	}
 
 	roundTimeText.setCharacterSize(56);
@@ -152,6 +154,10 @@ int main()
 	delayText.setCharacterSize(28);
 	delayText.setFillColor(sf::Color::White);
 	delayText.setPosition(sf::Vector2f(870, 100));
+
+	frameText.setCharacterSize(28);
+	frameText.setFillColor(sf::Color::White);
+	frameText.setPosition(sf::Vector2f(50, 100));
 
 	delayAmount = 0;
 
@@ -189,6 +195,8 @@ int main()
 		window.display();
 	}
 
+	rollBackOn = connectionHandler.IsRollBackOn();
+
 
 	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
 	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
@@ -206,11 +214,11 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 
-			if (event.type == sf::Event::Resized)
+			/*if (event.type == sf::Event::Resized)
 			{
 				std::cout << "new width: " << event.size.width << std::endl;
 				std::cout << "new height: " << event.size.height << std::endl;
-			}
+			}*/
 
 			if (event.type == sf::Event::LostFocus)
 				focus = false;
@@ -227,6 +235,8 @@ int main()
 
 		frameTime = frameClock.getElapsedTime();
 
+
+		messageHandler.ReceiveInputMessages();
 		//Advance frame
 		//TODO:
 		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
@@ -321,6 +331,7 @@ void RunFrame()
 
 	dontUpdateLocal = false;
 	//AdvanceFrame(inputs, disconnect_flags);
+	
 	AdvanceFrame();
 
 	DrawCurrentFrame();
@@ -330,14 +341,14 @@ void RunFrame()
 
 bool HandleInputs()
 {
-	if (!dontUpdateLocal)
+	if (!dontUpdateLocal && frameCount > 100)
 	{
 		SetLocalInputs();
 	}
 
 	SendInputs();
 
-	messageHandler.ReceiveInputMessages(frameCount);
+	//Receive inputs here?
 
 	UpdateInputs();
 
@@ -354,13 +365,13 @@ bool HandleInputs()
 void SetLocalInputs()
 {
 	inputHandler.SetCurrentFrame(frameCount);
-	if (focus)
+	if (focus && delayAmount < delayLimit;)
 	{
-		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount));
+		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount + delayAmount));
 	}
 	else
 	{
-		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount));
+		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount + delayAmount));
 	}
 
 }
@@ -462,13 +473,15 @@ void AdvanceFrame()
 	roundTimeText.setString(std::to_string(roundTimer));
 	delayText.setString("delay: " + std::to_string(delayAmount));
 
+	frameText.setString("frame: " + std::to_string(frameCount));
+
 	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
 	frameCount++;
 
 	framesInSecond++;
 
-
+	
 
 	// update the checksums to display in the top of the window.  this
 	// helps to detect desyncs.
@@ -519,6 +532,8 @@ void DrawCurrentFrame()
 
 	window.draw(roundTimeText);
 	window.draw(delayText);
+
+	window.draw(frameText);
 
 
 

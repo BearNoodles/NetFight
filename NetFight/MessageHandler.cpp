@@ -37,6 +37,33 @@ void MessageHandler::SetMinimumFrame(int minFrame)
 	minimumFrame = minFrame;
 }
 
+void MessageHandler::SendNoInput(int frame)
+{
+	sf::Int32 frameSend;
+	bool inputSend1 = false;
+	bool inputSend2 = false;
+	bool inputSend3 = false;
+	bool inputSend4 = false;
+	bool inputSend5 = false;
+	bool inputSend6 = false;
+	bool inputSend7 = false;
+
+	frameSend = frame;
+
+	sf::Packet packet;
+	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << frameSend;
+
+
+	//std::cout << "Send message failed" << std::endl;
+
+	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+	{
+		// error...
+		//send failed try it again
+		std::cout << "Send message failed" << std::endl;
+	}
+}
+
 void MessageHandler::SendFrameInput(FrameInput input)
 {
 
@@ -86,14 +113,14 @@ void MessageHandler::AddMessage(Message toAdd)
 
 //FIX
 //This should be called by Input to update the list of inputs from the opposing player
-void MessageHandler::ReceiveInputMessages(int frame)
+void MessageHandler::ReceiveInputMessages()
 {	
 	bool check = true;
 	
 	//Possibly time how long each new message takes to receive to calculate the delay required?
 	//Set some kind of limit on how long the function should read messages
 	int counter = 0;
-	while (counter < 10)
+	while (counter < 1000)
 	{
 
 
@@ -109,7 +136,7 @@ void MessageHandler::ReceiveInputMessages(int frame)
 			//recieve failed send hello again
 			//std::cout << "no messages yet" << std::endl;
 			counter++;
-			continue;
+			break;
 		}
 
 		std::cout << "MESSAGE RECIEVED" << std::endl;
