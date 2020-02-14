@@ -113,6 +113,8 @@ void MessageHandler::AddMessage(Message toAdd)
 
 //FIX
 //This should be called by Input to update the list of inputs from the opposing player
+
+//TODO: WRITE A NEW RECEIVE FUNCTION FOR ROLLBACK
 void MessageHandler::ReceiveInputMessages()
 {	
 	bool check = true;
@@ -244,28 +246,6 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 			break;
 		}
 	}
-
-	//for (Message m : messages)
-	//{
-	//	if (m.frame == frame)
-	//	{
-	//		/*for (int i = 0; i < 7; i++)
-	//		{
-	//			newInput.inputs[i] = m.inputs[i];
-	//		}*/
-	//		newInput.inputs[0] = m.input1;
-	//		newInput.inputs[1] = m.input2;
-	//		newInput.inputs[2] = m.input3;
-	//		newInput.inputs[3] = m.input4;
-	//		newInput.inputs[4] = m.input5;
-	//		newInput.inputs[5] = m.input6;
-	//		newInput.inputs[6] = m.input7;
-
-	//		newInput.frameNumber = m.frame;
-
-	//		break;
-	//	}
-	//}
 
 	return newInput;
 }

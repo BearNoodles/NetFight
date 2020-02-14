@@ -74,7 +74,7 @@ sf::Clock frameClock;
 sf::Time messageTimer;
 bool msgReady;
 
-void RunFrame();
+void RunFrameDelay();
 
 //void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
 bool BeginGame();
@@ -242,7 +242,7 @@ int main()
 		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
 		if (frameTime.asSeconds() > timeUntilFrameUpdate)
 		{
-			RunFrame();
+			RunFrameDelay();
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
 		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
@@ -295,33 +295,11 @@ int main()
 	//return 0;
 }
 
-void RunFrame()
+void RunFrameDelay()
 {
 	frameClock.restart();
 	
-//	GGPOErrorCode result = GGPO_OK;
-//	int disconnect_flags;
-//	int inputs[2] = { 0 };
-//
-//	if (currentState.localPlayerHandle != GGPO_INVALID_HANDLE) {
-//		FrameInput input = ReadInputs(); // SET INPUTS
-//#if defined(SYNC_TEST)
-//		input = rand(); // test: use random inputs to demonstrate sync testing
-//#endif
-//		result = ggpo_add_local_input(ggpo, ngs.local_player_handle, &input, sizeof(input));
-//	}
-//
-//	// synchronize these inputs with ggpo.  If we have enough input to proceed
-//	// ggpo will modify the input list with the correct inputs to use and
-//	// return 1.
-//	if (GGPO_SUCCEEDED(result)) {
-//		result = ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
-//		if (GGPO_SUCCEEDED(result)) {
-//			// inputs[0] and inputs[1] contain the inputs for p1 and p2.  Advance
-//			// the game by 1 frame using those inputs.
-//			AdvanceFrame(inputs, disconnect_flags);
-//		}
-//	}
+
 	if (!HandleInputs())
 	{
 		delayAmount++;
@@ -330,13 +308,17 @@ void RunFrame()
 	}
 
 	dontUpdateLocal = false;
-	//AdvanceFrame(inputs, disconnect_flags);
 	
 	AdvanceFrame();
 
 	DrawCurrentFrame();
 
 	delayAmount = 0;
+}
+
+void RunFrameRollback()
+{
+
 }
 
 bool HandleInputs()
@@ -378,8 +360,11 @@ void SetLocalInputs()
 
 void SendInputs()
 {
-	//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 2));
-	//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 1));
+	if (rollBackOn)
+	{
+		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 2));
+		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 1));
+	}
 	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 }
 
@@ -389,7 +374,13 @@ void SendInputs()
 //ONLY NEEDED FOR ROLLBACK, MAKE 1 FOR DELAY
 void UpdateInputs()
 {
-	for (int i = 0; i < 10; i++)
+	int setInputLimit = 1;
+	if (rollBackOn)
+	{
+		//Maybe set limit of furthest possible rollback at top
+		setInputLimit = 20;
+	}
+	for (int i = 0; i < setInputLimit; i++)
 	{
 		inputHandler.SetOpponentInput(messageHandler.GetFrameInput(frameCount - i));
 	}
@@ -464,6 +455,8 @@ void AdvanceFrame()
 
 	currentState.frame = frameCount;
 	
+
+	//TODO: add this to game state so it can be rolled back
 	if (framesInSecond >= framesInSecondMax)
 	{
 		framesInSecond = 0;

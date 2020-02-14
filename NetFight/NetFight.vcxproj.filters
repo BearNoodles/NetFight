@@ -25,6 +25,7 @@
     <ClCompile Include="MessageHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MessageHandlerRollback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Message.h">
@@ -54,6 +55,7 @@
     <ClInclude Include="ConnectionHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MessageHandlerRollback.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
