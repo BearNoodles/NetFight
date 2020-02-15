@@ -17,7 +17,7 @@ public:
 	bool Initialise(sf::IpAddress ip, unsigned short opponentPort, sf::UdpSocket* sock);
 
 	void SendFrameInput(FrameInput input);
-	void ReceiveInputMessages(int currentFrame);
+	int ReceiveInputMessages(int currentFrame);
 
 	void SendNoInput(int frame);
 
@@ -33,11 +33,13 @@ private:
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort;
 
-	std::vector<Message> messages;
+	//std::vector<Message> messages;
+	Message* messages[6000];
 	std::vector<Message> messagesEarly;
 	int maxMessagesSize;
 
 	void AddMessage(Message toAdd);
+	Message* GetMessage(int frame);
 
 	bool CheckEarlyMessages();
 	int minimumFrame;

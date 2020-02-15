@@ -4,6 +4,7 @@
 
 MessageHandlerRollback::MessageHandlerRollback()
 {
+	
 }
 
 
@@ -31,6 +32,28 @@ bool MessageHandlerRollback::Initialise(sf::IpAddress ip, unsigned short oppPort
 
 	maxMessagesSize = 1000;
 
+	FrameInput noInput;
+	noInput.frameNumber = -1;
+	for (bool b : noInput.inputs)
+	{
+		b = false;
+	}
+
+	//TODO WHEN INITIALISING SET ANOHTER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
+	for (int i = 0; i < 6000; i++)
+	{
+		messages[i] = new Message();
+		messages[i]->input1 = false;
+		messages[i]->input2 = false;
+		messages[i]->input3 = false;
+		messages[i]->input4 = false;
+		messages[i]->input5 = false;
+		messages[i]->input6 = false;
+		messages[i]->input7 = false;
+		messages[i]->set = false;
+		messages[i]->frame = i;
+	}
+
 	return true;
 }
 
@@ -53,7 +76,7 @@ void MessageHandlerRollback::SendNoInput(int frame)
 	frameSend = frame;
 
 	sf::Packet packet;
-	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << frameSend;
+	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << true << frameSend;
 
 
 	//std::cout << "Send message failed" << std::endl;
@@ -78,6 +101,7 @@ void MessageHandlerRollback::SendFrameInput(FrameInput input)
 	bool inputSend5 = input.inputs[4];
 	bool inputSend6 = input.inputs[5];
 	bool inputSend7 = input.inputs[6];
+	bool set = true;
 
 	/*for (int i = 0; i < 7; i++)
 	{
@@ -89,7 +113,7 @@ void MessageHandlerRollback::SendFrameInput(FrameInput input)
 	frameSend = input.frameNumber;
 
 	sf::Packet packet;
-	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << frameSend;
+	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << true << frameSend;
 
 
 	//std::cout << "Send message failed" << std::endl;
@@ -106,17 +130,25 @@ void MessageHandlerRollback::SendFrameInput(FrameInput input)
 void MessageHandlerRollback::AddMessage(Message toAdd)
 {
 	Message* temp = &toAdd;
-	if (messages.size() >= maxMessagesSize)
+
+	/*if (messages.size() >= maxMessagesSize)
 	{
-		messages.erase(messages.begin());
-	}
-	messages.push_back(*temp);
+	messages.erase(messages.begin());
+	}*/
+	messages[temp->frame] = temp;
+}
+
+Message* MessageHandlerRollback::GetMessage(int frame)
+{
+	return messages[frame];
 }
 
 //FIX
 //This should be called by Input to update the list of inputs from the opposing player
-void MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
+int MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 {
+	int rollbackFrame = -1;
+
 	bool check = true;
 
 	//Possibly time how long each new message takes to receive to calculate the delay required?
@@ -128,7 +160,7 @@ void MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 
 		sf::Int32 frame;
 		//bool inputs[7];
-		bool input1, input2, input3, input4, input5, input6, input7;
+		bool input1, input2, input3, input4, input5, input6, input7, set;
 		sf::Packet packet;
 		sf::IpAddress address;
 		unsigned short port;
@@ -149,24 +181,14 @@ void MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 		}
 
 		//if ((packet >> inputs[7] >> frame) && check)
-		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> frame) && check)
+		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
 
-			if (frame < minimumFrame)
+			/*if (frame < minimumFrame)
 			{
 				counter++;
 				break;
-			}
-			else if (frame < currentFrame)
-			{
-				//check if rollback needed here
-
-				//return bool if rollback needed?
-
-				//and possibly return the frame needed to rollback to
-
-				//REMEMBER GAME STATES
-			}
+			}*/
 
 			//good
 			Message msg;
@@ -183,24 +205,18 @@ void MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 			}*/
 
 			msg.frame = frame;
+			msg.set = true;
 
-			if (frame == minimumFrame)
+			if (frame < currentFrame && GetMessage(frame)->set == false)
 			{
-				AddMessage(msg);
-				minimumFrame++;
-				while (true)
+				if (frame < rollbackFrame)
 				{
-					if (!CheckEarlyMessages())
-					{
-						break;
-					}
+					rollbackFrame = frame;
 				}
 			}
-			else if (frame > minimumFrame)
-			{
-				messagesEarly.push_back(msg);
-			}
 
+
+			AddMessage(msg);
 
 		}
 		else if (check)
@@ -211,35 +227,47 @@ void MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 		counter++;
 	}
 
+	return rollbackFrame;
 }
 
-bool MessageHandlerRollback::CheckEarlyMessages()
-{
-	for (int i = 0; i < messagesEarly.size(); i++)
-	{
-		if (messagesEarly[i].frame == minimumFrame)
-		{
-			messages.push_back(messagesEarly[i]);
-			messagesEarly.erase(messagesEarly.begin() + i);
-			minimumFrame++;
-			return true;
-		}
-	}
-	return false;
-}
+//bool MessageHandlerRollback::CheckEarlyMessages()
+//{
+//	for (int i = 0; i < messagesEarly.size(); i++)
+//	{
+//		if (messagesEarly[i].frame == minimumFrame)
+//		{
+//			messages.push_back(messagesEarly[i]);
+//			messagesEarly.erase(messagesEarly.begin() + i);
+//			minimumFrame++;
+//			return true;
+//		}
+//	}
+//	return false;
+//}
 
 FrameInput MessageHandlerRollback::GetFrameInput(int frame)
 {
 
 	FrameInput newInput;
-	for (int i = 0; i < 7; i++)
+	/*for (int i = 0; i < 7; i++)
 	{
 		newInput.inputs[i] = false;
 	}
-	newInput.frameNumber = -1;
+	newInput.frameNumber = -1;*/
 
+	//TODO: FIX RECIEVING UNINITIALIZED MESSAGES
 
-	for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
+	newInput.inputs[0] = messages[frame]->input1;
+	newInput.inputs[1] = messages[frame]->input2;
+	newInput.inputs[2] = messages[frame]->input3;
+	newInput.inputs[3] = messages[frame]->input4;
+	newInput.inputs[4] = messages[frame]->input5;
+	newInput.inputs[5] = messages[frame]->input6;
+	newInput.inputs[6] = messages[frame]->input7;
+
+	newInput.frameNumber = messages[frame]->frame;
+
+	/*for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
 	{
 		if (it->frame == frame)
 		{
@@ -255,7 +283,7 @@ FrameInput MessageHandlerRollback::GetFrameInput(int frame)
 
 			break;
 		}
-	}
+	}*/
 
 	return newInput;
 }

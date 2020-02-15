@@ -9,6 +9,7 @@ struct Message {
 	bool input5;
 	bool input6;
 	bool input7;
+	bool set;
 	int frame;
 };
 

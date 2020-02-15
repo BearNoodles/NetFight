@@ -1,12 +1,2 @@
-﻿  MessageHandler.cpp
-m:\honours\netfight\netfight\messagehandler.cpp(107): warning C4018: '>=': signed/unsigned mismatch
-m:\honours\netfight\netfight\messagehandler.cpp(206): warning C4018: '<': signed/unsigned mismatch
-  MessageHandlerRollback.cpp
-m:\honours\netfight\netfight\messagehandlerrollback.cpp(109): warning C4018: '>=': signed/unsigned mismatch
-m:\honours\netfight\netfight\messagehandlerrollback.cpp(208): warning C4018: '<': signed/unsigned mismatch
-  NetFight.cpp
-m:\honours\netfight\netfight\netfight.cpp(459): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-m:\honours\netfight\netfight\netfight.cpp(512): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-m:\honours\netfight\netfight\netfight.cpp(513): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Generating Code...
+﻿  MessageHandlerRollback.cpp
   NetFight.vcxproj -> M:\Honours\NetFight\Debug\NetFight.exe

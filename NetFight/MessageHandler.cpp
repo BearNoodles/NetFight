@@ -2,7 +2,7 @@
 
 MessageHandler::MessageHandler()
 {
-
+	
 }
 
 MessageHandler::~MessageHandler()
@@ -28,6 +28,26 @@ bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::Ud
 	}*/
 
 	maxMessagesSize = 1000;
+
+	FrameInput noInput;
+	noInput.frameNumber = -1;
+	for (bool b : noInput.inputs)
+	{
+		b = false;
+	}
+	for (int i = 0; i < 6000; i++)
+	{
+		messages[i] = new Message();
+		messages[i]->input1 = false;
+		messages[i]->input2 = false;
+		messages[i]->input3 = false;
+		messages[i]->input4 = false;
+		messages[i]->input5 = false;
+		messages[i]->input6 = false;
+		messages[i]->input7 = false;
+		messages[i]->set = false;
+		messages[i]->frame = i;
+	}
 
 	return true;
 }
@@ -104,11 +124,17 @@ void MessageHandler::SendFrameInput(FrameInput input)
 void MessageHandler::AddMessage(Message toAdd)
 {
 	Message* temp = &toAdd;
-	if (messages.size() >= maxMessagesSize)
+
+	/*if (messages.size() >= maxMessagesSize)
 	{
 		messages.erase(messages.begin());
-	}
-	messages.push_back(*temp);
+	}*/
+	messages[temp->frame] = temp;
+}
+
+Message* MessageHandler::GetMessage(int frame)
+{
+	return messages[frame];
 }
 
 //FIX
@@ -137,7 +163,7 @@ void MessageHandler::ReceiveInputMessages()
 			// error...
 			//recieve failed send hello again
 			//std::cout << "no messages yet" << std::endl;
-			counter++;
+			//counter++;
 			break;
 		}
 
@@ -178,18 +204,18 @@ void MessageHandler::ReceiveInputMessages()
 			{
 				AddMessage(msg);
 				minimumFrame++;
-				while (true)
+				/*while (true)
 				{
 					if (!CheckEarlyMessages())
 					{
 						break;
 					}
-				}
+				}*/
 			}
-			else if(frame > minimumFrame)
+			/*else if(frame > minimumFrame)
 			{
 				messagesEarly.push_back(msg);
-			}
+			}*/
 
 
 		}
@@ -203,20 +229,20 @@ void MessageHandler::ReceiveInputMessages()
 
 }
 
-bool MessageHandler::CheckEarlyMessages()
-{
-	for (int i = 0; i < messagesEarly.size(); i++)
-	{
-		if (messagesEarly[i].frame == minimumFrame)
-		{
-			messages.push_back(messagesEarly[i]);
-			messagesEarly.erase(messagesEarly.begin() + i);
-			minimumFrame++;
-			return true;
-		}
-	}
-	return false;
-}
+//bool MessageHandler::CheckEarlyMessages()
+//{
+//	for (int i = 0; i < messagesEarly.size(); i++)
+//	{
+//		if (messagesEarly[i].frame == minimumFrame)
+//		{
+//			messages.push_back(messagesEarly[i]);
+//			messagesEarly.erase(messagesEarly.begin() + i);
+//			minimumFrame++;
+//			return true;
+//		}
+//	}
+//	return false;
+//}
 
 FrameInput MessageHandler::GetFrameInput(int frame)
 {
@@ -228,8 +254,17 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 	}
 	newInput.frameNumber = -1;
 
+	newInput.inputs[0] = messages[frame]->input1;
+	newInput.inputs[1] = messages[frame]->input2;
+	newInput.inputs[2] = messages[frame]->input3;
+	newInput.inputs[3] = messages[frame]->input4;
+	newInput.inputs[4] = messages[frame]->input5;
+	newInput.inputs[5] = messages[frame]->input6;
+	newInput.inputs[6] = messages[frame]->input7;
 
-	for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
+	newInput.frameNumber = messages[frame]->frame;
+
+	/*for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
 	{
 		if (it->frame == frame)
 		{
@@ -245,7 +280,7 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 
 			break;
 		}
-	}
+	}*/
 
 	return newInput;
 }

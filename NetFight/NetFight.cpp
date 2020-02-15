@@ -11,6 +11,7 @@
 #include "GameStateManager.h"
 #include "Message.h"
 #include "MessageHandler.h"
+#include "MessageHandlerRollback.h"
 #include "ConnectionHandler.h"
 //#include "ggponet.h"
 //#include "nongamestate.h"
@@ -113,7 +114,11 @@ void ReadInputs();
 std::list<Message> messages;
 
 ConnectionHandler connectionHandler;
+
+//TODO: make delay and rollback message handler classes to inherit from the main one
 MessageHandler messageHandler;
+
+MessageHandlerRollback messageRollback;
 
 bool rollBackOn;
 
@@ -200,6 +205,7 @@ int main()
 
 	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
 	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
+	messageRollback.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
 
 	msgReady = false;
 
@@ -235,8 +241,28 @@ int main()
 
 		frameTime = frameClock.getElapsedTime();
 
+		if (rollBackOn)
+		{
+			int rollbackFrame = messageRollback.ReceiveInputMessages(frameCount);
+			if (rollbackFrame != -1)
+			{
+				int step = rollbackFrame;
+				stateManager.SetCurrentState(rollbackFrame);
+				player2->SetFighterState(stateManager.GetState(rollbackFrame));
+				player1->SetFighterState(stateManager.GetState(rollbackFrame));
 
-		messageHandler.ReceiveInputMessages();
+				while (step < frameCount)
+				{
+					AdvanceFrame();
+					step++;
+				}
+			}
+		}
+		else
+		{
+			messageHandler.ReceiveInputMessages();
+		}
+
 		//Advance frame
 		//TODO:
 		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
@@ -245,7 +271,7 @@ int main()
 			RunFrameDelay();
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
-		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace))
 		{
 			sButt = true;
 		}
@@ -310,6 +336,7 @@ void RunFrameDelay()
 	dontUpdateLocal = false;
 	
 	AdvanceFrame();
+	frameCount++;
 
 	DrawCurrentFrame();
 
@@ -334,7 +361,7 @@ bool HandleInputs()
 
 	UpdateInputs();
 
-	if (!inputHandler.BothInputsReady(frameCount))
+	if (!rollBackOn && !inputHandler.BothInputsReady(frameCount))
 	{
 		return false;
 	}
@@ -362,10 +389,23 @@ void SendInputs()
 {
 	if (rollBackOn)
 	{
-		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 2));
-		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - 1));
+		//how many previous messages to send
+		for (int i = 0; i < 3; i++)
+		{
+			int previousFrames = i;
+
+			if (frameCount < i)
+			{
+				previousFrames = frameCount;
+			}
+			messageRollback.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames));
+		}
+		
 	}
-	messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
+	else
+	{
+		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
+	}
 }
 
 
@@ -378,11 +418,25 @@ void UpdateInputs()
 	if (rollBackOn)
 	{
 		//Maybe set limit of furthest possible rollback at top
-		setInputLimit = 20;
+		if (frameCount < 20)
+		{
+			setInputLimit = frameCount;
+		}
+		else
+		{
+			setInputLimit = 20;
+		}
+		for (int i = 0; i < setInputLimit; i++)
+		{
+			inputHandler.SetOpponentInput(messageRollback.GetFrameInput(frameCount - i));
+		}
 	}
-	for (int i = 0; i < setInputLimit; i++)
+	else
 	{
-		inputHandler.SetOpponentInput(messageHandler.GetFrameInput(frameCount - i));
+		for (int i = 0; i < setInputLimit; i++)
+		{
+			inputHandler.SetOpponentInput(messageHandler.GetFrameInput(frameCount - i));
+		}
 	}
 }
 
@@ -470,7 +524,6 @@ void AdvanceFrame()
 
 	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
-	frameCount++;
 
 	framesInSecond++;
 

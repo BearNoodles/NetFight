@@ -34,11 +34,13 @@ private:
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort;
 
-	std::vector<Message> messages;
+	//std::vector<Message> messages;
+	Message* messages[6000];
 	std::vector<Message> messagesEarly;
 	int maxMessagesSize;
 
 	void AddMessage(Message toAdd);
+	Message* GetMessage(int frame);
 
 	bool CheckEarlyMessages();
 	int minimumFrame;
