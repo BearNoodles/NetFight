@@ -101,7 +101,9 @@ FrameInput Input::GetOpponentInput(int frameNo)
 			return *it;
 		}
 	}
-	return noInput;
+	FrameInput temp = noInput;
+	temp.frameNumber = frameNo;
+	return temp;
 }
 
 FrameInput Input::GetLocalInput(int frameNo)

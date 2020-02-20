@@ -1,2 +1,7 @@
 ﻿  MessageHandlerRollback.cpp
+  NetFight.cpp
+m:\honours\netfight\netfight\netfight.cpp(520): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+m:\honours\netfight\netfight\netfight.cpp(572): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+m:\honours\netfight\netfight\netfight.cpp(573): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Generating Code...
   NetFight.vcxproj -> M:\Honours\NetFight\Debug\NetFight.exe

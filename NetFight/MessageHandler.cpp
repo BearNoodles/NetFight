@@ -86,9 +86,8 @@ void MessageHandler::SendNoInput(int frame)
 
 void MessageHandler::SendFrameInput(FrameInput input)
 {
-
 	sf::Int32 frameSend;
-	//bool inputSend[7];
+
 	bool inputSend1 = input.inputs[0];
 	bool inputSend2 = input.inputs[1];
 	bool inputSend3 = input.inputs[2];

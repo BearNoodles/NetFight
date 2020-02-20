@@ -109,7 +109,7 @@ bool HandleInputs();
 void SetLocalInputs();
 void SendInputs();
 void UpdateInputs();
-void ReadInputs();
+void ReadInputs(int frame);
 
 std::list<Message> messages;
 
@@ -235,7 +235,6 @@ int main()
 
 
 
-		//SEND MESSAGES
 
 
 
@@ -246,13 +245,15 @@ int main()
 			int rollbackFrame = messageRollback.ReceiveInputMessages(frameCount);
 			if (rollbackFrame != -1)
 			{
+				std::cout << "rollback: " << frameCount - rollbackFrame << std::endl;
 				int step = rollbackFrame;
-				stateManager.SetCurrentState(rollbackFrame);
-				player2->SetFighterState(stateManager.GetState(rollbackFrame));
-				player1->SetFighterState(stateManager.GetState(rollbackFrame));
+				stateManager.SetCurrentState(step);
+				player2->SetFighterState(stateManager.GetState(step));
+				player1->SetFighterState(stateManager.GetState(step));
 
-				while (step < frameCount)
+				while (step < frameCount - 1)
 				{
+					ReadInputs(step);
 					AdvanceFrame();
 					step++;
 				}
@@ -366,7 +367,7 @@ bool HandleInputs()
 		return false;
 	}
 
-	ReadInputs();
+	ReadInputs(frameCount);
 
 	return true;
 }
@@ -440,38 +441,38 @@ void UpdateInputs()
 	}
 }
 
-void ReadInputs()
+void ReadInputs(int frame)
 {
-	inputHandler.SetCurrentFrame(frameCount);
+	inputHandler.SetCurrentFrame(frame);
 
 	if (thisPlayer == 1)
 	{
 		if (focus)
 		{
-			player1Input = inputHandler.GetLocalInput(frameCount);
+			player1Input = inputHandler.GetLocalInput(frame);
 		}
 		else
 		{
-			player1Input = inputHandler.GetNoInput(frameCount);
+			player1Input = inputHandler.GetNoInput(frame);
 		}
 
 		//Get received input
-		player2Input = inputHandler.GetOpponentInput(frameCount);
+		player2Input = inputHandler.GetOpponentInput(frame);
 	}
 
 	else
 	{
 		if (focus)
 		{
-			player2Input = inputHandler.GetLocalInput(frameCount);
+			player2Input = inputHandler.GetLocalInput(frame);
 		}
 		else
 		{
-			player2Input = inputHandler.GetNoInput(frameCount);
+			player2Input = inputHandler.GetNoInput(frame);
 		}
 
 		//Get received input
-		player1Input = inputHandler.GetOpponentInput(frameCount);
+		player1Input = inputHandler.GetOpponentInput(frame);
 	}
 
 	player1->SetInput(player1Input);

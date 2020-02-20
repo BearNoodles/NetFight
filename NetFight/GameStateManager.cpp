@@ -8,8 +8,11 @@ GameStateManager::GameStateManager()
 	m_emptyState.frame = -1; 
 	for (int i = 0; i < 100; i++)
 	{
+		m_emptyState.frame = i;
 		m_gameStateVector->push_back(m_emptyState);
 	}
+
+	m_emptyState.frame = -1;
 }
 
 
@@ -26,15 +29,15 @@ void GameStateManager::SaveState(GameState state)
 		return;
 	}
 
-	//Shouldnt need this
-	//for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
-	//{
-	//	if (state.frame == it->frame)
-	//	{
-	//		*it = state;
-	//		return;
-	//	}
-	//}
+
+	for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
+	{
+		if (state.frame == it->frame)
+		{
+			*it = state;
+			return;
+		}
+	}
 }
 
 GameState GameStateManager::GetState(int frame)

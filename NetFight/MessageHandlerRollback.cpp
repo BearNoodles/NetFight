@@ -101,7 +101,7 @@ void MessageHandlerRollback::SendFrameInput(FrameInput input)
 	bool inputSend5 = input.inputs[4];
 	bool inputSend6 = input.inputs[5];
 	bool inputSend7 = input.inputs[6];
-	bool set = true;
+	//bool set = true;
 
 	/*for (int i = 0; i < 7; i++)
 	{
@@ -131,11 +131,26 @@ void MessageHandlerRollback::AddMessage(Message toAdd)
 {
 	Message* temp = &toAdd;
 
+	if (messages[temp->frame]->set)
+	{
+		return;
+	}
+
 	/*if (messages.size() >= maxMessagesSize)
 	{
 	messages.erase(messages.begin());
 	}*/
-	messages[temp->frame] = temp;
+	messages[temp->frame]->input1 = temp->input1;
+	messages[temp->frame]->input2 = temp->input2;
+	messages[temp->frame]->input3 = temp->input3;
+	messages[temp->frame]->input4 = temp->input4;
+	messages[temp->frame]->input5 = temp->input5;
+	messages[temp->frame]->input6 = temp->input6;
+	messages[temp->frame]->input7 = temp->input7;
+
+	messages[temp->frame]->set = true;
+
+
 }
 
 Message* MessageHandlerRollback::GetMessage(int frame)
@@ -173,7 +188,7 @@ int MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 			break;
 		}
 
-		std::cout << "MESSAGE RECIEVED" << std::endl;
+		//std::cout << "MESSAGE RECIEVED" << std::endl;
 
 		if (address != opponentIP || port != opponentPort)
 		{
@@ -209,12 +224,11 @@ int MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 
 			if (frame < currentFrame && GetMessage(frame)->set == false)
 			{
-				if (frame < rollbackFrame)
+				if (frame < rollbackFrame || rollbackFrame == -1)
 				{
 					rollbackFrame = frame;
 				}
 			}
-
 
 			AddMessage(msg);
 
