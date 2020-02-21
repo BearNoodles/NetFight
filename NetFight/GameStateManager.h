@@ -49,7 +49,8 @@ struct GameState
 	bool player1IsBlocking;
 	bool player2IsBlocking;
 
-	float time;
+	int framesInSecond;
+	int roundTimer;
 
 	int localPlayerHandle;
 };
@@ -61,7 +62,7 @@ public:
 
 	void SaveState(GameState state);
 	GameState GetState(int frame);
-	void SetCurrentState(int frame);
+	void TrimRolledbackStates(int frame);
 	void LoadState(int frame);
 
 	void CreateNewGameState(GameState player1State, GameState player2State, GameState gameState);

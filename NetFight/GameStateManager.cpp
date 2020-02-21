@@ -1,12 +1,13 @@
 #include "GameStateManager.h"
 
+#include <iostream>
 
 
 GameStateManager::GameStateManager()
 {
 	m_gameStateVector = new std::vector<GameState>();
 	m_emptyState.frame = -1; 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		m_emptyState.frame = i;
 		m_gameStateVector->push_back(m_emptyState);
@@ -24,7 +25,10 @@ void GameStateManager::SaveState(GameState state)
 {
 	if (m_gameStateVector->back().frame < state.frame)
 	{
-		m_gameStateVector->erase(m_gameStateVector->begin());
+		if (m_gameStateVector->size() >= 100)
+		{
+			m_gameStateVector->erase(m_gameStateVector->begin());
+		}
 		m_gameStateVector->push_back(state);
 		return;
 	}
@@ -38,6 +42,8 @@ void GameStateManager::SaveState(GameState state)
 			return;
 		}
 	}
+
+	std::cout << "Not saved state error" << std::endl;
 }
 
 GameState GameStateManager::GetState(int frame)
@@ -49,19 +55,21 @@ GameState GameStateManager::GetState(int frame)
 			return *it;
 		}
 	}
+	std::cout << "bad state" << std::endl;
 	return m_emptyState;
 }
 
-void GameStateManager::SetCurrentState(int frame)
+void GameStateManager::TrimRolledbackStates(int frame)
 {
 	while (m_gameStateVector->back().frame > frame)
 	{
 		if (m_gameStateVector->back().frame == -1)
 		{
+			std::cout << "back frame -1" << std::endl;
 			return;
 		}
 		m_gameStateVector->pop_back();
-		m_gameStateVector->insert(m_gameStateVector->begin(), m_emptyState);
+		//m_gameStateVector->insert(m_gameStateVector->begin(), m_emptyState);
 	}
 }
 
@@ -71,6 +79,11 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 	GameState newGameState;
 
 	newGameState.frame = gameState.frame;
+
+	if (player1State.player1Position.y == 0)
+	{
+		std::cout << "player 1 pos wrong" << std::endl;
+	}
 
 	newGameState.player1Action = player1State.player1Action;
 	newGameState.player1ActionFrame = player1State.player1ActionFrame;
@@ -102,7 +115,8 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 	newGameState.player2State = player2State.player2State;
 	newGameState.player2StunFrames = player2State.player2StunFrames;
 
-	newGameState.time = gameState.time;
+	newGameState.roundTimer = gameState.roundTimer;
+	newGameState.framesInSecond = gameState.framesInSecond;
 
 	SaveState(newGameState);
 }

@@ -21,6 +21,9 @@
 
 int myID;
 
+int framesInSecondMax = 60;
+int roundTimerInitial = 99;
+
 GameStateManager stateManager;
 GameState currentState;
 
@@ -48,9 +51,6 @@ Input inputHandler;
 int screenWidth = 1000;
 int screenHeight = 600;
 
-int framesInSecond;
-int framesInSecondMax;
-int roundTimer;
 sf::Text roundTimeText;
 sf::Font timerFont;
 
@@ -64,7 +64,8 @@ sf::Text frameText;
 
 sf::Time timeFromClock;
 sf::Time frameTime;
-float timeUntilFrameUpdate;
+//float timeUntilFrameUpdate;
+sf::Time timeUntilFrameUpdate;
 
 bool sButt = true;
 
@@ -82,7 +83,7 @@ bool BeginGame();
 //void InitSpectator(int localport, int num_players, char *host_ip, int host_port);
 void DrawCurrentFrame();
 //void AdvanceFrame(int inputs[], int disconnect_flags);
-void AdvanceFrame();
+void AdvanceFrame(int frame);
 //void VectorWar_RunFrame(HWND hwnd);
 void Idle(int time);
 void DisconnectPlayer(int player);
@@ -132,11 +133,14 @@ int main()
 {
 	rollBackOn = false;
 
-	framesInSecond = 0;
 	framesInSecondMax = 60;
 
-	roundTimer = 99;
+	roundTimerInitial = 99;
 
+
+	sf::Time timeSinceLastFrame = sf::Time::Zero;
+
+	timeUntilFrameUpdate = sf::seconds(1.0f / 60.0f);
 
 
 	if (!timerFont.loadFromFile("font.ttf"))
@@ -178,8 +182,6 @@ int main()
 	healthBar1 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(75, 30));
 	healthBar2 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(550, 30));
 
-	timeUntilFrameUpdate = 1.0f / 60.0f;
-
 	while (window.isOpen())
 	{
 		window.clear();
@@ -211,6 +213,8 @@ int main()
 
 	frameClock.restart();
 	
+	currentState.roundTimer = roundTimerInitial;
+	currentState.framesInSecond = 0;
 
 	while (window.isOpen())
 	{
@@ -234,27 +238,24 @@ int main()
 		}
 
 
-
-
-
-
-		frameTime = frameClock.getElapsedTime();
+		timeSinceLastFrame += frameClock.restart();
+		
 
 		if (rollBackOn)
 		{
 			int rollbackFrame = messageRollback.ReceiveInputMessages(frameCount);
 			if (rollbackFrame != -1)
 			{
-				std::cout << "rollback: " << frameCount - rollbackFrame << std::endl;
+				//std::cout << "rollback: " << frameCount - rollbackFrame << std::endl;
 				int step = rollbackFrame;
-				stateManager.SetCurrentState(step);
+				//stateManager.TrimRolledbackStates(step);
 				player2->SetFighterState(stateManager.GetState(step));
 				player1->SetFighterState(stateManager.GetState(step));
 
-				while (step < frameCount - 1)
+				while (step < frameCount)
 				{
 					ReadInputs(step);
-					AdvanceFrame();
+					AdvanceFrame(step);
 					step++;
 				}
 			}
@@ -267,8 +268,9 @@ int main()
 		//Advance frame
 		//TODO:
 		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
-		if (frameTime.asSeconds() > timeUntilFrameUpdate)
+		if (timeSinceLastFrame > timeUntilFrameUpdate)
 		{
+			timeSinceLastFrame -= timeUntilFrameUpdate;
 			RunFrameDelay();
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
@@ -281,7 +283,7 @@ int main()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && sButt && focus)
 		{
 			frameCount -= 20;
-			stateManager.SetCurrentState(frameCount);
+			stateManager.TrimRolledbackStates(frameCount);
 			player2->SetFighterState(stateManager.GetState(frameCount));
 			player1->SetFighterState(stateManager.GetState(frameCount));
 			
@@ -323,10 +325,7 @@ int main()
 }
 
 void RunFrameDelay()
-{
-	frameClock.restart();
-	
-
+{	
 	if (!HandleInputs())
 	{
 		delayAmount++;
@@ -336,7 +335,7 @@ void RunFrameDelay()
 
 	dontUpdateLocal = false;
 	
-	AdvanceFrame();
+	AdvanceFrame(frameCount);
 	frameCount++;
 
 	DrawCurrentFrame();
@@ -479,9 +478,10 @@ void ReadInputs(int frame)
 	player2->SetInput(player2Input);
 }
 
-
-//void AdvanceFrame(int inputs[], int disconnect_flags)
-void AdvanceFrame()
+//TODO::  WHY DOES THIS SEEM TO BE RUNNING SEVERAL TIMES
+////////////////////////////////////////////////////////
+//MAYBE PUT IN A RUNNING COUNT OF ADVANCED FRAMES VS ROLLBACK FRAMES
+void AdvanceFrame(int frame)
 {
 	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
 	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
@@ -508,25 +508,23 @@ void AdvanceFrame()
 	player1->UpdateFrame();
 	player2->UpdateFrame();
 
-	currentState.frame = frameCount;
+	currentState.frame = frame;
 	
 
-	//TODO: add this to game state so it can be rolled back
-	if (framesInSecond >= framesInSecondMax)
+	if (currentState.framesInSecond >= framesInSecondMax)
 	{
-		framesInSecond = 0;
-		roundTimer--;
+		currentState.framesInSecond = 0;
+		currentState.roundTimer--;
 	}
-	currentState.time = roundTimer;
-	roundTimeText.setString(std::to_string(roundTimer));
+	roundTimeText.setString(std::to_string(currentState.roundTimer));
 	delayText.setString("delay: " + std::to_string(delayAmount));
 
-	frameText.setString("frame: " + std::to_string(frameCount));
+	frameText.setString("frame: " + std::to_string(frame));
 
 	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
 
-	framesInSecond++;
+	currentState.framesInSecond++;
 
 	
 

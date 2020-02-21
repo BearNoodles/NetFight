@@ -241,6 +241,29 @@ int MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 		counter++;
 	}
 
+	
+	if (!messages[currentFrame]->set && currentFrame > 0)
+	{
+		for (int i = currentFrame; i > 0; i--)
+		{
+			if (messages[i]->set)
+			{
+				for (int j = i; j <= currentFrame; j++)
+				{
+					messages[j]->input1 = messages[i]->input1;
+					messages[j]->input2 = messages[i]->input2;
+					messages[j]->input3 = messages[i]->input3;
+					messages[j]->input4 = messages[i]->input4;
+					messages[j]->input5 = messages[i]->input5;
+					messages[j]->input6 = messages[i]->input6;
+					messages[j]->input7 = messages[i]->input7;
+					messages[j]->set = false;
+				}
+				break;
+			}
+		}
+	}
+
 	return rollbackFrame;
 }
 
