@@ -222,11 +222,15 @@ int MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 			msg.frame = frame;
 			msg.set = true;
 
-			if (frame < currentFrame && GetMessage(frame)->set == false)
+			if (frame < currentFrame && messages[frame]->set == false)
 			{
 				if (frame < rollbackFrame || rollbackFrame == -1)
 				{
-					rollbackFrame = frame;
+					Message* temp = messages[frame];
+					if (temp->input1 != msg.input1 || temp->input2 != msg.input2 || temp->input3 != msg.input3 || temp->input4 != msg.input4 || temp->input5 != msg.input5 || temp->input6 != msg.input6 || temp->input7 != msg.input7)
+					{
+						rollbackFrame = frame;
+					}
 				}
 			}
 
@@ -248,7 +252,7 @@ int MessageHandlerRollback::ReceiveInputMessages(int currentFrame)
 		{
 			if (messages[i]->set)
 			{
-				for (int j = i; j <= currentFrame; j++)
+				for (int j = i + 1; j <= currentFrame; j++)
 				{
 					messages[j]->input1 = messages[i]->input1;
 					messages[j]->input2 = messages[i]->input2;

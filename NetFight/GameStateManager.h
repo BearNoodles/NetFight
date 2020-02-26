@@ -67,6 +67,8 @@ public:
 
 	void CreateNewGameState(GameState player1State, GameState player2State, GameState gameState);
 
+	
+
 protected:
 
 	std::vector<GameState>* m_gameStateVector;

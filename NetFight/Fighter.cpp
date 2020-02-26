@@ -221,16 +221,16 @@ sf::RectangleShape Fighter::GetActiveHitbox()
 	return  *m_activeHitbox;
 }
 
-void Fighter::CreateHitbox()
-{
-	m_activeHitbox = new sf::RectangleShape();
-	m_activeHitbox->setSize(sf::Vector2f(100, 50));
-	m_activeHitbox->setFillColor(sf::Color::Red);
-
-	m_hitboxPosition = sf::Vector2f(100, 50);
-
-	m_activeHitbox->setPosition(m_position + m_hitboxPosition);
-}
+//void Fighter::CreateHitbox()
+//{
+//	m_activeHitbox = new sf::RectangleShape();
+//	m_activeHitbox->setSize(sf::Vector2f(100, 50));
+//	m_activeHitbox->setFillColor(sf::Color::Red);
+//
+//	m_hitboxPosition = sf::Vector2f(100, 50);
+//
+//	m_activeHitbox->setPosition(m_position + m_hitboxPosition);
+//}
 
 bool Fighter::IsHitboxActive()
 {
@@ -323,6 +323,7 @@ void Fighter::SetFighterState(GameState gameState)
 		m_actionFrame = gameState.player1ActionFrame;
 		m_currentHealth = gameState.player1Health;
 		m_position = gameState.player1Position;
+		m_playerState = gameState.player1State;
 		m_isHitboxActive = gameState.player1IsHitboxActive;
 
 		m_currentInput = gameState.player1CurrentInput;
@@ -333,6 +334,11 @@ void Fighter::SetFighterState(GameState gameState)
 		m_direction = gameState.player1Direction;
 		m_isBlocking = gameState.player1IsBlocking;
 		m_pushbackFrame = gameState.player1PushbackFrame;
+
+		if (m_isHitboxActive)
+		{
+			m_activeHitbox = &m_currentAction.activeHitbox;
+		}
 	}
 
 	else if (m_playerID == 2)
@@ -343,6 +349,7 @@ void Fighter::SetFighterState(GameState gameState)
 		m_actionFrame = gameState.player2ActionFrame;
 		m_currentHealth = gameState.player2Health;
 		m_position = gameState.player2Position;
+		m_playerState = gameState.player2State;
 		m_isHitboxActive = gameState.player2IsHitboxActive;
 
 		m_currentInput = gameState.player2CurrentInput;
@@ -353,6 +360,11 @@ void Fighter::SetFighterState(GameState gameState)
 		m_direction = gameState.player2Direction;
 		m_isBlocking = gameState.player2IsBlocking;
 		m_pushbackFrame = gameState.player2PushbackFrame;
+
+		if (m_isHitboxActive)
+		{
+			m_activeHitbox = &m_currentAction.activeHitbox;
+		}
 	}
 }
 

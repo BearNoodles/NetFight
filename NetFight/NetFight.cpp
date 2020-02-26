@@ -19,6 +19,8 @@
 #define FPS 60
 #define FRAME_DELAY 2
 
+int gameFrames, rollbackFrameCount;
+
 int myID;
 
 int framesInSecondMax = 60;
@@ -131,6 +133,9 @@ sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
 int main()
 {
+	gameFrames = 0;
+	rollbackFrameCount = 0;
+
 	rollBackOn = false;
 
 	framesInSecondMax = 60;
@@ -216,6 +221,10 @@ int main()
 	currentState.roundTimer = roundTimerInitial;
 	currentState.framesInSecond = 0;
 
+	//CHECK MESSAGE HANDLER PREDICTION
+
+	//stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -238,7 +247,9 @@ int main()
 		}
 
 
-		timeSinceLastFrame += frameClock.restart();
+		/*std::cout << "Frames: " << gameFrames << std::endl;
+		std::cout << "Rollback Frames: " << rollbackFrameCount << std::endl;*/
+
 		
 
 		if (rollBackOn)
@@ -246,11 +257,17 @@ int main()
 			int rollbackFrame = messageRollback.ReceiveInputMessages(frameCount);
 			if (rollbackFrame != -1)
 			{
-				//std::cout << "rollback: " << frameCount - rollbackFrame << std::endl;
-				int step = rollbackFrame;
+				std::cout << "Frame; " << frameCount << "	Rollback: " << rollbackFrame << std::endl;
+				int step = rollbackFrame - 1;
+
 				//stateManager.TrimRolledbackStates(step);
 				player2->SetFighterState(stateManager.GetState(step));
 				player1->SetFighterState(stateManager.GetState(step));
+
+				currentState.frame = stateManager.GetState(step).frame;
+				currentState.framesInSecond= stateManager.GetState(step).framesInSecond;
+				currentState.roundTimer = stateManager.GetState(step).roundTimer;
+				step++;
 
 				while (step < frameCount)
 				{
@@ -265,12 +282,16 @@ int main()
 			messageHandler.ReceiveInputMessages();
 		}
 
+
+		timeSinceLastFrame += frameClock.restart();
+
 		//Advance frame
 		//TODO:
 		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
 		if (timeSinceLastFrame > timeUntilFrameUpdate)
 		{
 			timeSinceLastFrame -= timeUntilFrameUpdate;
+			//timeSinceLastFrame = sf::Time::Zero;
 			RunFrameDelay();
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
@@ -335,6 +356,7 @@ void RunFrameDelay()
 
 	dontUpdateLocal = false;
 	
+	gameFrames++;
 	AdvanceFrame(frameCount);
 	frameCount++;
 
@@ -446,14 +468,16 @@ void ReadInputs(int frame)
 
 	if (thisPlayer == 1)
 	{
-		if (focus)
+		/*if (focus)
 		{
 			player1Input = inputHandler.GetLocalInput(frame);
 		}
 		else
 		{
 			player1Input = inputHandler.GetNoInput(frame);
-		}
+		}*/
+
+		player1Input = inputHandler.GetLocalInput(frame);
 
 		//Get received input
 		player2Input = inputHandler.GetOpponentInput(frame);
@@ -461,14 +485,15 @@ void ReadInputs(int frame)
 
 	else
 	{
-		if (focus)
+		/*if (focus)
 		{
 			player2Input = inputHandler.GetLocalInput(frame);
 		}
 		else
 		{
 			player2Input = inputHandler.GetNoInput(frame);
-		}
+		}*/
+		player2Input = inputHandler.GetLocalInput(frame);
 
 		//Get received input
 		player1Input = inputHandler.GetOpponentInput(frame);
@@ -481,6 +506,10 @@ void ReadInputs(int frame)
 //TODO::  WHY DOES THIS SEEM TO BE RUNNING SEVERAL TIMES
 ////////////////////////////////////////////////////////
 //MAYBE PUT IN A RUNNING COUNT OF ADVANCED FRAMES VS ROLLBACK FRAMES
+
+//NOW WORK OUT WHY THEY ARE SLIGHTLY OUT OF SYNC
+
+//ROLLBACK WORKING! (99%) FIX DELAY AGAIN
 void AdvanceFrame(int frame)
 {
 	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
@@ -521,10 +550,9 @@ void AdvanceFrame(int frame)
 
 	frameText.setString("frame: " + std::to_string(frame));
 
-	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
-
-
 	currentState.framesInSecond++;
+
+	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
 	
 
