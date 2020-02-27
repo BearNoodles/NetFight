@@ -27,6 +27,8 @@ public:
 
 	FrameInput GetFrameInput(int frame);
 
+	int CalculateDelay();
+
 private:
 
 	//sf::IpAddress opponentIP;
@@ -47,4 +49,7 @@ private:
 
 	void UpdateMinFrame();
 	int minimumFrame;
+
+	int lastSent;
+	int lastReceived;
 };

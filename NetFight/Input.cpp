@@ -135,7 +135,6 @@ void Input::SetOpponentInput(FrameInput input)
 {
 	if (opponentInputs->back().frameNumber < input.frameNumber)
 	{
-		input.set = true;
 		opponentInputs->erase(opponentInputs->begin());
 		opponentInputs->push_back(input);
 		return;
@@ -145,7 +144,6 @@ void Input::SetOpponentInput(FrameInput input)
 	{
 		if (input.frameNumber == it->frameNumber)
 		{
-			input.set = true;
 			*it = input;
 			return;
 		}
@@ -219,7 +217,7 @@ void Input::SetCurrentFrame(int frame)
 
 bool Input::BothInputsReady(int frame)
 {
-	if (GetOpponentInput(frame).frameNumber != -1)
+	if (GetOpponentInput(frame).set)
 	{
 		return true;
 	}

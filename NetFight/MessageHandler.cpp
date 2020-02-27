@@ -54,6 +54,9 @@ bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::Ud
 		messages[i]->frame = i;
 	}
 
+	lastSent = 0;
+	lastReceived = 0;
+
 	return true;
 }
 
@@ -86,6 +89,11 @@ void MessageHandler::SendNoInput(int frame)
 		// error...
 		//send failed try it again
 		std::cout << "Send message failed" << std::endl;
+	}
+
+	if (frameSend > lastSent)
+	{
+		lastSent = frameSend;
 	}
 }
 
@@ -125,6 +133,10 @@ void MessageHandler::SendFrameInput(FrameInput input)
 		std::cout << "Send message failed" << std::endl;
 	}
 
+	if (frameSend > lastSent)
+	{
+		lastSent = frameSend;
+	}
 }
 
 void MessageHandler::AddMessage(Message toAdd)
@@ -150,7 +162,10 @@ void MessageHandler::AddMessage(Message toAdd)
 
 	messages[temp->frame]->set = true;
 
-
+	if (toAdd.frame > lastReceived)
+	{
+		lastReceived = toAdd.frame;
+	}
 }
 
 Message* MessageHandler::GetMessage(int frame)
@@ -167,11 +182,11 @@ void MessageHandler::ReceiveMessagesDelay()
 	int counter = 0;
 	while (counter < 1000)
 	{
-
+		std::cout << "Count: " << counter << std::endl;
 
 		sf::Int32 frame;
 		//bool inputs[7];
-		bool input1, input2, input3, input4, input5, input6, input7;
+		bool input1, input2, input3, input4, input5, input6, input7, set;
 		sf::Packet packet;
 		sf::IpAddress address;
 		unsigned short port;
@@ -184,7 +199,7 @@ void MessageHandler::ReceiveMessagesDelay()
 			break;
 		}
 
-		std::cout << "MESSAGE RECIEVED" << std::endl;
+		//std::cout << "MESSAGE RECIEVED" << std::endl;
 
 		if (address != opponentIP || port != opponentPort)
 		{
@@ -192,13 +207,12 @@ void MessageHandler::ReceiveMessagesDelay()
 		}
 
 		//if ((packet >> inputs[7] >> frame) && check)
-		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> frame) && check)
+		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
 
 			if (frame < minimumFrame)
 			{
 				counter++;
-				break;
 			}
 
 			//good
@@ -386,25 +400,14 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 
 	newInput.frameNumber = messages[frame]->frame;
 
-	/*for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
-	{
-	if (it->frame == frame)
-	{
-	newInput.inputs[0] = it->input1;
-	newInput.inputs[1] = it->input2;
-	newInput.inputs[2] = it->input3;
-	newInput.inputs[3] = it->input4;
-	newInput.inputs[4] = it->input5;
-	newInput.inputs[5] = it->input6;
-	newInput.inputs[6] = it->input7;
-
-	newInput.frameNumber = it->frame;
-
-	break;
-	}
-	}*/
+	newInput.set = messages[frame]->set;
 
 	return newInput;
+}
+
+int MessageHandler::CalculateDelay()
+{
+	return lastSent - lastReceived;
 }
 
 

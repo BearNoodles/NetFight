@@ -56,7 +56,8 @@ int screenHeight = 600;
 sf::Text roundTimeText;
 sf::Font timerFont;
 
-int delayAmount;
+int currentDelay;
+int nextDelay;
 sf::Text delayText;
 
 int delayLimit = 99;
@@ -173,7 +174,8 @@ int main()
 	frameText.setFillColor(sf::Color::White);
 	frameText.setPosition(sf::Vector2f(50, 100));
 
-	delayAmount = 0;
+	currentDelay = 0;
+	nextDelay = 0;
 
 	//socket.setBlocking(false);
 
@@ -346,10 +348,10 @@ int main()
 }
 
 void RunFrameDelay()
-{	
+{
 	if (!HandleInputs())
 	{
-		delayAmount++;
+		//currentDelay++;
 		dontUpdateLocal = true;
 		return;
 	}
@@ -362,7 +364,9 @@ void RunFrameDelay()
 
 	DrawCurrentFrame();
 
-	delayAmount = 0;
+	delayText.setString("delay: " + std::to_string(currentDelay));
+	currentDelay = nextDelay;
+	nextDelay = 0;
 }
 
 void RunFrameRollback()
@@ -372,6 +376,7 @@ void RunFrameRollback()
 
 bool HandleInputs()
 {
+	currentDelay = 10;
 	if (!dontUpdateLocal && frameCount > 100)
 	{
 		SetLocalInputs();
@@ -383,8 +388,8 @@ bool HandleInputs()
 
 	UpdateInputs();
 
+	//If delay is on and either input is not ready
 	if (!rollBackOn && !inputHandler.BothInputsReady(frameCount))
-	if (!rollBackOn && !m)
 	{
 		return false;
 	}
@@ -397,13 +402,13 @@ bool HandleInputs()
 void SetLocalInputs()
 {
 	inputHandler.SetCurrentFrame(frameCount);
-	if (focus && delayAmount < delayLimit)
+	if (focus && currentDelay < delayLimit)
 	{
-		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount + delayAmount));
+		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount + currentDelay));
 	}
 	else
 	{
-		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount + delayAmount));
+		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount + currentDelay));
 	}
 
 }
@@ -413,7 +418,7 @@ void SendInputs()
 	if (rollBackOn)
 	{
 		//how many previous messages to send
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 3 + currentDelay; i++)
 		{
 			int previousFrames = i;
 
@@ -421,7 +426,7 @@ void SendInputs()
 			{
 				previousFrames = frameCount;
 			}
-			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames));
+			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames + currentDelay));
 		}
 		
 	}
@@ -429,7 +434,17 @@ void SendInputs()
 	//TODO: THIS MAY NEED TO SEND SOME PREVIOUS FRAMES TOO
 	else
 	{
-		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
+		for (int i = 0; i < 3 + currentDelay; i++)
+		{
+			int previousFrames = i;
+
+			if (frameCount < i)
+			{
+				previousFrames = frameCount;
+			}
+			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames + currentDelay));
+		}
+		//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 	}
 }
 
@@ -440,12 +455,13 @@ void SendInputs()
 void UpdateInputs()
 {
 	int setInputLimit = 1;
-	if (rollBackOn)
+	//if (rollBackOn)
+	if (true)
 	{
 		//Maybe set limit of furthest possible rollback at top
 		if (frameCount < 20)
 		{
-			setInputLimit = frameCount;
+			setInputLimit = frameCount + 1;
 		}
 		else
 		{
@@ -549,7 +565,6 @@ void AdvanceFrame(int frame)
 		currentState.roundTimer--;
 	}
 	roundTimeText.setString(std::to_string(currentState.roundTimer));
-	delayText.setString("delay: " + std::to_string(delayAmount));
 
 	frameText.setString("frame: " + std::to_string(frame));
 
