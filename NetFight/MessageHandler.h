@@ -18,7 +18,8 @@ public:
 	bool Initialise(sf::IpAddress ip, unsigned short opponentPort, sf::UdpSocket* sock);
 
 	void SendFrameInput(FrameInput input);
-	void ReceiveInputMessages();
+	void ReceiveMessagesDelay();
+	int ReceiveMessagesRollback(int currentFrame);
 
 	void SendNoInput(int frame);
 
@@ -43,6 +44,7 @@ private:
 	Message* GetMessage(int frame);
 
 	bool CheckEarlyMessages();
+
+	void UpdateMinFrame();
 	int minimumFrame;
 };
-

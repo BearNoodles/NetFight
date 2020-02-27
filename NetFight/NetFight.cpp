@@ -121,7 +121,7 @@ ConnectionHandler connectionHandler;
 //TODO: make delay and rollback message handler classes to inherit from the main one
 MessageHandler messageHandler;
 
-MessageHandlerRollback messageRollback;
+//MessageHandlerRollback messageRollback;
 
 bool rollBackOn;
 
@@ -212,7 +212,7 @@ int main()
 
 	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
 	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
-	messageRollback.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
+	//messageRollback.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
 
 	msgReady = false;
 
@@ -254,7 +254,7 @@ int main()
 
 		if (rollBackOn)
 		{
-			int rollbackFrame = messageRollback.ReceiveInputMessages(frameCount);
+			int rollbackFrame = messageHandler.ReceiveMessagesRollback(frameCount);
 			if (rollbackFrame != -1)
 			{
 				std::cout << "Frame; " << frameCount << "	Rollback: " << rollbackFrame << std::endl;
@@ -273,13 +273,13 @@ int main()
 				{
 					ReadInputs(step);
 					AdvanceFrame(step);
-					step++;
+					step++; 
 				}
 			}
 		}
 		else
 		{
-			messageHandler.ReceiveInputMessages();
+			messageHandler.ReceiveMessagesDelay();
 		}
 
 
@@ -420,10 +420,12 @@ void SendInputs()
 			{
 				previousFrames = frameCount;
 			}
-			messageRollback.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames));
+			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames));
 		}
 		
 	}
+
+	//TODO: THIS MAY NEED TO SEND SOME PREVIOUS FRAMES TOO
 	else
 	{
 		messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
@@ -450,7 +452,7 @@ void UpdateInputs()
 		}
 		for (int i = 0; i < setInputLimit; i++)
 		{
-			inputHandler.SetOpponentInput(messageRollback.GetFrameInput(frameCount - i));
+			inputHandler.SetOpponentInput(messageHandler.GetFrameInput(frameCount - i));
 		}
 	}
 	else
