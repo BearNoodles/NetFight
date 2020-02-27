@@ -384,6 +384,7 @@ bool HandleInputs()
 	UpdateInputs();
 
 	if (!rollBackOn && !inputHandler.BothInputsReady(frameCount))
+	if (!rollBackOn && !m)
 	{
 		return false;
 	}

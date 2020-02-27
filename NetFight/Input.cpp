@@ -12,6 +12,7 @@ Input::Input()
 	for (int i = 0; i < 100; i++)
 	{
 		noInput.frameNumber = i;
+		noInput.set = false;
 		opponentInputs->push_back(noInput);
 		localInputs->push_back(noInput);
 	}
@@ -134,6 +135,7 @@ void Input::SetOpponentInput(FrameInput input)
 {
 	if (opponentInputs->back().frameNumber < input.frameNumber)
 	{
+		input.set = true;
 		opponentInputs->erase(opponentInputs->begin());
 		opponentInputs->push_back(input);
 		return;
@@ -143,6 +145,7 @@ void Input::SetOpponentInput(FrameInput input)
 	{
 		if (input.frameNumber == it->frameNumber)
 		{
+			input.set = true;
 			*it = input;
 			return;
 		}
@@ -153,6 +156,7 @@ void Input::SetLocalInput(FrameInput input)
 {
 	if (localInputs->back().frameNumber < input.frameNumber)
 	{
+		input.set = true;
 		localInputs->erase(localInputs->begin());
 		localInputs->push_back(input);
 		return;
@@ -162,6 +166,7 @@ void Input::SetLocalInput(FrameInput input)
 	{
 		if (input.frameNumber == it->frameNumber)
 		{
+			input.set = true;
 			*it = input;
 			return;
 		}

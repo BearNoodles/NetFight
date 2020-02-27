@@ -5,6 +5,7 @@ struct FrameInput
 {
 	int frameNumber;
 	bool inputs[7];
+	bool set;
 };
 class Input
 {
