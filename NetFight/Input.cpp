@@ -12,7 +12,7 @@ Input::Input()
 	for (int i = 0; i < 100; i++)
 	{
 		noInput.frameNumber = i;
-		noInput.set = false;
+		noInput.set = true;
 		opponentInputs->push_back(noInput);
 		localInputs->push_back(noInput);
 	}
@@ -102,6 +102,9 @@ FrameInput Input::GetOpponentInput(int frameNo)
 			return *it;
 		}
 	}
+
+	std::cout << "THIS SHOULD NEVER HAPPEN" << std::endl;
+
 	FrameInput temp = noInput;
 	temp.frameNumber = frameNo;
 	return temp;
@@ -118,6 +121,10 @@ FrameInput Input::GetLocalInput(int frameNo)
 	}
 	FrameInput temp = noInput;
 	temp.frameNumber = frameNo;
+
+	temp.set = true;
+
+	InsertLocalInput(temp);
 	return temp;
 }
 
@@ -126,6 +133,8 @@ FrameInput Input::GetNoInput(int frameNo)
 	FrameInput tempInput = noInput;
 
 	tempInput.frameNumber = frameNo;
+
+	tempInput.set = true;
 
 	return tempInput;
 }
@@ -144,7 +153,10 @@ void Input::SetOpponentInput(FrameInput input)
 	{
 		if (input.frameNumber == it->frameNumber)
 		{
-			*it = input;
+			if (!it->set)
+			{
+				*it = input;
+			}
 			return;
 		}
 	}
@@ -160,15 +172,83 @@ void Input::SetLocalInput(FrameInput input)
 		return;
 	}
 
+	
 	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
 	{
-		if (input.frameNumber == it->frameNumber)
+		if (input.frameNumber == it->frameNumber && !it->set)
 		{
-			input.set = true;
-			*it = input;
+			if (!it->set)
+			{
+				*it = input;
+			}
 			return;
 		}
 	}
+	
+	InsertLocalInput(input);
+
+}
+
+
+void Input::InsertLocalInput(FrameInput input)
+{
+	int i = 0;
+	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
+	{
+		if (input.frameNumber > it->frameNumber)
+		{
+			break;
+		}
+		i++;
+	}
+
+	input.set = true;
+	auto it2 = localInputs->end() - i;
+	localInputs->insert(it2, input);
+}
+
+void Input::PredictLocalInput(int frame)
+{
+	int i = 0;
+	FrameInput predicted;
+	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
+	{
+		if (frame == it->frameNumber)
+		{
+			if (it->set)
+			{
+				return;
+			}
+			else
+			{
+				it = it + 1;
+			}
+		}
+		else if (frame > it->frameNumber)
+		{
+			predicted = *it;
+			break;
+		}
+		i++;
+	}
+
+	predicted.set = true;
+	auto it2 = localInputs->end() - i;
+	localInputs->insert(it2, predicted);
+}
+
+void Input::ForceSet(int frame)
+{
+	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
+	{
+		if (frame == it->frameNumber)
+		{
+			it->set = true;
+			return;
+		}
+	}
+
+	std::cout << "No input to force" << std::endl;
 }
 
 

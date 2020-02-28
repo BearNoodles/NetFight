@@ -133,10 +133,6 @@ void MessageHandler::SendFrameInput(FrameInput input)
 		std::cout << "Send message failed" << std::endl;
 	}
 
-	if (frameSend > lastSent)
-	{
-		lastSent = frameSend;
-	}
 }
 
 void MessageHandler::AddMessage(Message toAdd)
@@ -162,10 +158,6 @@ void MessageHandler::AddMessage(Message toAdd)
 
 	messages[temp->frame]->set = true;
 
-	if (toAdd.frame > lastReceived)
-	{
-		lastReceived = toAdd.frame;
-	}
 }
 
 Message* MessageHandler::GetMessage(int frame)
@@ -180,10 +172,10 @@ void MessageHandler::ReceiveMessagesDelay()
 	//Possibly time how long each new message takes to receive to calculate the delay required?
 	//Set some kind of limit on how long the function should read messages
 	int counter = 0;
-	while (counter < 1000)
+	while (counter < 100)
 	{
-		std::cout << "Count: " << counter << std::endl;
-
+		//std::cout << "Count: " << counter << std::endl;
+		
 		sf::Int32 frame;
 		//bool inputs[7];
 		bool input1, input2, input3, input4, input5, input6, input7, set;
@@ -213,6 +205,7 @@ void MessageHandler::ReceiveMessagesDelay()
 			if (frame < minimumFrame)
 			{
 				counter++;
+				continue;
 			}
 
 			//good

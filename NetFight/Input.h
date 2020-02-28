@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include <iostream>
 
 struct FrameInput
 {
@@ -22,6 +23,11 @@ public:
 
 	void SetOpponentInput(FrameInput input);
 	void SetLocalInput(FrameInput input);
+
+	void InsertLocalInput(FrameInput input);
+
+	void PredictLocalInput(int frame);
+	void ForceSet(int frame);
 
 	std::vector<FrameInput>* GetAllInputs(int player);
 

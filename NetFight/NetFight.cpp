@@ -57,7 +57,7 @@ sf::Text roundTimeText;
 sf::Font timerFont;
 
 int currentDelay;
-int nextDelay;
+//int nextDelay;
 sf::Text delayText;
 
 int delayLimit = 99;
@@ -124,7 +124,7 @@ MessageHandler messageHandler;
 
 //MessageHandlerRollback messageRollback;
 
-bool rollBackOn;
+bool rollbackOn;
 
 
 //GGPOSession *ggpo = NULL;
@@ -137,7 +137,7 @@ int main()
 	gameFrames = 0;
 	rollbackFrameCount = 0;
 
-	rollBackOn = false;
+	rollbackOn = false;
 
 	framesInSecondMax = 60;
 
@@ -175,7 +175,6 @@ int main()
 	frameText.setPosition(sf::Vector2f(50, 100));
 
 	currentDelay = 0;
-	nextDelay = 0;
 
 	//socket.setBlocking(false);
 
@@ -209,7 +208,7 @@ int main()
 		window.display();
 	}
 
-	rollBackOn = connectionHandler.IsRollBackOn();
+	rollbackOn = connectionHandler.IsRollBackOn();
 
 
 	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
@@ -254,7 +253,7 @@ int main()
 
 		
 
-		if (rollBackOn)
+		if (rollbackOn)
 		{
 			int rollbackFrame = messageHandler.ReceiveMessagesRollback(frameCount);
 			if (rollbackFrame != -1)
@@ -365,8 +364,6 @@ void RunFrameDelay()
 	DrawCurrentFrame();
 
 	delayText.setString("delay: " + std::to_string(currentDelay));
-	currentDelay = nextDelay;
-	nextDelay = 0;
 }
 
 void RunFrameRollback()
@@ -376,8 +373,8 @@ void RunFrameRollback()
 
 bool HandleInputs()
 {
-	currentDelay = 10;
-	if (!dontUpdateLocal && frameCount > 100)
+	//currentDelay = 10;
+	if (!dontUpdateLocal)
 	{
 		SetLocalInputs();
 	}
@@ -389,7 +386,7 @@ bool HandleInputs()
 	UpdateInputs();
 
 	//If delay is on and either input is not ready
-	if (!rollBackOn && !inputHandler.BothInputsReady(frameCount))
+	if (!rollbackOn && !inputHandler.BothInputsReady(frameCount))
 	{
 		return false;
 	}
@@ -411,11 +408,18 @@ void SetLocalInputs()
 		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount + currentDelay));
 	}
 
+	if (!rollbackOn)
+	{
+		for (int i = frameCount; i < frameCount + currentDelay; i++)
+		{
+			inputHandler.PredictLocalInput(i);
+		}
+	}
 }
 
 void SendInputs()
 {
-	if (rollBackOn)
+	if (rollbackOn)
 	{
 		//how many previous messages to send
 		for (int i = 0; i < 3 + currentDelay; i++)
@@ -431,18 +435,18 @@ void SendInputs()
 		
 	}
 
-	//TODO: THIS MAY NEED TO SEND SOME PREVIOUS FRAMES TOO
 	else
 	{
 		for (int i = 0; i < 3 + currentDelay; i++)
 		{
-			int previousFrames = i;
+			//int previousFrames = i;
 
-			if (frameCount < i)
+			if (frameCount + currentDelay < i)
 			{
-				previousFrames = frameCount;
+				break;
 			}
-			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - previousFrames + currentDelay));
+			inputHandler.ForceSet(frameCount - i + currentDelay);
+			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - i + currentDelay));
 		}
 		//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 	}
@@ -454,9 +458,13 @@ void SendInputs()
 //ONLY NEEDED FOR ROLLBACK, MAKE 1 FOR DELAY
 void UpdateInputs()
 {
+	if (frameCount < 100)
+	{
+		return;
+	}
 	int setInputLimit = 1;
 	//if (rollBackOn)
-	if (true)
+	if (rollbackOn)
 	{
 		//Maybe set limit of furthest possible rollback at top
 		if (frameCount < 20)
@@ -484,6 +492,11 @@ void UpdateInputs()
 void ReadInputs(int frame)
 {
 	inputHandler.SetCurrentFrame(frame);
+
+	if (frameCount < 100)
+	{
+		return;
+	}
 
 	if (thisPlayer == 1)
 	{
