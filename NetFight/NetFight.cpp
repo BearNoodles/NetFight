@@ -75,6 +75,8 @@ bool sButt = true;
 int frameCount = 0;
 sf::Clock frameClock;
 
+sf::Clock pingClock;
+sf::Time ping;
 
 sf::Time messageTimer;
 bool msgReady;
@@ -226,6 +228,8 @@ int main()
 
 	//stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 
+	pingClock.restart();
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -281,6 +285,18 @@ int main()
 		else
 		{
 			messageHandler.ReceiveMessagesDelay();
+		}
+
+		if (!rollbackOn && messageHandler.CheckPing())
+		{
+			ping = pingClock.restart();
+			currentDelay = (ping.asSeconds() * 60) + 1;
+			std::cout << "ping is: " << currentDelay << std::endl;
+		}
+
+		else if(rollbackOn)
+		{
+			currentDelay = 0;
 		}
 
 
@@ -350,7 +366,6 @@ void RunFrameDelay()
 {
 	if (!HandleInputs())
 	{
-		//currentDelay++;
 		dontUpdateLocal = true;
 		return;
 	}
@@ -373,7 +388,6 @@ void RunFrameRollback()
 
 bool HandleInputs()
 {
-	//currentDelay = 10;
 	if (!dontUpdateLocal)
 	{
 		SetLocalInputs();

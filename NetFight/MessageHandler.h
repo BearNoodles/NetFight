@@ -21,6 +21,8 @@ public:
 	void ReceiveMessagesDelay();
 	int ReceiveMessagesRollback(int currentFrame);
 
+	void SendPingReply(int frame);
+
 	void SendNoInput(int frame);
 
 	void SetMinimumFrame(int minFrame);
@@ -28,6 +30,8 @@ public:
 	FrameInput GetFrameInput(int frame);
 
 	int CalculateDelay();
+
+	bool CheckPing();
 
 private:
 
@@ -52,4 +56,8 @@ private:
 
 	int lastSent;
 	int lastReceived;
+
+	int pingCheckFrame;
+	bool pingChecked;
+	bool pingReceived;
 };

@@ -164,6 +164,11 @@ void Input::SetOpponentInput(FrameInput input)
 
 void Input::SetLocalInput(FrameInput input)
 {
+	if (input.frameNumber == 100)
+	{
+		//stop;
+		int x = 1;
+	}
 	if (localInputs->back().frameNumber < input.frameNumber)
 	{
 		input.set = true;
@@ -175,7 +180,7 @@ void Input::SetLocalInput(FrameInput input)
 	
 	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
 	{
-		if (input.frameNumber == it->frameNumber && !it->set)
+		if (input.frameNumber == it->frameNumber)
 		{
 			if (!it->set)
 			{
@@ -222,6 +227,7 @@ void Input::PredictLocalInput(int frame)
 			else
 			{
 				it = it + 1;
+				it->frameNumber = frame;
 			}
 		}
 		else if (frame > it->frameNumber)
@@ -233,6 +239,7 @@ void Input::PredictLocalInput(int frame)
 	}
 
 	predicted.set = true;
+	predicted.frameNumber = frame;
 	auto it2 = localInputs->end() - i;
 	localInputs->insert(it2, predicted);
 }
@@ -249,6 +256,15 @@ void Input::ForceSet(int frame)
 	}
 
 	std::cout << "No input to force" << std::endl;
+
+	/*for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
+	{
+		if (frame == it->frameNumber)
+		{
+			it->set = true;
+			return;
+		}
+	}*/
 }
 
 

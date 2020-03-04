@@ -57,6 +57,9 @@ bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::Ud
 	lastSent = 0;
 	lastReceived = 0;
 
+	pingCheckFrame = 0;
+	pingChecked = true;
+
 	return true;
 }
 
@@ -102,6 +105,10 @@ void MessageHandler::SendFrameInput(FrameInput input)
 
 	sf::Int32 frameSend;
 	//bool inputSend[7];
+
+	bool pingSend = false;
+	bool pingReply = false;
+
 	bool inputSend1 = input.inputs[0];
 	bool inputSend2 = input.inputs[1];
 	bool inputSend3 = input.inputs[2];
@@ -116,12 +123,18 @@ void MessageHandler::SendFrameInput(FrameInput input)
 	inputSend[i] = input.inputs[i];
 	}*/
 
-
-
 	frameSend = input.frameNumber;
 
+	if (pingChecked && frameSend > pingCheckFrame)
+	{
+		pingCheckFrame = frameSend;
+		pingChecked = false;
+		pingSend = true;
+	}
+
+
 	sf::Packet packet;
-	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << true << frameSend;
+	packet << pingSend << pingReply << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << true << frameSend;
 
 
 	//std::cout << "Send message failed" << std::endl;
@@ -132,7 +145,31 @@ void MessageHandler::SendFrameInput(FrameInput input)
 		//send failed try it again
 		std::cout << "Send message failed" << std::endl;
 	}
+}
 
+
+void MessageHandler::SendPingReply(int frame)
+{
+
+	sf::Int32 frameSend;
+
+	bool pingReply = true;
+
+
+	frameSend = frame;
+
+	sf::Packet packet;
+	packet << false << pingReply << false << false << false << false << false << false << false << false << frame;
+
+
+	//std::cout << "Send message failed" << std::endl;
+
+	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+	{
+		// error...
+		//send failed try it again
+		std::cout << "Send message failed" << std::endl;
+	}
 }
 
 void MessageHandler::AddMessage(Message toAdd)
@@ -178,7 +215,8 @@ void MessageHandler::ReceiveMessagesDelay()
 		
 		sf::Int32 frame;
 		//bool inputs[7];
-		bool input1, input2, input3, input4, input5, input6, input7, set;
+		int pingFrame;
+		bool pingSend, pingReply, input1, input2, input3, input4, input5, input6, input7, set;
 		sf::Packet packet;
 		sf::IpAddress address;
 		unsigned short port;
@@ -199,8 +237,23 @@ void MessageHandler::ReceiveMessagesDelay()
 		}
 
 		//if ((packet >> inputs[7] >> frame) && check)
-		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
+		if ((packet >> pingSend >> pingReply >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
+
+			if (pingSend)
+			{
+				SendPingReply(frame);
+			}
+
+			else if (pingReply)
+			{
+				if (frame == pingCheckFrame)
+				{
+					pingReceived = true;
+					counter++;
+					continue;
+				}
+			}
 
 			if (frame < minimumFrame)
 			{
@@ -234,6 +287,7 @@ void MessageHandler::ReceiveMessagesDelay()
 				minimumFrame++;
 			}
 		}
+
 		else if (check)
 		{
 			std::cout << "Couldnt receive message" << std::endl;
@@ -260,7 +314,8 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 
 		sf::Int32 frame;
 		//bool inputs[7];
-		bool input1, input2, input3, input4, input5, input6, input7, set;
+		int pingFrame;
+		bool pingSend, pingReply, input1, input2, input3, input4, input5, input6, input7, set;
 		sf::Packet packet;
 		sf::IpAddress address;
 		unsigned short port;
@@ -269,7 +324,7 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 			// error...
 			//recieve failed send hello again
 			//std::cout << "no messages yet" << std::endl;
-			counter++;
+			//counter++;
 			break;
 		}
 
@@ -281,9 +336,22 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 		}
 
 		//if ((packet >> inputs[7] >> frame) && check)
-		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
+		if ((packet >> pingSend >> pingReply >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
+			if (pingSend)
+			{
+				SendPingReply(frame);
+			}
 
+			else if (pingReply)
+			{
+				if (frame == pingCheckFrame)
+				{
+					pingReceived = true;
+					counter++;
+					continue;
+				}
+			}
 			/*if (frame < minimumFrame)
 			{
 			counter++;
@@ -401,6 +469,17 @@ FrameInput MessageHandler::GetFrameInput(int frame)
 int MessageHandler::CalculateDelay()
 {
 	return lastSent - lastReceived;
+}
+
+bool MessageHandler::CheckPing()
+{
+	if (pingReceived)
+	{
+		pingChecked = true;
+		pingReceived = false;
+		return true;
+	}
+	return pingReceived;
 }
 
 
