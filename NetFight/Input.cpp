@@ -116,6 +116,11 @@ FrameInput Input::GetLocalInput(int frameNo)
 	{
 		if (it->frameNumber == frameNo)
 		{
+			//it->set = true;
+			if (!it->set)
+			{
+				return *it;
+			}
 			return *it;
 		}
 	}
@@ -164,11 +169,6 @@ void Input::SetOpponentInput(FrameInput input)
 
 void Input::SetLocalInput(FrameInput input)
 {
-	if (input.frameNumber == 100)
-	{
-		//stop;
-		int x = 1;
-	}
 	if (localInputs->back().frameNumber < input.frameNumber)
 	{
 		input.set = true;

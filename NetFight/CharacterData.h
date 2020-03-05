@@ -22,6 +22,8 @@ struct CharacterStruct
 {
 	Action attack1;
 	Action attack2;
+
+	sf::Sprite spriteSheet;
 };
 
 class CharacterData
@@ -36,5 +38,8 @@ public:
 	
 protected:
 	CharacterStruct m_characterStruct;
+
+	sf::Sprite spriteSheet1;
+
 };
 

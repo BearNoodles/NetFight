@@ -56,6 +56,8 @@ public:
 	void SetFighterState(GameState gameState);
 	GameState GetFighterState();
 
+	sf::Sprite GetAnimationFrame();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
@@ -114,5 +116,7 @@ protected:
 	int m_pushbackFrame;
 
 	bool m_isBlocking;
+
+	sf::Sprite m_spriteSheet;
 };
 

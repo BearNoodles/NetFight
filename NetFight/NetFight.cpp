@@ -35,6 +35,8 @@ GameState currentState;
 Fighter* player1;
 Fighter* player2;
 
+CharacterData* charData;
+
 int thisPlayer;
 
 bool focus = true;
@@ -184,6 +186,8 @@ int main()
 	window.setKeyRepeatEnabled(false);
 	//window.setFramerateLimit(FPS);
 
+	//charData = new CharacterData();
+
 	player1 = new Fighter(sf::Vector2f(200.0f, 350.0f), 1, screenWidth);
 	player2 = new Fighter(sf::Vector2f(700.0f, 350.0f), 2, screenWidth);
 
@@ -256,7 +260,6 @@ int main()
 		std::cout << "Rollback Frames: " << rollbackFrameCount << std::endl;*/
 
 		
-
 		if (rollbackOn)
 		{
 			int rollbackFrame = messageHandler.ReceiveMessagesRollback(frameCount);
@@ -276,6 +279,7 @@ int main()
 
 				while (step < frameCount)
 				{
+					UpdateInputs();
 					ReadInputs(step);
 					AdvanceFrame(step);
 					step++; 
@@ -413,7 +417,7 @@ bool HandleInputs()
 void SetLocalInputs()
 {
 	inputHandler.SetCurrentFrame(frameCount);
-	if (focus && currentDelay < delayLimit)
+	if (focus && currentDelay < delayLimit && frameCount >= 100)
 	{
 		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount + currentDelay));
 	}
@@ -472,10 +476,6 @@ void SendInputs()
 //ONLY NEEDED FOR ROLLBACK, MAKE 1 FOR DELAY
 void UpdateInputs()
 {
-	if (frameCount < 100)
-	{
-		return;
-	}
 	int setInputLimit = 1;
 	//if (rollBackOn)
 	if (rollbackOn)
@@ -506,11 +506,6 @@ void UpdateInputs()
 void ReadInputs(int frame)
 {
 	inputHandler.SetCurrentFrame(frame);
-
-	if (frameCount < 100)
-	{
-		return;
-	}
 
 	if (thisPlayer == 1)
 	{
@@ -629,8 +624,12 @@ void DrawCurrentFrame()
 	window.clear();
 
 
-	window.draw(player1->GetHurtbox());
-	window.draw(player2->GetHurtbox());
+	/*window.draw(player1->GetHurtbox());
+	window.draw(player2->GetHurtbox());*/
+
+	window.draw(player1->GetAnimationFrame());
+	window.draw(player2->GetAnimationFrame());
+
 	if (player1->IsHitboxActive())
 	{
 		window.draw(player1->GetActiveHitbox());

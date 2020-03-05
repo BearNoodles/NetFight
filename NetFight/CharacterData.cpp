@@ -1,9 +1,16 @@
 #include "CharacterData.h"
-
+#include <iostream>
 
 
 CharacterData::CharacterData()
 {
+	sf::Texture t;
+	if (!t.loadFromFile("image.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	spriteSheet1.setTexture(t);
 }
 
 //TODO:
@@ -38,7 +45,7 @@ void CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.selfBlockPushback = 10;
 	m_characterStruct.attack2.selfPushbackFrames = 2;
 
-
+	m_characterStruct.spriteSheet = spriteSheet1;
 }
 
 CharacterStruct CharacterData::GetCharacterStruct()

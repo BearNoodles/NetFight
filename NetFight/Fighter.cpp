@@ -37,6 +37,8 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 
 	m_maxHealth = 1000;
 	m_currentHealth = m_maxHealth;
+
+	m_spriteSheet = m_characterData.GetCharacterStruct().spriteSheet;
 }
 
 void Fighter::UpdateFrame()
@@ -154,6 +156,7 @@ void Fighter::UpdateFrame()
 
 
 	m_hurtbox.setPosition(m_position);
+	m_spriteSheet.setPosition(m_position);
 }
 
 //POSSIBLY MAKE A BOOL SO OPPONENT KNOWS IF THE ATTACK WAS BLOCKED OR NOT
@@ -203,6 +206,11 @@ void Fighter::HitLanded()
 sf::RectangleShape Fighter::GetHurtbox()
 {
 	return m_hurtbox;
+}
+
+sf::Sprite Fighter::GetAnimationFrame()
+{
+	return m_spriteSheet;
 }
 
 Action Fighter::GetCurrentAction()
