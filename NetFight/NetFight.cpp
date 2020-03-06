@@ -138,6 +138,9 @@ sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
 int main()
 {
+
+	charData = new CharacterData();
+
 	gameFrames = 0;
 	rollbackFrameCount = 0;
 
@@ -188,15 +191,18 @@ int main()
 
 	//charData = new CharacterData();
 
-	player1 = new Fighter(sf::Vector2f(200.0f, 350.0f), 1, screenWidth);
-	player2 = new Fighter(sf::Vector2f(700.0f, 350.0f), 2, screenWidth);
+	player1 = new Fighter(sf::Vector2i(200, 350), 1, screenWidth);
+	player2 = new Fighter(sf::Vector2i(700, 350), 2, screenWidth);
+
+	player1->SetCharacterData(charData->LoadCharacter1());
+	player2->SetCharacterData(charData->LoadCharacter1());
 
 	healthBar1 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(75, 30));
 	healthBar2 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(550, 30));
 
 	while (window.isOpen())
 	{
-		window.clear();
+		window.clear(sf::Color::Blue);
 		window.display();
 		//Setup or join a game
 		thisPlayer = connectionHandler.HostOrClient();
@@ -621,14 +627,16 @@ void AdvanceFrame(int frame)
 
 void DrawCurrentFrame()
 {
-	window.clear();
+	window.clear(sf::Color::Blue);
 
 
-	/*window.draw(player1->GetHurtbox());
-	window.draw(player2->GetHurtbox());*/
 
-	window.draw(player1->GetAnimationFrame());
-	window.draw(player2->GetAnimationFrame());
+	window.draw(player1->GetHurtbox());
+	window.draw(player2->GetHurtbox());
+
+	window.draw(*player1->GetAnimationFrame());
+	window.draw(*player2->GetAnimationFrame());
+
 
 	if (player1->IsHitboxActive())
 	{

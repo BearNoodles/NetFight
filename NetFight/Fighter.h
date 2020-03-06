@@ -20,7 +20,7 @@
 class Fighter
 {
 public:
-	Fighter(sf::Vector2f position, int playerNumber, int screenWidth);
+	Fighter(sf::Vector2i position, int playerNumber, int screenWidth);
 	~Fighter();
 
 	void UpdateFrame();
@@ -56,7 +56,9 @@ public:
 	void SetFighterState(GameState gameState);
 	GameState GetFighterState();
 
-	sf::Sprite GetAnimationFrame();
+	sf::Sprite* GetAnimationFrame();
+
+	void SetCharacterData(CharacterStruct data);
 
 protected:
 
@@ -71,11 +73,11 @@ protected:
 
 	int m_walkSpeed;
 
-	sf::Vector2f m_hitboxPosition;
+	sf::Vector2i m_hitboxPosition;
 
 	bool m_isHitboxActive;
 
-	sf::Vector2f m_position;
+	sf::Vector2i m_position;
 
 	int m_playerID;
 
@@ -85,7 +87,13 @@ protected:
 	CharacterData m_characterData;
 	CharacterStruct m_characterActions;
 
+
 	Action m_currentAction;
+
+	Animation m_currentAnim;
+	sf::IntRect m_animRect;
+
+	void SetAnimRect();
 
 	/*enum State
 	{
@@ -117,6 +125,6 @@ protected:
 
 	bool m_isBlocking;
 
-	sf::Sprite m_spriteSheet;
+	sf::Sprite* m_spriteSheet;
 };
 

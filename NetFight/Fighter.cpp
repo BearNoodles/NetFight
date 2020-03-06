@@ -2,22 +2,18 @@
 
 
 
-Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
+Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth)
 {
 	m_position = position;
-	m_hurtbox.setSize(sf::Vector2f(100, 200));
+	m_hurtbox.setSize((sf::Vector2f)sf::Vector2i(100, 200));
 	ChangeState(idle);
 	//m_activeHitbox = nullptr;
 	m_activeHitbox = nullptr;
-	m_hitboxPosition = sf::Vector2f(0, 0);
+	m_hitboxPosition = sf::Vector2i(0, 0);
 	m_isHitboxActive = false;
 	m_playerID = playerNumber;
 
 	m_walkSpeed = 6;
-
-	m_characterData.LoadCharacter1();
-
-	m_characterActions = m_characterData.GetCharacterStruct();
 
 	m_playerState = idle;
 
@@ -38,16 +34,33 @@ Fighter::Fighter(sf::Vector2f position, int playerNumber, int screenwidth)
 	m_maxHealth = 1000;
 	m_currentHealth = m_maxHealth;
 
-	m_spriteSheet = m_characterData.GetCharacterStruct().spriteSheet;
+	m_actionFrame = 0;
+	m_animRect = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, 0));
+}
+
+void Fighter::SetCharacterData(CharacterStruct data)
+{
+	m_characterActions = data;
+	m_currentAnim = m_characterActions.idleAnim;
+
+	m_currentAction = m_characterActions.idle;
+	m_currentAnim = m_characterActions.idleAnim;
+	m_spriteSheet = &m_currentAnim.spriteSheet;
 }
 
 void Fighter::UpdateFrame()
 {
+	m_actionFrame++;
+	if (m_actionFrame > m_currentAction.framesT)
+	{
+		m_actionFrame = 1;
+	}
+
 	//CHANGE UPDATE TO ITERATE THROUGH CURRENTATTACKFRAME IF NOT IDLE
 	//AND CHECK HOW MANY FRAMES THE CURRENT ATTACK STATE HAS FROM THE CHARACTRE DATA STRUCT
-	if (m_playerState == attacking)
+	if (m_playerState == attack1 || m_playerState == attack2)
 	{
-		m_actionFrame++;
+		//m_actionFrame++;
 
 		//TODO:
 		//Update this to push attacking player on block too
@@ -57,7 +70,7 @@ void Fighter::UpdateFrame()
 			m_position.x -= m_direction * m_currentAction.selfHitPushback;
 		}
 		
-		if (m_actionFrame >= m_currentAction.recoveryFrames + m_currentAction.activeFrames + m_currentAction.startupFrames)
+		if (m_actionFrame >= m_currentAction.framesT)
 		{
 			ChangeState(idle);
 			m_hitLanded = false;
@@ -81,7 +94,7 @@ void Fighter::UpdateFrame()
 			RemoveActiveHitbox();
 		}
 
-		m_actionFrame++;
+		//m_actionFrame++;
 
 
 		if (!(IsCornered()) && m_pushbackFrame < m_hitBy.pushbackFrames)
@@ -140,14 +153,12 @@ void Fighter::UpdateFrame()
 
 		if (m_currentInput.inputs[4])
 		{
-			m_currentAction = m_characterActions.attack1;
-			ChangeState(attacking);
+			ChangeState(attack1);
 		}
 
 		else if (m_currentInput.inputs[5])
 		{
-			m_currentAction = m_characterActions.attack2;
-			ChangeState(attacking);
+			ChangeState(attack2);
 		}
 
 		//sf::Vector2f pos = m_position + m_hitboxPosition;
@@ -155,8 +166,21 @@ void Fighter::UpdateFrame()
 	}
 
 
-	m_hurtbox.setPosition(m_position);
-	m_spriteSheet.setPosition(m_position);
+	m_hurtbox.setPosition((sf::Vector2f)m_position);
+	m_spriteSheet->setPosition((sf::Vector2f)m_position);
+
+	//updateanimation
+	SetAnimRect();
+}
+
+void Fighter::SetAnimRect()
+{
+	int frames = m_currentAnim.frames;
+	int width = m_currentAnim.spriteWidth;
+	int height = m_currentAnim.spriteHeight;
+	int frameWidth = width / frames;
+	int posX = (m_actionFrame - 1) * (frameWidth);
+	m_animRect = sf::IntRect(sf::Vector2i(posX, 0), sf::Vector2i(frameWidth, height));
 }
 
 //POSSIBLY MAKE A BOOL SO OPPONENT KNOWS IF THE ATTACK WAS BLOCKED OR NOT
@@ -208,8 +232,9 @@ sf::RectangleShape Fighter::GetHurtbox()
 	return m_hurtbox;
 }
 
-sf::Sprite Fighter::GetAnimationFrame()
+sf::Sprite* Fighter::GetAnimationFrame()
 {
+	m_spriteSheet->setTextureRect(m_animRect);
 	return m_spriteSheet;
 }
 
@@ -255,22 +280,47 @@ void Fighter::ChangeState(PlayerState playerState)
 	m_playerState = playerState;
 	m_actionFrame = 0;
 	m_pushbackFrame = 0;
+	sf::Color greenish = sf::Color::Green;
+	sf::Color pinkish = sf::Color::Magenta;
+	sf::Color yellowish = sf::Color::Yellow;
+	sf::Color blueish = sf::Color::Blue;
+	greenish.a = 0.5f;
+	pinkish.a = 0.5f;
+	yellowish.a = 0.5f;
+	blueish.a = 0.5f;
 	switch (m_playerState)
 	{
 		case idle:
-			m_hurtbox.setFillColor(sf::Color::Green);
+			m_currentAction = m_characterActions.idle;
+			m_currentAnim = m_characterActions.idleAnim;
+			m_spriteSheet = &m_currentAnim.spriteSheet;
+			m_hurtbox.setFillColor(greenish);
 			break;
-		case attacking:
-			m_hurtbox.setFillColor(sf::Color::Magenta);
+		case attack1:
+			m_currentAction = m_characterActions.attack1;
+			m_currentAnim = m_characterActions.attackAnim1;
+			m_hurtbox.setFillColor(pinkish);
+			break;
+		case attack2:
+			m_currentAction = m_characterActions.attack2;
+			m_currentAnim = m_characterActions.attackAnim2;
+			m_hurtbox.setFillColor(pinkish);
 			break;
 		case hit:
-			m_hurtbox.setFillColor(sf::Color::Yellow);
+			m_currentAnim = m_characterActions.hitAnim;
+			m_hurtbox.setFillColor(yellowish);
 			break;
 		case block:
-			m_hurtbox.setFillColor(sf::Color::Blue);
+			m_currentAnim = m_characterActions.blockAnim;
+			m_hurtbox.setFillColor(blueish);
+			break; 
+		case jump:
+			m_currentAnim = m_characterActions.jumpAnim;
+			m_hurtbox.setFillColor(greenish);
 			break;
-		default: 
-			m_hurtbox.setFillColor(sf::Color::Green);
+		default:
+			m_currentAnim = m_characterActions.idleAnim; 
+			m_hurtbox.setFillColor(greenish);
 			break;
 	}
 }
@@ -295,7 +345,7 @@ void Fighter::WalkPush()
 
 void Fighter::StartJump(int direction)
 {
-	m_playerState = jump;
+	ChangeState(jump);
 	//m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
 	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * direction, -m_initialJumpSpeed.y);
 }
@@ -310,7 +360,7 @@ void Fighter::UpdateJump()
 	m_jumpSpeed.y++;
 	if (m_position.y >= m_floorPosition - m_hurtbox.getSize().y)
 	{
-		m_playerState = idle;
+		ChangeState(idle);
 		m_position.y = m_floorPosition - m_hurtbox.getSize().y;
 		//m_verticalSpeed = 0;
 	}
@@ -328,6 +378,7 @@ void Fighter::SetFighterState(GameState gameState)
 		ChangeState(gameState.player1State);
 
 		m_currentAction = gameState.player1Action;
+		m_currentAnim = gameState.player1Anim;
 		m_actionFrame = gameState.player1ActionFrame;
 		m_currentHealth = gameState.player1Health;
 		m_position = gameState.player1Position;
@@ -343,6 +394,7 @@ void Fighter::SetFighterState(GameState gameState)
 		m_isBlocking = gameState.player1IsBlocking;
 		m_pushbackFrame = gameState.player1PushbackFrame;
 
+
 		if (m_isHitboxActive)
 		{
 			m_activeHitbox = &m_currentAction.activeHitbox;
@@ -354,6 +406,7 @@ void Fighter::SetFighterState(GameState gameState)
 		ChangeState(gameState.player2State);
 
 		m_currentAction = gameState.player2Action;
+		m_currentAnim = gameState.player2Anim;
 		m_actionFrame = gameState.player2ActionFrame;
 		m_currentHealth = gameState.player2Health;
 		m_position = gameState.player2Position;
@@ -374,6 +427,8 @@ void Fighter::SetFighterState(GameState gameState)
 			m_activeHitbox = &m_currentAction.activeHitbox;
 		}
 	}
+
+	SetAnimRect();
 }
 
 GameState Fighter::GetFighterState()
@@ -383,6 +438,7 @@ GameState Fighter::GetFighterState()
 	if (m_playerID == 1)
 	{
 		currentState.player1Action = m_currentAction;
+		currentState.player1Anim = m_currentAnim;
 		currentState.player1ActionFrame = m_actionFrame;
 		currentState.player1Health = m_currentHealth;
 		currentState.player1Position = m_position;
@@ -402,6 +458,7 @@ GameState Fighter::GetFighterState()
 	else if (m_playerID == 2)
 	{
 		currentState.player2Action = m_currentAction;
+		currentState.player2Anim = m_currentAnim;
 		currentState.player2ActionFrame = m_actionFrame;
 		currentState.player2Health = m_currentHealth;
 		currentState.player2Position = m_position;

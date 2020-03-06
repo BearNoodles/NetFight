@@ -10,11 +10,14 @@ struct GameState
 	int player1Health;
 	int player2Health;
 
-	sf::Vector2f player1Position;
-	sf::Vector2f player2Position;
+	sf::Vector2i player1Position;
+	sf::Vector2i player2Position;
 
 	Action player1Action;
 	Action player2Action;
+
+	Animation player1Anim;
+	Animation player2Anim;
 
 	int player1ActionFrame;
 	int player2ActionFrame;
