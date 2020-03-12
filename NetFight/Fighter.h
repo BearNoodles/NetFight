@@ -20,7 +20,7 @@
 class Fighter
 {
 public:
-	Fighter(sf::Vector2i position, int playerNumber, int screenWidth);
+	Fighter(sf::Vector2i position, int playerNumber, int screenWidth, int floorHeight);
 	~Fighter();
 
 	void UpdateFrame();
@@ -114,6 +114,7 @@ protected:
 	sf::Vector2i m_initialJumpSpeed;
 
 	int m_floorPosition;
+	int m_landPosition;
 
 	int m_direction;
 

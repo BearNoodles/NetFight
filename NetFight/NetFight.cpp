@@ -130,6 +130,8 @@ MessageHandler messageHandler;
 
 bool rollbackOn;
 
+int floorHeight = 500;
+
 
 //GGPOSession *ggpo = NULL;
 
@@ -191,8 +193,8 @@ int main()
 
 	//charData = new CharacterData();
 
-	player1 = new Fighter(sf::Vector2i(200, 350), 1, screenWidth);
-	player2 = new Fighter(sf::Vector2i(700, 350), 2, screenWidth);
+	player1 = new Fighter(sf::Vector2i(200, floorHeight), 1, screenWidth, floorHeight);
+	player2 = new Fighter(sf::Vector2i(700, floorHeight), 2, screenWidth, floorHeight);
 
 	player1->SetCharacterData(charData->LoadCharacter1());
 	player2->SetCharacterData(charData->LoadCharacter1());
@@ -584,7 +586,10 @@ void AdvanceFrame(int frame)
 	player1->UpdateFrame();
 	player2->UpdateFrame();
 
-	currentState.frame = frame;
+	if (rollbackOn)
+	{
+		currentState.frame = frame;
+	}
 	
 
 	if (currentState.framesInSecond >= framesInSecondMax)
@@ -598,7 +603,11 @@ void AdvanceFrame(int frame)
 
 	currentState.framesInSecond++;
 
-	stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
+
+	if (rollbackOn)
+	{
+		stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
+	}
 
 	
 
@@ -631,12 +640,12 @@ void DrawCurrentFrame()
 
 
 
-	window.draw(player1->GetHurtbox());
-	window.draw(player2->GetHurtbox());
+	
 
 	window.draw(*player1->GetAnimationFrame());
 	window.draw(*player2->GetAnimationFrame());
-
+	window.draw(player1->GetHurtbox());
+	window.draw(player2->GetHurtbox());
 
 	if (player1->IsHitboxActive())
 	{

@@ -45,32 +45,82 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.selfPushbackFrames = 2;
 	m_characterStruct.attack2.attackNumber = 2;
 
-	m_characterStruct.idle.framesT = 1;
+	m_characterStruct.idle.framesT = 40;
 	m_characterStruct.block.framesT = 1;
 	m_characterStruct.hit.framesT = 1;
-	m_characterStruct.jump.framesT = 1;
-	m_characterStruct.walk.framesT = 1;
-
-
+	m_characterStruct.jumpU.framesT = 84;
+	m_characterStruct.jumpF.framesT = 1;
+	m_characterStruct.jumpB.framesT = 1;
+	m_characterStruct.walkF.framesT = 44;
+	m_characterStruct.walkB.framesT = 44;
 
 
 	//Animation stuff
-	if (!m_characterStruct.attackAnim1.texture.loadFromFile("image2.png"))
+	if (!m_hibikiAttTexture1.loadFromFile("image2.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	if (!m_kenIdleTexture.loadFromFile("kenIdle.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	if (!m_kenWalkFTexture.loadFromFile("kenWalkF.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	if (!m_kenWalkBTexture.loadFromFile("kenWalkB.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	if (!m_kenJUTexture.loadFromFile("kenJU.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
 
 
+	m_characterStruct.attackAnim1.spriteSheet = new sf::Sprite();
+	m_characterStruct.idleAnim.spriteSheet = new sf::Sprite();
+	m_characterStruct.walkFAnim.spriteSheet = new sf::Sprite();
+	m_characterStruct.walkBAnim.spriteSheet = new sf::Sprite();
+	m_characterStruct.jumpUAnim.spriteSheet = new sf::Sprite();
+
+
 	m_characterStruct.attackAnim1.spriteWidth = 4246;
 	m_characterStruct.attackAnim1.spriteHeight = 171;
+	m_characterStruct.attackAnim1.framesPerStep = 1;
 	m_characterStruct.attackAnim1.frames = m_characterStruct.attack1.framesT;
-	m_characterStruct.attackAnim1.spriteSheet.setTexture(m_characterStruct.attackAnim1.texture);
+	m_characterStruct.attackAnim1.spriteSheet->setTexture(m_hibikiAttTexture1);
 
-	m_characterStruct.idleAnim.spriteWidth = 193;
-	m_characterStruct.idleAnim.spriteHeight = 171;
-	m_characterStruct.idleAnim.frames = 1;
-	m_characterStruct.idleAnim.spriteSheet.setTexture(m_characterStruct.attackAnim1.texture);
+	m_characterStruct.idleAnim.spriteWidth = 1560;
+	m_characterStruct.idleAnim.spriteHeight = 222;
+	m_characterStruct.idleAnim.framesPerStep = 4;
+	m_characterStruct.idleAnim.frames = m_characterStruct.idle.framesT;
+	m_characterStruct.idleAnim.spriteSheet->setTexture(m_kenIdleTexture);
+
+	m_characterStruct.walkFAnim.spriteWidth = 2442;
+	m_characterStruct.walkFAnim.spriteHeight = 226;
+	m_characterStruct.walkFAnim.framesPerStep = 4;
+	m_characterStruct.walkFAnim.frames = m_characterStruct.walkF.framesT;
+	m_characterStruct.walkFAnim.spriteSheet->setTexture(m_kenWalkFTexture);
+
+	m_characterStruct.walkBAnim.spriteWidth = 2464;
+	m_characterStruct.walkBAnim.spriteHeight = 226;
+	m_characterStruct.walkBAnim.framesPerStep = 4;
+	m_characterStruct.walkBAnim.frames = m_characterStruct.walkB.framesT;
+	m_characterStruct.walkBAnim.spriteSheet->setTexture(m_kenWalkBTexture);
+
+	m_characterStruct.jumpUAnim.spriteWidth = 3612;
+	m_characterStruct.jumpUAnim.spriteHeight = 380;
+	m_characterStruct.jumpUAnim.framesPerStep = 4;
+	m_characterStruct.jumpUAnim.frames = m_characterStruct.jumpU.framesT;
+	m_characterStruct.jumpUAnim.offsetY = 154;
+	//m_characterStruct.jumpUAnim.spriteSheet->setPosition(sf::Vector2f(0, m_characterStruct.jumpUAnim.offsetY));
+	m_characterStruct.jumpUAnim.spriteSheet->setTexture(m_kenJUTexture);
 
 
 	return m_characterStruct;

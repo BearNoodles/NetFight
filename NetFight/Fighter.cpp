@@ -2,10 +2,12 @@
 
 
 
-Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth)
+Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth, int floorHeight)
 {
 	m_position = position;
 	m_hurtbox.setSize((sf::Vector2f)sf::Vector2i(100, 200));
+	m_position.y = m_position.y - (m_hurtbox.getSize().y);
+	m_landPosition = m_position.y;
 	ChangeState(idle);
 	//m_activeHitbox = nullptr;
 	m_activeHitbox = nullptr;
@@ -29,7 +31,7 @@ Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth)
 
 	m_initialJumpSpeed = sf::Vector2i(m_walkSpeed, 20);
 
-	m_floorPosition = position.y + m_hurtbox.getSize().y;
+	m_floorPosition = floorHeight;
 
 	m_maxHealth = 1000;
 	m_currentHealth = m_maxHealth;
@@ -45,7 +47,7 @@ void Fighter::SetCharacterData(CharacterStruct data)
 
 	m_currentAction = m_characterActions.idle;
 	m_currentAnim = m_characterActions.idleAnim;
-	m_spriteSheet = &m_currentAnim.spriteSheet;
+	m_spriteSheet = m_currentAnim.spriteSheet;
 }
 
 void Fighter::UpdateFrame()
@@ -117,22 +119,38 @@ void Fighter::UpdateFrame()
 		}
 	}
 	
-	else if (m_playerState == jump)
+	else if (m_playerState == jumpU || m_playerState == jumpF || m_playerState == jumpB)
 	{
 		UpdateJump();
 	}
 
+	
 	else
 	{
 		if (m_currentInput.inputs[2] && m_position.x > 0)
 		{
-			m_position.x -= m_walkSpeed;// *m_direction;
+			if (m_direction == 1 && m_playerState != walkB)
+			{
+				ChangeState(walkB);
+			}
+			else if(m_direction == -1 && m_playerState != walkF)
+			{
+				ChangeState(walkF);
+			}
 		}
 		else if (m_currentInput.inputs[3] && m_position.x < m_screenWidth - m_hurtbox.getSize().x)
 		{
-			m_position.x += m_walkSpeed;// *m_direction;
+			if (m_direction == 1 && m_playerState != walkF)
+			{
+				ChangeState(walkF);
+			}
+			else if(m_direction == -1 && m_playerState != walkB)
+			{
+				ChangeState(walkB);
+			}
 		}
 
+		//Change to jump state the nset start jump there
 		if (m_currentInput.inputs[0])
 		{
 			/*m_currentAction = m_characterActions.attack1;
@@ -161,13 +179,38 @@ void Fighter::UpdateFrame()
 			ChangeState(attack2);
 		}
 
+		//Check which state (idle walkf or walkb)
+		if (m_playerState == walkB)
+		{
+			if ((m_direction == 1 && !m_currentInput.inputs[2]) || m_direction == -1 && !m_currentInput.inputs[3])
+			{
+				ChangeState(idle);
+			}
+			else
+			{
+				m_position.x -= m_walkSpeed * m_direction;
+			}
+		}
+		else if (m_playerState == walkF)
+		{
+			if ((m_direction == 1 && !m_currentInput.inputs[3]) || m_direction == -1 && !m_currentInput.inputs[2])
+			{
+				ChangeState(idle);
+			}
+			else
+			{
+				m_position.x += m_walkSpeed * m_direction;
+			}
+		}
+
 		//sf::Vector2f pos = m_position + m_hitboxPosition;
 		//m_activeHitbox->setPosition(pos);
 	}
 
+	sf::Vector2f offsetVec(0, -m_currentAnim.offsetY);
 
 	m_hurtbox.setPosition((sf::Vector2f)m_position);
-	m_spriteSheet->setPosition((sf::Vector2f)m_position);
+	m_spriteSheet->setPosition((sf::Vector2f)m_position + offsetVec);
 
 	//updateanimation
 	SetAnimRect();
@@ -178,8 +221,9 @@ void Fighter::SetAnimRect()
 	int frames = m_currentAnim.frames;
 	int width = m_currentAnim.spriteWidth;
 	int height = m_currentAnim.spriteHeight;
-	int frameWidth = width / frames;
-	int posX = (m_actionFrame - 1) * (frameWidth);
+	int frameWidth = width * m_currentAnim.framesPerStep / frames;
+	int posX = (int)((m_actionFrame - 1) / (m_currentAnim.framesPerStep)) * (frameWidth);
+	int posY = m_currentAnim.offsetY;
 	m_animRect = sf::IntRect(sf::Vector2i(posX, 0), sf::Vector2i(frameWidth, height));
 }
 
@@ -284,16 +328,25 @@ void Fighter::ChangeState(PlayerState playerState)
 	sf::Color pinkish = sf::Color::Magenta;
 	sf::Color yellowish = sf::Color::Yellow;
 	sf::Color blueish = sf::Color::Blue;
-	greenish.a = 0.5f;
-	pinkish.a = 0.5f;
-	yellowish.a = 0.5f;
-	blueish.a = 0.5f;
+	greenish.a = 150;
+	pinkish.a = 150;
+	yellowish.a = 150;
+	blueish.a = 150;
 	switch (m_playerState)
 	{
 		case idle:
 			m_currentAction = m_characterActions.idle;
 			m_currentAnim = m_characterActions.idleAnim;
-			m_spriteSheet = &m_currentAnim.spriteSheet;
+			m_hurtbox.setFillColor(greenish);
+			break;
+		case walkF:
+			m_currentAction = m_characterActions.walkF;
+			m_currentAnim = m_characterActions.walkFAnim;
+			m_hurtbox.setFillColor(greenish);
+			break;
+		case walkB:
+			m_currentAction = m_characterActions.walkB;
+			m_currentAnim = m_characterActions.walkBAnim;
 			m_hurtbox.setFillColor(greenish);
 			break;
 		case attack1:
@@ -314,15 +367,26 @@ void Fighter::ChangeState(PlayerState playerState)
 			m_currentAnim = m_characterActions.blockAnim;
 			m_hurtbox.setFillColor(blueish);
 			break; 
-		case jump:
-			m_currentAnim = m_characterActions.jumpAnim;
+		case jumpU:
+			m_currentAnim = m_characterActions.jumpUAnim;
+			m_hurtbox.setFillColor(greenish);
+			break;
+		case jumpF:
+			m_currentAnim = m_characterActions.jumpFAnim;
+			m_hurtbox.setFillColor(greenish);
+			break;
+		case jumpB:
+			m_currentAnim = m_characterActions.jumpBAnim;
 			m_hurtbox.setFillColor(greenish);
 			break;
 		default:
-			m_currentAnim = m_characterActions.idleAnim; 
+			m_currentAction = m_characterActions.idle;
+			m_currentAnim = m_characterActions.idleAnim;
 			m_hurtbox.setFillColor(greenish);
 			break;
 	}
+
+	m_spriteSheet = m_currentAnim.spriteSheet;
 }
 
 bool Fighter::CheckPushing(sf::RectangleShape opponentHurtbox)
@@ -345,9 +409,20 @@ void Fighter::WalkPush()
 
 void Fighter::StartJump(int direction)
 {
-	ChangeState(jump);
+	if (direction == 0)
+	{
+		ChangeState(jumpU);
+	}
+	else if (direction == m_direction)
+	{
+		ChangeState(jumpF);
+	}
+	else
+	{
+		ChangeState(jumpB);
+	}
 	//m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
-	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * direction, -m_initialJumpSpeed.y);
+	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * direction * m_direction, -m_initialJumpSpeed.y);
 }
 
 void Fighter::UpdateJump()
@@ -358,10 +433,10 @@ void Fighter::UpdateJump()
 	}
 	m_position.y += m_jumpSpeed.y;
 	m_jumpSpeed.y++;
-	if (m_position.y >= m_floorPosition - m_hurtbox.getSize().y)
+	if (m_position.y >= m_landPosition)
 	{
 		ChangeState(idle);
-		m_position.y = m_floorPosition - m_hurtbox.getSize().y;
+		m_position.y = m_landPosition;
 		//m_verticalSpeed = 0;
 	}
 }

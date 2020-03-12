@@ -1,14 +1,4 @@
-﻿  CharacterData.cpp
-  Fighter.cpp
-m:\honours\netfight\netfight\fighter.cpp(32): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-m:\honours\netfight\netfight\fighter.cpp(287): warning C4244: '=': conversion from 'float' to 'sf::Uint8', possible loss of data
-m:\honours\netfight\netfight\fighter.cpp(288): warning C4244: '=': conversion from 'float' to 'sf::Uint8', possible loss of data
-m:\honours\netfight\netfight\fighter.cpp(289): warning C4244: '=': conversion from 'float' to 'sf::Uint8', possible loss of data
-m:\honours\netfight\netfight\fighter.cpp(290): warning C4244: '=': conversion from 'float' to 'sf::Uint8', possible loss of data
-m:\honours\netfight\netfight\fighter.cpp(364): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  NetFight.cpp
-m:\honours\netfight\netfight\netfight.cpp(303): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-m:\honours\netfight\netfight\netfight.cpp(650): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-m:\honours\netfight\netfight\netfight.cpp(651): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Generating Code...
+﻿  Fighter.cpp
+m:\honours\netfight\netfight\fighter.cpp(9): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+m:\honours\netfight\netfight\fighter.cpp(210): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   NetFight.vcxproj -> M:\Honours\NetFight\Debug\NetFight.exe

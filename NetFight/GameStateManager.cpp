@@ -5,9 +5,10 @@
 
 GameStateManager::GameStateManager()
 {
+	m_maxStateVectorSize = 1000;
 	m_gameStateVector = new std::vector<GameState>();
 	m_emptyState.frame = -1; 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < m_maxStateVectorSize; i++)
 	{
 		m_emptyState.frame = i;
 		m_gameStateVector->push_back(m_emptyState);
@@ -19,13 +20,14 @@ GameStateManager::GameStateManager()
 
 GameStateManager::~GameStateManager()
 {
+	
 }
 
 void GameStateManager::SaveState(GameState state)
 {
 	if (m_gameStateVector->back().frame < state.frame)
 	{
-		if (m_gameStateVector->size() >= 100)
+		if (m_gameStateVector->size() >= m_maxStateVectorSize)
 		{
 			m_gameStateVector->erase(m_gameStateVector->begin());
 		}

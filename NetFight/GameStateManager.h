@@ -78,5 +78,6 @@ protected:
 
 	GameState m_emptyState;
 
+	int m_maxStateVectorSize;
 };
 
