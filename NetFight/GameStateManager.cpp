@@ -98,6 +98,7 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 	newGameState.player1IsHitboxActive = player1State.player1IsHitboxActive;
 	newGameState.player1JumpSpeed = player1State.player1JumpSpeed;
 	newGameState.player1Position = player1State.player1Position;
+	newGameState.player1SpritePosition = player1State.player1SpritePosition;
 	newGameState.player1Pushback = player1State.player1Pushback;
 	newGameState.player1PushbackFrame = player1State.player1PushbackFrame;
 	newGameState.player1State = player1State.player1State;
@@ -114,6 +115,7 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 	newGameState.player2IsHitboxActive = player2State.player2IsHitboxActive;
 	newGameState.player2JumpSpeed = player2State.player2JumpSpeed;
 	newGameState.player2Position = player2State.player2Position;
+	newGameState.player2SpritePosition = player2State.player2SpritePosition;
 	newGameState.player2Pushback = player2State.player2Pushback;
 	newGameState.player2PushbackFrame = player2State.player2PushbackFrame;
 	newGameState.player2State = player2State.player2State;

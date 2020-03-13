@@ -13,6 +13,9 @@ struct GameState
 	sf::Vector2i player1Position;
 	sf::Vector2i player2Position;
 
+	sf::Vector2i player1SpritePosition;
+	sf::Vector2i player2SpritePosition;
+
 	Action player1Action;
 	Action player2Action;
 

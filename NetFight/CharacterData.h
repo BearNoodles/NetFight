@@ -18,6 +18,7 @@ struct Animation
 {
 	sf::Sprite* spriteSheet;
 	int framesPerStep;
+	int offsetX = 0;
 	int offsetY = 0;
 	//sf::Texture texture;
 	//std::vector<sf::Vector2i> animRect;
@@ -25,6 +26,8 @@ struct Animation
 	int frames;
 	int spriteWidth;
 	int spriteHeight;
+
+	bool loop = false;
 };
 
 enum PlayerState
@@ -44,6 +47,8 @@ struct CharacterStruct
 	Action jumpB;
 	Action walkF;
 	Action walkB;
+
+	int preJumpFrames;
 
 	Animation attackAnim1;
 	Animation attackAnim2;
@@ -70,11 +75,13 @@ public:
 protected:
 	CharacterStruct m_characterStruct;
 
-	sf::Texture m_hibikiAttTexture1;
+	sf::Texture m_kenAttTexture1;
 	sf::Texture m_kenIdleTexture;
 	sf::Texture m_kenWalkFTexture;
 	sf::Texture m_kenWalkBTexture;
 	sf::Texture m_kenJUTexture;
+	sf::Texture m_kenJFTexture;
+	sf::Texture m_kenJBTexture;
 
 };
 

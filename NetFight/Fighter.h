@@ -60,6 +60,8 @@ public:
 
 	void SetCharacterData(CharacterStruct data);
 
+	int GetDirection();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
@@ -78,6 +80,9 @@ protected:
 	bool m_isHitboxActive;
 
 	sf::Vector2i m_position;
+	sf::Vector2i m_spritePosition;
+
+	sf::Vector2i m_hurtboxOffset;
 
 	int m_playerID;
 
@@ -113,6 +118,8 @@ protected:
 	sf::Vector2i m_jumpSpeed;
 	sf::Vector2i m_initialJumpSpeed;
 
+	int m_jumpSpeedLossRate;
+
 	int m_floorPosition;
 	int m_landPosition;
 
@@ -127,5 +134,7 @@ protected:
 	bool m_isBlocking;
 
 	sf::Sprite* m_spriteSheet;
+
+	sf::Vector2f offsetVec;
 };
 
