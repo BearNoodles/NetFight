@@ -76,12 +76,15 @@ protected:
 	CharacterStruct m_characterStruct;
 
 	sf::Texture m_kenAttTexture1;
+	sf::Texture m_kenAttTexture2;
 	sf::Texture m_kenIdleTexture;
 	sf::Texture m_kenWalkFTexture;
 	sf::Texture m_kenWalkBTexture;
 	sf::Texture m_kenJUTexture;
 	sf::Texture m_kenJFTexture;
 	sf::Texture m_kenJBTexture;
+	sf::Texture m_kenHitTexture;
+	sf::Texture m_kenBlockTexture;
 
 };
 

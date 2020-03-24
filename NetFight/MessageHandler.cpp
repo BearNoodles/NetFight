@@ -12,6 +12,32 @@ MessageHandler::~MessageHandler()
 {
 }
 
+void MessageHandler::Reset()
+{
+	//TODO WHEN INITIALISING SET ANOHTER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
+	for (int i = 0; i < 6000; i++)
+	{
+		messages[i] = new Message();
+		messages[i]->input1 = false;
+		messages[i]->input2 = false;
+		messages[i]->input3 = false;
+		messages[i]->input4 = false;
+		messages[i]->input5 = false;
+		messages[i]->input6 = false;
+		messages[i]->input7 = false;
+		messages[i]->set = false;
+		messages[i]->frame = i;
+	}
+
+	lastSent = 0;
+	lastReceived = 0;
+
+	pingCheckFrame = 0;
+	pingChecked = true;
+	pingReceived = false;
+
+	minimumFrame = 0;
+}
 
 //bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
 bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::UdpSocket* sock)

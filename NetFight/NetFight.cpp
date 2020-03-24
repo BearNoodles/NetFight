@@ -80,10 +80,12 @@ sf::Clock frameClock;
 sf::Clock pingClock;
 sf::Time ping;
 
-sf::Time messageTimer;
-bool msgReady;
+//sf::Time messageTimer;
+//bool msgReady;
 
 void RunFrameDelay();
+
+void Restart();
 
 //void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
 bool BeginGame();
@@ -119,7 +121,7 @@ void SendInputs();
 void UpdateInputs();
 void ReadInputs(int frame);
 
-std::list<Message> messages;
+//std::list<Message> messages;
 
 ConnectionHandler connectionHandler;
 
@@ -137,6 +139,29 @@ int floorHeight = 500;
 
 sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
+void Restart()
+{
+	messageHandler.Reset();
+	
+	player1->Reset();
+	player2->Reset();
+
+	stateManager.Reset();
+	currentState = stateManager.GetInitialState();
+
+	inputHandler.Reset();
+
+	frameCount = 0;
+
+
+	frameClock.restart();
+	pingClock.restart();
+
+	timeFromClock = sf::Time::Zero;
+	frameTime = sf::Time::Zero;
+	timeUntilFrameUpdate = sf::Time::Zero;
+	ping = sf::Time::Zero;
+}
 
 int main()
 {
@@ -229,7 +254,6 @@ int main()
 	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
 	//messageRollback.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
 
-	msgReady = false;
 
 	frameClock.restart();
 	

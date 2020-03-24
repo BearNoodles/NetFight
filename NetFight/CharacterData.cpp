@@ -29,14 +29,14 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack1.attackNumber = 1;
 
 	m_characterStruct.attack2.damage = 200;
-	m_characterStruct.attack2.startupFrames = 12;
-	m_characterStruct.attack2.activeFrames = 2;
-	m_characterStruct.attack2.recoveryFrames = 15;
-	m_characterStruct.attack2.framesT = m_characterStruct.attack1.startupFrames + m_characterStruct.attack1.activeFrames + m_characterStruct.attack1.recoveryFrames;
+	m_characterStruct.attack2.startupFrames = 6;
+	m_characterStruct.attack2.activeFrames = 1;
+	m_characterStruct.attack2.recoveryFrames = 5;
+	m_characterStruct.attack2.framesT = m_characterStruct.attack2.startupFrames + m_characterStruct.attack2.activeFrames + m_characterStruct.attack2.recoveryFrames;
 	m_characterStruct.attack2.blockstun = 30;
 	m_characterStruct.attack2.hitstun = 30;
 	m_characterStruct.attack2.activeHitbox.setSize(sf::Vector2f(150, 50));
-	m_characterStruct.attack2.activeHitbox.setPosition(sf::Vector2f(75, 150));
+	m_characterStruct.attack2.activeHitbox.setPosition(sf::Vector2f(75, 50));
 	m_characterStruct.attack2.hitPushback = 7;
 	m_characterStruct.attack2.blockPushback = 20;
 	m_characterStruct.attack2.pushbackFrames = 2;
@@ -47,7 +47,8 @@ CharacterStruct CharacterData::LoadCharacter1()
 
 	m_characterStruct.idle.framesT = 10;
 	m_characterStruct.block.framesT = 1;
-	m_characterStruct.hit.framesT = 1;
+	m_characterStruct.hit.framesT = 3;
+	m_characterStruct.block.framesT = 4;
 	m_characterStruct.jumpU.framesT = 21;
 	m_characterStruct.jumpF.framesT = 22;
 	m_characterStruct.jumpB.framesT = 22;
@@ -60,6 +61,11 @@ CharacterStruct CharacterData::LoadCharacter1()
 
 	//Animation stuff
 	if (!m_kenAttTexture1.loadFromFile("kenJab.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	if (!m_kenAttTexture2.loadFromFile("kenHK2.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
@@ -94,15 +100,28 @@ CharacterStruct CharacterData::LoadCharacter1()
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
+	if (!m_kenHitTexture.loadFromFile("kenHit.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
+	if (!m_kenBlockTexture.loadFromFile("kenBlock.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
 
 
 	m_characterStruct.attackAnim1.spriteSheet = new sf::Sprite();
+	m_characterStruct.attackAnim2.spriteSheet = new sf::Sprite();
 	m_characterStruct.idleAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.walkFAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.walkBAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.jumpUAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.jumpFAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.jumpBAnim.spriteSheet = new sf::Sprite();
+	m_characterStruct.hitAnim.spriteSheet = new sf::Sprite();
+	m_characterStruct.blockAnim.spriteSheet = new sf::Sprite();
 
 
 	m_characterStruct.attackAnim1.spriteWidth = 1200;
@@ -116,6 +135,18 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack1.framesT *= m_characterStruct.attackAnim1.framesPerStep;
 
 	m_characterStruct.attackAnim1.spriteSheet->setTexture(m_kenAttTexture1);
+
+	m_characterStruct.attackAnim2.spriteWidth = 4488;
+	m_characterStruct.attackAnim2.spriteHeight = 242;
+	m_characterStruct.attackAnim2.framesPerStep = 3;
+	m_characterStruct.attackAnim2.loop = false;
+
+	m_characterStruct.attack2.startupFrames *= m_characterStruct.attackAnim2.framesPerStep;
+	m_characterStruct.attack2.activeFrames *= m_characterStruct.attackAnim2.framesPerStep;
+	m_characterStruct.attack2.recoveryFrames *= m_characterStruct.attackAnim2.framesPerStep;
+	m_characterStruct.attack2.framesT *= m_characterStruct.attackAnim2.framesPerStep;
+
+	m_characterStruct.attackAnim2.spriteSheet->setTexture(m_kenAttTexture2);
 
 
 	m_characterStruct.idleAnim.spriteWidth = 1560;
@@ -183,6 +214,29 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.jumpBAnim.offsetX = -304;
 	m_characterStruct.jumpBAnim.offsetY = -158;
 	m_characterStruct.jumpBAnim.spriteSheet->setTexture(m_kenJBTexture);
+
+	m_characterStruct.hitAnim.spriteWidth = 852;
+	m_characterStruct.hitAnim.spriteHeight = 220;
+	m_characterStruct.hitAnim.framesPerStep = 3;
+	m_characterStruct.hitAnim.loop = false;
+
+	m_characterStruct.hit.framesT *= m_characterStruct.hitAnim.framesPerStep;
+
+	m_characterStruct.hitAnim.offsetX = -100;
+	m_characterStruct.hitAnim.offsetY = 0;
+	m_characterStruct.hitAnim.spriteSheet->setTexture(m_kenHitTexture);
+
+
+	m_characterStruct.blockAnim.spriteWidth = 624;
+	m_characterStruct.blockAnim.spriteHeight = 210;
+	m_characterStruct.blockAnim.framesPerStep = 3;
+	m_characterStruct.blockAnim.loop = false;
+
+	m_characterStruct.block.framesT *= m_characterStruct.blockAnim.framesPerStep;
+
+	m_characterStruct.blockAnim.offsetX = -100;
+	m_characterStruct.blockAnim.offsetY = 0;
+	m_characterStruct.blockAnim.spriteSheet->setTexture(m_kenBlockTexture);
 
 
 	

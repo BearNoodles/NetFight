@@ -62,6 +62,8 @@ public:
 
 	int GetDirection();
 
+	void Reset();
+
 protected:
 
 	sf::RectangleShape m_hurtbox;
@@ -81,6 +83,8 @@ protected:
 
 	sf::Vector2i m_position;
 	sf::Vector2i m_spritePosition;
+
+	sf::Vector2i m_startPosition;
 
 	sf::Vector2i m_hurtboxOffset;
 
@@ -108,6 +112,7 @@ protected:
 	Action m_hitBy;
 
 	int m_actionFrame;
+	int m_animFrame;
 	int m_stunFrames;
 	int m_pushback;
 	PlayerState m_playerState;

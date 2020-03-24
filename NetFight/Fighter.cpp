@@ -4,14 +4,29 @@
 
 Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth, int floorHeight)
 {
-	m_position = position;
-	m_hurtbox.setSize((sf::Vector2f)sf::Vector2i(100, 200));
-
-
 
 	m_playerID = playerNumber;
 
 	m_direction = (playerNumber * -2) + 3;
+
+	m_startPosition = position;
+
+	m_walkSpeed = 6;
+	m_screenWidth = screenwidth;
+	m_initialJumpSpeed = sf::Vector2i(m_walkSpeed, 13);
+	m_jumpSpeedLossRate = 2;
+
+	m_floorPosition = floorHeight;
+
+	m_maxHealth = 1000;
+
+	Reset();
+}
+
+void Fighter::Reset()
+{
+	m_position = m_startPosition;
+	m_hurtbox.setSize((sf::Vector2f)sf::Vector2i(100, 200));
 
 	if (m_direction == 1)
 	{
@@ -23,32 +38,21 @@ Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth, int f
 	}
 
 	m_position.y = m_position.y - (m_hurtbox.getSize().y);
-	m_landPosition = m_position.y;
-	//m_activeHitbox = nullptr;
+
 	m_activeHitbox = nullptr;
 	m_hitboxPosition = sf::Vector2i(0, 0);
 	m_isHitboxActive = false;
 
-	m_walkSpeed = 6;
-
 	m_stunFrames = 0;
-
-
-	m_screenWidth = screenwidth;
 
 	m_hitLanded = false;
 
 	m_jumpSpeed = sf::Vector2i(0, 0);
 
-	m_initialJumpSpeed = sf::Vector2i(m_walkSpeed, 13);
-	m_jumpSpeedLossRate = 2;
-
-	m_floorPosition = floorHeight;
-
-	m_maxHealth = 1000;
 	m_currentHealth = m_maxHealth;
 
 	m_actionFrame = 0;
+	m_animFrame = 0;
 	m_animRect = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, 0));
 }
 
@@ -68,15 +72,16 @@ void Fighter::SetCharacterData(CharacterStruct data)
 void Fighter::UpdateFrame()
 {
 	m_actionFrame++;
-	if (m_actionFrame > m_currentAction.framesT)
+	m_animFrame++;
+	if (m_animFrame > m_currentAction.framesT)
 	{
 		if (!m_currentAnim.loop)
 		{
-			m_actionFrame--;
+			m_animFrame--;
 		}
 		else
 		{
-			m_actionFrame = 1;
+			m_animFrame = 1;
 		}
 	}
 
@@ -253,7 +258,7 @@ void Fighter::SetAnimRect()
 	int width = m_currentAnim.spriteWidth;
 	int height = m_currentAnim.spriteHeight;
 	int frameWidth = width * m_currentAnim.framesPerStep / frames;
-	int posX = (int)((m_actionFrame - 1) / (m_currentAnim.framesPerStep)) * (frameWidth);
+	int posX = (int)((m_animFrame - 1) / (m_currentAnim.framesPerStep)) * (frameWidth);
 	int posY = m_currentAnim.offsetY;
 	m_animRect = sf::IntRect(sf::Vector2i(posX, 0), sf::Vector2i(frameWidth, height));
 }
@@ -355,6 +360,7 @@ void Fighter::ChangeState(PlayerState playerState)
 {
 	m_playerState = playerState;
 	m_actionFrame = 0;
+	m_animFrame = 0;
 	m_pushbackFrame = 0;
 	sf::Color greenish = sf::Color::Green;
 	sf::Color pinkish = sf::Color::Magenta;
@@ -521,6 +527,7 @@ void Fighter::SetFighterState(GameState gameState)
 		m_currentAction = gameState.player1Action;
 		m_currentAnim = gameState.player1Anim;
 		m_actionFrame = gameState.player1ActionFrame;
+		m_animFrame = gameState.player1AnimFrame;
 		m_currentHealth = gameState.player1Health;
 		m_position = gameState.player1Position;
 		m_spritePosition = gameState.player1SpritePosition;
@@ -550,6 +557,7 @@ void Fighter::SetFighterState(GameState gameState)
 		m_currentAction = gameState.player2Action;
 		m_currentAnim = gameState.player2Anim;
 		m_actionFrame = gameState.player2ActionFrame;
+		m_animFrame = gameState.player2AnimFrame;
 		m_currentHealth = gameState.player2Health;
 		m_position = gameState.player2Position;
 		m_spritePosition = gameState.player2SpritePosition;
@@ -583,6 +591,7 @@ GameState Fighter::GetFighterState()
 		currentState.player1Action = m_currentAction;
 		currentState.player1Anim = m_currentAnim;
 		currentState.player1ActionFrame = m_actionFrame;
+		currentState.player1AnimFrame = m_animFrame;
 		currentState.player1Health = m_currentHealth;
 		currentState.player1Position = m_position;
 		currentState.player1SpritePosition = m_spritePosition;
@@ -604,6 +613,7 @@ GameState Fighter::GetFighterState()
 		currentState.player2Action = m_currentAction;
 		currentState.player2Anim = m_currentAnim;
 		currentState.player2ActionFrame = m_actionFrame;
+		currentState.player2AnimFrame = m_animFrame;
 		currentState.player2Health = m_currentHealth;
 		currentState.player2Position = m_position;
 		currentState.player2SpritePosition = m_spritePosition;

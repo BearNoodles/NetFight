@@ -33,6 +33,8 @@ public:
 
 	bool CheckPing();
 
+	void Reset();
+
 private:
 
 	//sf::IpAddress opponentIP;

@@ -25,6 +25,9 @@ struct GameState
 	int player1ActionFrame;
 	int player2ActionFrame;
 
+	int player1AnimFrame;
+	int player2AnimFrame;
+
 	PlayerState player1State;
 	PlayerState player2State;
 
