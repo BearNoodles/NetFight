@@ -1,37 +1,5 @@
-﻿  ConnectionHandler.cpp
-  Fighter.cpp
-c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(41): warning C4244: '=': conversion from 'T' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-          and
-          [
-              T=int
-          ]
-c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(239): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(430): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(472): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(508): warning C4244: '=': conversion from 'T' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-          and
-          [
-              T=int
-          ]
-  Generating Code...
+﻿  NetFight.cpp
+c:\users\daryl\desktop\netfight\netfight\netfight\netfight.cpp(336): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\daryl\desktop\netfight\netfight\netfight\netfight.cpp(704): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\daryl\desktop\netfight\netfight\netfight\netfight.cpp(705): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   NetFight.vcxproj -> C:\Users\Daryl\Desktop\Netfight\NetFight\Debug\NetFight.exe

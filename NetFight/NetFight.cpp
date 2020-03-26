@@ -167,7 +167,7 @@ void Restart()
 	sf::Time timeSinceLastFrame = sf::Time::Zero;
 	timeFromClock = sf::Time::Zero;
 	frameTime = sf::Time::Zero;
-	timeUntilFrameUpdate = sf::Time::Zero;
+
 	ping = sf::Time::Zero;
 }
 
