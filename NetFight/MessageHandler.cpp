@@ -15,7 +15,7 @@ MessageHandler::~MessageHandler()
 void MessageHandler::Reset()
 {
 	//TODO WHEN INITIALISING SET ANOHTER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
-	for (int i = 0; i < 6000; i++)
+	for (int i = 0; i < MAXMESSAGE; i++)
 	{
 		messages[i] = new Message();
 		messages[i]->input1 = false;
@@ -37,6 +37,27 @@ void MessageHandler::Reset()
 	pingReceived = false;
 
 	minimumFrame = 0;
+
+	restartRecieved = false;
+
+	while (true)
+	{
+		sf::Int32 frame;
+		//bool inputs[7];
+		int pingFrame;
+		bool pingSend, pingReply, input1, input2, input3, input4, input5, input6, input7, set;
+		sf::Packet packet;
+		sf::IpAddress address;
+		unsigned short port;
+		if (socket->receive(packet, address, port) != sf::Socket::Done)
+		{
+			// error...
+			//recieve failed send hello again
+			//std::cout << "no messages yet" << std::endl;
+			//counter++;
+			break;
+		}
+	}
 }
 
 //bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
@@ -66,7 +87,7 @@ bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::Ud
 	}
 
 	//TODO WHEN INITIALISING SET ANOHTER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
-	for (int i = 0; i < 6000; i++)
+	for (int i = 0; i < MAXMESSAGE; i++)
 	{
 		messages[i] = new Message();
 		messages[i]->input1 = false;
@@ -198,6 +219,31 @@ void MessageHandler::SendPingReply(int frame)
 	}
 }
 
+void MessageHandler::SendRestartMessage()
+{
+	sf::Int32 frameSend;
+
+	frameSend = -10;
+
+	sf::Packet packet;
+	packet << false << false << false << false << false << false << false << false << false << false << frameSend;
+
+
+	//std::cout << "Send message failed" << std::endl;
+
+	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+	{
+		// error...
+		//send failed try it again
+		std::cout << "Send message failed" << std::endl;
+	}
+}
+
+bool MessageHandler::GetRestartReceived()
+{
+	return restartRecieved;
+}
+
 void MessageHandler::AddMessage(Message toAdd)
 {
 	Message* temp = &toAdd;
@@ -226,6 +272,11 @@ void MessageHandler::AddMessage(Message toAdd)
 Message* MessageHandler::GetMessage(int frame)
 {
 	return messages[frame];
+}
+
+void MessageHandler::ExhaustAllMessages()
+{
+	
 }
 
 void MessageHandler::ReceiveMessagesDelay()
@@ -265,6 +316,11 @@ void MessageHandler::ReceiveMessagesDelay()
 		//if ((packet >> inputs[7] >> frame) && check)
 		if ((packet >> pingSend >> pingReply >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
+			if (frame == -10)
+			{
+				restartRecieved = true;
+				return;
+			}
 
 			if (pingSend)
 			{
@@ -364,6 +420,12 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 		//if ((packet >> inputs[7] >> frame) && check)
 		if ((packet >> pingSend >> pingReply >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
+			if (frame == -10)
+			{
+				restartRecieved = true;
+				continue;
+			}
+
 			if (pingSend)
 			{
 				SendPingReply(frame);

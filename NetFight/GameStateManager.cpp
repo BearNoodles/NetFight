@@ -17,6 +17,24 @@ GameStateManager::GameStateManager()
 	m_emptyState.frame = -1;
 }
 
+void GameStateManager::Reset()
+{
+	m_gameStateVector->clear();
+
+	m_emptyState.frame = -1;
+	for (int i = 0; i < m_maxStateVectorSize; i++)
+	{
+		m_emptyState.frame = i;
+		m_gameStateVector->push_back(m_emptyState);
+	}
+
+	m_emptyState.frame = -1;
+}
+
+//GameState GameStateManager::GetInitialState()
+//{
+//	
+//}
 
 GameStateManager::~GameStateManager()
 {

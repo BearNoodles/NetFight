@@ -17,6 +17,7 @@ Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth, int f
 	m_jumpSpeedLossRate = 2;
 
 	m_floorPosition = floorHeight;
+	//m_landPosition = m_floorPosition;
 
 	m_maxHealth = 1000;
 
@@ -241,10 +242,6 @@ void Fighter::UpdateFrame()
 	if (m_playerState != jumpU && m_playerState != jumpF && m_playerState != jumpB)
 	{
 		m_spritePosition = sf::Vector2i((sf::Vector2f)m_position + offsetVec);
-	}
-	else
-	{
-		int x = 1;
 	}
 
 	m_spriteSheet->setPosition((sf::Vector2f)m_spritePosition - (sf::Vector2f)m_hurtboxOffset);
@@ -505,10 +502,10 @@ void Fighter::UpdateJump()
 		m_jumpSpeed.y++;
 	}
 
-	if (m_position.y >= m_landPosition)
+	if (m_position.y + m_hurtbox.getSize().y >= m_floorPosition)
 	{
 		ChangeState(idle);
-		m_position.y = m_landPosition;
+		m_position.y = m_floorPosition - m_hurtbox.getSize().y;
 		//m_verticalSpeed = 0;
 	}
 }

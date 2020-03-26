@@ -71,6 +71,7 @@ sf::Time timeFromClock;
 sf::Time frameTime;
 //float timeUntilFrameUpdate;
 sf::Time timeUntilFrameUpdate;
+sf::Time timeSinceLastFrame = sf::Time::Zero;
 
 bool sButt = true;
 
@@ -133,30 +134,37 @@ MessageHandler messageHandler;
 bool rollbackOn;
 
 int floorHeight = 500;
-
+sf::Vector2i p1StartPos(200, floorHeight);
+sf::Vector2i p2StartPos(700, floorHeight);
 
 //GGPOSession *ggpo = NULL;
 
 sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
+bool gameFinished = false;
+
 void Restart()
 {
+	gameFinished = false;
+
 	messageHandler.Reset();
 	
 	player1->Reset();
 	player2->Reset();
 
 	stateManager.Reset();
-	currentState = stateManager.GetInitialState();
+	currentState.frame = 0;
+	currentState.framesInSecond = 0;
+	currentState.roundTimer = roundTimerInitial;
+	frameCount = 0;
 
 	inputHandler.Reset();
-
-	frameCount = 0;
 
 
 	frameClock.restart();
 	pingClock.restart();
 
+	sf::Time timeSinceLastFrame = sf::Time::Zero;
 	timeFromClock = sf::Time::Zero;
 	frameTime = sf::Time::Zero;
 	timeUntilFrameUpdate = sf::Time::Zero;
@@ -178,7 +186,6 @@ int main()
 	roundTimerInitial = 99;
 
 
-	sf::Time timeSinceLastFrame = sf::Time::Zero;
 
 	timeUntilFrameUpdate = sf::seconds(1.0f / 60.0f);
 
@@ -218,8 +225,8 @@ int main()
 
 	//charData = new CharacterData();
 
-	player1 = new Fighter(sf::Vector2i(200, floorHeight), 1, screenWidth, floorHeight);
-	player2 = new Fighter(sf::Vector2i(700, floorHeight), 2, screenWidth, floorHeight);
+	player1 = new Fighter(p1StartPos, 1, screenWidth, floorHeight);
+	player2 = new Fighter(p2StartPos, 2, screenWidth, floorHeight);
 
 	player1->SetCharacterData(charData->LoadCharacter1());
 	player2->SetCharacterData(charData->LoadCharacter1());
@@ -335,6 +342,17 @@ int main()
 			currentDelay = 0;
 		}
 
+
+		if (gameFinished)
+		{
+			messageHandler.SendRestartMessage();
+			if (messageHandler.GetRestartReceived())
+			{
+				Restart();
+			}
+			//Check other players status
+			continue;
+		}
 
 		timeSinceLastFrame += frameClock.restart();
 
@@ -633,7 +651,10 @@ void AdvanceFrame(int frame)
 		stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 	}
 
-	
+	if (currentState.roundTimer < 0)
+	{
+		gameFinished = true;
+	}
 
 	// update the checksums to display in the top of the window.  this
 	// helps to detect desyncs.

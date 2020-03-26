@@ -2,13 +2,19 @@
 
 Input::Input()
 {
+	opponentInputs = new std::vector<FrameInput>();
+	localInputs = new std::vector<FrameInput>();
+	
+	Init();
+}
+
+void Input::Init()
+{
 	for (bool b : noInput.inputs)
 	{
 		b = false;
 	}
 	noInput.frameNumber = -1;
-	opponentInputs = new std::vector<FrameInput>();
-	localInputs = new std::vector<FrameInput>();
 	for (int i = 0; i < 100; i++)
 	{
 		noInput.frameNumber = i;
@@ -20,6 +26,13 @@ Input::Input()
 	m_currentFrame = 0;
 }
 
+void Input::Reset()
+{
+	opponentInputs->clear();
+	localInputs->clear();
+
+	Init();
+}
 
 FrameInput Input::ReadLocalInput(int frameNo)
 {

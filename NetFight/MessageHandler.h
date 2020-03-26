@@ -7,6 +7,8 @@
 #include <vector>
 #include <iostream>
 
+#define MAXMESSAGE 6500
+
 class MessageHandler
 {
 public:
@@ -35,16 +37,24 @@ public:
 
 	void Reset();
 
+	void SendRestartMessage();
+
+	bool GetRestartReceived();
+
+	void ExhaustAllMessages();
+
 private:
 
 	//sf::IpAddress opponentIP;
+
+	bool restartRecieved = false;
 
 	sf::UdpSocket* socket;
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort;
 
 	//std::vector<Message> messages;
-	Message* messages[6000];
+	Message* messages[MAXMESSAGE];
 	std::vector<Message> messagesEarly;
 	int maxMessagesSize;
 

@@ -42,7 +42,12 @@ public:
 
 	bool BothInputsReady(int frame);
 
+	void Reset();
+
 protected:
+
+	void Init();
+
 	std::vector<FrameInput>* localInputs;
 	std::vector<FrameInput>* opponentInputs;
 

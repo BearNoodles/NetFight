@@ -76,7 +76,8 @@ public:
 
 	void CreateNewGameState(GameState player1State, GameState player2State, GameState gameState);
 
-	
+	void Reset();
+	GameState GetInitialState();
 
 protected:
 
