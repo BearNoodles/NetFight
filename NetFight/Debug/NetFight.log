@@ -1,4 +1,5 @@
-﻿  Fighter.cpp
+﻿  ConnectionHandler.cpp
+  Fighter.cpp
 c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(41): warning C4244: '=': conversion from 'T' to 'T', possible loss of data
           with
           [
@@ -32,4 +33,5 @@ c:\users\daryl\desktop\netfight\netfight\netfight\fighter.cpp(508): warning C424
           [
               T=int
           ]
+  Generating Code...
   NetFight.vcxproj -> C:\Users\Daryl\Desktop\Netfight\NetFight\Debug\NetFight.exe

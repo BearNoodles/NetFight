@@ -73,6 +73,7 @@ int ConnectionHandler::HostOrClient()
 		}
 		else
 		{
+			ID = 2;
 			opponentIP = choice;
 
 			std::cout << "Enter port number of host" << std::endl;
