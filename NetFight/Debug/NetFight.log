@@ -1,5 +1,2 @@
-﻿  NetFight.cpp
-c:\users\daryl\desktop\netfight\netfight\netfight\netfight.cpp(336): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-c:\users\daryl\desktop\netfight\netfight\netfight\netfight.cpp(704): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\daryl\desktop\netfight\netfight\netfight\netfight.cpp(705): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+﻿  Input.cpp
   NetFight.vcxproj -> C:\Users\Daryl\Desktop\Netfight\NetFight\Debug\NetFight.exe

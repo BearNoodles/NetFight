@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include "SFML/Window/Joystick.hpp"
 #include <iostream>
 
 struct FrameInput
@@ -54,5 +55,7 @@ protected:
 	int m_currentFrame;
 
 	FrameInput noInput;
+
+	int deadZone;
 };
 

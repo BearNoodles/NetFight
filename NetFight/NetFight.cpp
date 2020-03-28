@@ -19,7 +19,7 @@
 #define FPS 60
 #define FRAME_DELAY 2
 
-int gameFrames, rollbackFrameCount;
+int rollbackFrameCount;
 
 int myID;
 
@@ -73,7 +73,6 @@ sf::Time frameTime;
 sf::Time timeUntilFrameUpdate;
 sf::Time timeSinceLastFrame = sf::Time::Zero;
 
-bool sButt = true;
 
 int frameCount = 0;
 sf::Clock frameClock;
@@ -160,6 +159,7 @@ void Restart()
 
 	inputHandler.Reset();
 
+	currentDelay = 0;
 
 	frameClock.restart();
 	pingClock.restart();
@@ -176,7 +176,7 @@ int main()
 
 	charData = new CharacterData();
 
-	gameFrames = 0;
+	//gameFrames = 0;
 	rollbackFrameCount = 0;
 
 	rollbackOn = false;
@@ -334,7 +334,7 @@ int main()
 		{
 			ping = pingClock.restart();
 			currentDelay = (ping.asSeconds() * 60) + 1;
-			std::cout << "ping is: " << currentDelay << std::endl;
+			//std::cout << "ping is: " << currentDelay << std::endl;
 		}
 
 		else if(rollbackOn)
@@ -366,24 +366,7 @@ int main()
 			RunFrameDelay();
 		}
 		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
-		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace))
-		{
-			sButt = true;
-		}
 		
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && sButt && focus)
-		{
-			frameCount -= 20;
-			stateManager.TrimRolledbackStates(frameCount);
-			player2->SetFighterState(stateManager.GetState(frameCount));
-			player1->SetFighterState(stateManager.GetState(frameCount));
-			
-			//inputHandler.SetCurrentFrame(frameCount);
-			//frameCount = stateManager.GetState(frameCount).frame;
-			//time = stateManager.GetState(frameCount).time;
-			sButt = false;
-		}
 
 		/*window.clear();
 
@@ -426,7 +409,7 @@ void RunFrameDelay()
 
 	dontUpdateLocal = false;
 	
-	gameFrames++;
+	//gameFrames++;
 	AdvanceFrame(frameCount);
 	frameCount++;
 

@@ -5,7 +5,7 @@
 
 GameStateManager::GameStateManager()
 {
-	m_maxStateVectorSize = 1000;
+	m_maxStateVectorSize = 500;
 	m_gameStateVector = new std::vector<GameState>();
 	m_emptyState.frame = -1; 
 	for (int i = 0; i < m_maxStateVectorSize; i++)

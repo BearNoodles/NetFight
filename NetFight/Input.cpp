@@ -24,6 +24,8 @@ void Input::Init()
 	}
 	noInput.frameNumber = -1;
 	m_currentFrame = 0;
+
+	deadZone = 20;
 }
 
 void Input::Reset()
@@ -45,12 +47,16 @@ FrameInput Input::ReadLocalInput(int frameNo)
 		b = false;
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	std::cout << "X xis: " << sf::Joystick::getAxisPosition(0, sf::Joystick::X) << std::endl;
+	std::cout << "Y xis: " << sf::Joystick::getAxisPosition(0, sf::Joystick::Y) << std::endl;
+	//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	if (sf::Joystick::getAxisPosition(0, sf::Joystick::Y) > deadZone)
 	{
 		tempInput.inputs[1] = true;
 	}
 
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	else if (sf::Joystick::getAxisPosition(0, sf::Joystick::Y) < -deadZone)
 	{
 		tempInput.inputs[0] = true;
 	}
@@ -60,21 +66,22 @@ FrameInput Input::ReadLocalInput(int frameNo)
 		tempInput.inputs[2] = false;
 		tempInput.inputs[3] = false;
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	else if (sf::Joystick::getAxisPosition(0, sf::Joystick::X) < -deadZone)
 	{
 		tempInput.inputs[2] = true;
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	else if (sf::Joystick::getAxisPosition(0, sf::Joystick::X) > deadZone)
 	{
 		tempInput.inputs[3] = true;
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	if (sf::Joystick::isButtonPressed(0, 2))
 	{
 		tempInput.inputs[4] = true;
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	if (sf::Joystick::isButtonPressed(0, 3))
 	{
 		tempInput.inputs[5] = true;
 	}
