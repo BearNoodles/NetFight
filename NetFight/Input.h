@@ -15,6 +15,8 @@ public:
 	Input();
 	~Input();
 
+	void SetPlayerNumber(int playerNo);
+
 	FrameInput ReadLocalInput(int frameNo);
 
 	void SetInput(FrameInput frameInput);
@@ -57,5 +59,7 @@ protected:
 	FrameInput noInput;
 
 	int deadZone;
+
+	int playerNumber;
 };
 

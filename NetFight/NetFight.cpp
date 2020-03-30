@@ -256,6 +256,7 @@ int main()
 
 	rollbackOn = connectionHandler.IsRollBackOn();
 
+	inputHandler.SetPlayerNumber(connectionHandler.GetLocalPlayerNumber());
 
 	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
 	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
@@ -288,7 +289,7 @@ int main()
 			}*/
 
 			if (event.type == sf::Event::LostFocus)
-				focus = false;
+				//focus = false;
 
 			if (event.type == sf::Event::GainedFocus)
 				focus = true;

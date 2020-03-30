@@ -329,3 +329,8 @@ bool ConnectionHandler::IsRollBackOn()
 	return rollback;
 }
 
+int ConnectionHandler::GetLocalPlayerNumber()
+{
+	return ID - 1;
+}
+

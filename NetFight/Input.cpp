@@ -28,6 +28,11 @@ void Input::Init()
 	deadZone = 20;
 }
 
+void Input::SetPlayerNumber(int playerNo)
+{
+	playerNumber = playerNo;
+}
+
 void Input::Reset()
 {
 	opponentInputs->clear();
@@ -47,16 +52,16 @@ FrameInput Input::ReadLocalInput(int frameNo)
 		b = false;
 	}
 
-	std::cout << "X xis: " << sf::Joystick::getAxisPosition(0, sf::Joystick::X) << std::endl;
-	std::cout << "Y xis: " << sf::Joystick::getAxisPosition(0, sf::Joystick::Y) << std::endl;
+	std::cout << "X xis: " << sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::X) << std::endl;
+	std::cout << "Y xis: " << sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::Y) << std::endl;
 	//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-	if (sf::Joystick::getAxisPosition(0, sf::Joystick::Y) > deadZone)
+	if (sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::Y) > deadZone)
 	{
 		tempInput.inputs[1] = true;
 	}
 
 	//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-	else if (sf::Joystick::getAxisPosition(0, sf::Joystick::Y) < -deadZone)
+	else if (sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::Y) < -deadZone)
 	{
 		tempInput.inputs[0] = true;
 	}
@@ -67,21 +72,21 @@ FrameInput Input::ReadLocalInput(int frameNo)
 		tempInput.inputs[3] = false;
 	}
 	//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	else if (sf::Joystick::getAxisPosition(0, sf::Joystick::X) < -deadZone)
+	else if (sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::X) < -deadZone)
 	{
 		tempInput.inputs[2] = true;
 	}
-	else if (sf::Joystick::getAxisPosition(0, sf::Joystick::X) > deadZone)
+	else if (sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::X) > deadZone)
 	{
 		tempInput.inputs[3] = true;
 	}
 
-	if (sf::Joystick::isButtonPressed(0, 2))
+	if (sf::Joystick::isButtonPressed(playerNumber, 2))
 	{
 		tempInput.inputs[4] = true;
 	}
 
-	if (sf::Joystick::isButtonPressed(0, 3))
+	if (sf::Joystick::isButtonPressed(playerNumber, 3))
 	{
 		tempInput.inputs[5] = true;
 	}

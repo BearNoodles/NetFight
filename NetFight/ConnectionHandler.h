@@ -20,6 +20,7 @@ public:
 
 	sf::UdpSocket* GetSocket();
 
+	int GetLocalPlayerNumber();
 private:
 	bool InitHost();
 	bool InitClient();
