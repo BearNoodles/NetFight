@@ -105,6 +105,7 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 		std::cout << "player 1 pos wrong" << std::endl;
 	}
 
+	newGameState.player1HitLanded = player1State.player1HitLanded;
 	newGameState.player1Action = player1State.player1Action;
 	newGameState.player1Anim= player1State.player1Anim;
 	newGameState.player1ActionFrame = player1State.player1ActionFrame;
@@ -123,8 +124,10 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 	newGameState.player1State = player1State.player1State;
 	newGameState.player1StunFrames = player1State.player1StunFrames;
 
+
+	newGameState.player2HitLanded = player2State.player2HitLanded;
 	newGameState.player2Action = player2State.player2Action;
-	newGameState.player2Anim = player1State.player2Anim;
+	newGameState.player2Anim = player2State.player2Anim;
 	newGameState.player2ActionFrame = player2State.player2ActionFrame;
 	newGameState.player2AnimFrame = player2State.player2AnimFrame;
 	newGameState.player2CurrentInput = player2State.player2CurrentInput;

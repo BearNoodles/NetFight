@@ -56,7 +56,7 @@ public:
 	void SetFighterState(GameState gameState);
 	GameState GetFighterState();
 
-	sf::Sprite* GetAnimationFrame();
+	sf::Sprite GetAnimationFrame();
 
 	void SetCharacterData(CharacterStruct data);
 

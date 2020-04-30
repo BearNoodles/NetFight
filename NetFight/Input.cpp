@@ -52,8 +52,8 @@ FrameInput Input::ReadLocalInput(int frameNo)
 		b = false;
 	}
 
-	std::cout << "X xis: " << sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::X) << std::endl;
-	std::cout << "Y xis: " << sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::Y) << std::endl;
+	//std::cout << "X xis: " << sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::X) << std::endl;
+	//std::cout << "Y xis: " << sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::Y) << std::endl;
 	//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	if (sf::Joystick::getAxisPosition(playerNumber, sf::Joystick::Y) > deadZone)
 	{

@@ -52,6 +52,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.jumpU.framesT = 21;
 	m_characterStruct.jumpF.framesT = 22;
 	m_characterStruct.jumpB.framesT = 22;
+	m_characterStruct.jumpHit.framesT = 3;
 	m_characterStruct.walkF.framesT = 11;
 	m_characterStruct.walkB.framesT = 11;
 	
@@ -100,6 +101,11 @@ CharacterStruct CharacterData::LoadCharacter1()
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
+	if (!m_kenJHitTexture.loadFromFile("kenHit.png"))
+	{
+		// error...
+		std::cout << "error loading image.png" << std::endl;
+	}
 	if (!m_kenHitTexture.loadFromFile("kenHit.png"))
 	{
 		// error...
@@ -120,6 +126,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.jumpUAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.jumpFAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.jumpBAnim.spriteSheet = new sf::Sprite();
+	m_characterStruct.jumpHitAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.hitAnim.spriteSheet = new sf::Sprite();
 	m_characterStruct.blockAnim.spriteSheet = new sf::Sprite();
 
@@ -146,6 +153,8 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.recoveryFrames *= m_characterStruct.attackAnim2.framesPerStep;
 	m_characterStruct.attack2.framesT *= m_characterStruct.attackAnim2.framesPerStep;
 
+	m_characterStruct.attackAnim2.offsetX = -50;
+	m_characterStruct.attackAnim2.offsetY = -20;
 	m_characterStruct.attackAnim2.spriteSheet->setTexture(m_kenAttTexture2);
 
 
@@ -214,6 +223,18 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.jumpBAnim.offsetX = -304;
 	m_characterStruct.jumpBAnim.offsetY = -158;
 	m_characterStruct.jumpBAnim.spriteSheet->setTexture(m_kenJBTexture);
+
+	m_characterStruct.jumpHitAnim.spriteWidth = 852;
+	m_characterStruct.jumpHitAnim.spriteHeight = 220;
+	m_characterStruct.jumpHitAnim.framesPerStep = 3;
+	m_characterStruct.jumpHitAnim.loop = false;
+
+	m_characterStruct.jumpHit.framesT *= m_characterStruct.jumpHitAnim.framesPerStep;
+
+	m_characterStruct.jumpHitAnim.offsetX = -100;
+	m_characterStruct.jumpHitAnim.offsetY = 0;
+	m_characterStruct.jumpHitAnim.spriteSheet->setTexture(m_kenJHitTexture);
+
 
 	m_characterStruct.hitAnim.spriteWidth = 852;
 	m_characterStruct.hitAnim.spriteHeight = 220;

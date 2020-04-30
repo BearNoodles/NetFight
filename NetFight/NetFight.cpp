@@ -604,7 +604,7 @@ void AdvanceFrame(int frame)
 	{
 		player1->WalkPush();
 	}
-	if (player2->CheckPushing(player1->GetHurtbox()) && player2->IsCornered())
+	if (player2->CheckPushing(player1->GetHurtbox()) && player1->IsCornered())
 	{
 		player2->WalkPush();
 	}
@@ -671,8 +671,8 @@ void DrawCurrentFrame()
 
 	
 
-	window.draw(*player1->GetAnimationFrame());
-	window.draw(*player2->GetAnimationFrame());
+	window.draw(player1->GetAnimationFrame());
+	window.draw(player2->GetAnimationFrame());
 	window.draw(player1->GetHurtbox());
 	window.draw(player2->GetHurtbox());
 

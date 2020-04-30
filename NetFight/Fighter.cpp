@@ -91,7 +91,7 @@ void Fighter::UpdateFrame()
 	if (m_playerState == attack1 || m_playerState == attack2)
 	{
 		//m_actionFrame++;
-
+		
 		//TODO:
 		//Update this to push attacking player on block too
 		if (m_hitLanded && m_pushbackFrame < m_currentAction.selfHitPushback)
@@ -147,7 +147,7 @@ void Fighter::UpdateFrame()
 		}
 	}
 	
-	else if (m_playerState == jumpU || m_playerState == jumpF || m_playerState == jumpB)
+	else if (m_playerState == jumpU || m_playerState == jumpF || m_playerState == jumpB || m_playerState == jumpHit)
 	{
 		UpdateJump();
 	}
@@ -239,7 +239,7 @@ void Fighter::UpdateFrame()
 	offsetVec = sf::Vector2f(m_currentAnim.offsetX * m_direction, m_currentAnim.offsetY);
 
 	m_hurtbox.setPosition((sf::Vector2f)m_position);
-	if (m_playerState != jumpU && m_playerState != jumpF && m_playerState != jumpB)
+	if (m_playerState != jumpU && m_playerState != jumpF && m_playerState != jumpB)// && m_playerState != jumpHit)
 	{
 		m_spritePosition = sf::Vector2i((sf::Vector2f)m_position + offsetVec);
 	}
@@ -270,6 +270,10 @@ void Fighter::HandleCollision(Action opponentAttack)
 		ChangeState(block);
 		m_stunFrames = opponentAttack.blockstun;
 		m_pushback = opponentAttack.blockPushback;
+	}
+	else if (m_playerState == jumpU || m_playerState == jumpF || m_playerState == jumpB || m_playerState == jumpHit)
+	{
+		ChangeState(jumpHit);
 	}
 	else
 	{
@@ -309,10 +313,10 @@ sf::RectangleShape Fighter::GetHurtbox()
 	return m_hurtbox;
 }
 
-sf::Sprite* Fighter::GetAnimationFrame()
+sf::Sprite Fighter::GetAnimationFrame()
 {
 	m_spriteSheet->setTextureRect(m_animRect);
-	return m_spriteSheet;
+	return *m_spriteSheet;
 }
 
 Action Fighter::GetCurrentAction()
@@ -356,6 +360,7 @@ bool Fighter::IsCornered()
 void Fighter::ChangeState(PlayerState playerState)
 {
 	m_playerState = playerState;
+	m_hitLanded = false;
 	m_actionFrame = 0;
 	m_animFrame = 0;
 	m_pushbackFrame = 0;
@@ -417,6 +422,12 @@ void Fighter::ChangeState(PlayerState playerState)
 		case jumpB:
 			m_currentAction = m_characterActions.jumpB;
 			m_currentAnim = m_characterActions.jumpBAnim;
+			m_hurtbox.setFillColor(greenish);
+			break;
+		case jumpHit:
+			m_currentAction = m_characterActions.jumpHit;
+			m_currentAnim = m_characterActions.jumpHitAnim;
+			m_stunFrames = 6000;
 			m_hurtbox.setFillColor(greenish);
 			break;
 		default:
@@ -521,6 +532,7 @@ void Fighter::SetFighterState(GameState gameState)
 	{
 		ChangeState(gameState.player1State);
 
+		m_hitLanded = gameState.player1HitLanded;
 		m_currentAction = gameState.player1Action;
 		m_currentAnim = gameState.player1Anim;
 		m_actionFrame = gameState.player1ActionFrame;
@@ -551,6 +563,7 @@ void Fighter::SetFighterState(GameState gameState)
 	{
 		ChangeState(gameState.player2State);
 
+		m_hitLanded = gameState.player2HitLanded;
 		m_currentAction = gameState.player2Action;
 		m_currentAnim = gameState.player2Anim;
 		m_actionFrame = gameState.player2ActionFrame;
@@ -585,6 +598,7 @@ GameState Fighter::GetFighterState()
 
 	if (m_playerID == 1)
 	{
+		currentState.player1HitLanded = m_hitLanded;
 		currentState.player1Action = m_currentAction;
 		currentState.player1Anim = m_currentAnim;
 		currentState.player1ActionFrame = m_actionFrame;
@@ -607,6 +621,7 @@ GameState Fighter::GetFighterState()
 
 	else if (m_playerID == 2)
 	{
+		currentState.player2HitLanded = m_hitLanded;
 		currentState.player2Action = m_currentAction;
 		currentState.player2Anim = m_currentAnim;
 		currentState.player2ActionFrame = m_actionFrame;

@@ -7,6 +7,9 @@ struct GameState
 {
 	int frame;
 
+	bool player1HitLanded;
+	bool player2HitLanded;
+
 	int player1Health;
 	int player2Health;
 

@@ -32,7 +32,7 @@ struct Animation
 
 enum PlayerState
 {
-	idle, attack1, attack2, hit, block, jumpU, jumpF, jumpB, walkF, walkB
+	idle, attack1, attack2, hit, block, jumpU, jumpF, jumpB, jumpHit, walkF, walkB
 };
 
 struct CharacterStruct
@@ -45,6 +45,7 @@ struct CharacterStruct
 	Action jumpU;
 	Action jumpF;
 	Action jumpB;
+	Action jumpHit;
 	Action walkF;
 	Action walkB;
 
@@ -59,6 +60,7 @@ struct CharacterStruct
 	Animation jumpUAnim;
 	Animation jumpFAnim;
 	Animation jumpBAnim;
+	Animation jumpHitAnim;
 	Animation idleAnim;
 };
 
@@ -83,6 +85,7 @@ protected:
 	sf::Texture m_kenJUTexture;
 	sf::Texture m_kenJFTexture;
 	sf::Texture m_kenJBTexture;
+	sf::Texture m_kenJHitTexture;
 	sf::Texture m_kenHitTexture;
 	sf::Texture m_kenBlockTexture;
 
