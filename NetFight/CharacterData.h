@@ -1,6 +1,7 @@
 #pragma once
 #include "SFML/Graphics.hpp"
 
+//Data relating to an actions
 struct Action
 {
 	int damage;
@@ -9,19 +10,16 @@ struct Action
 	int blockPushback, hitPushback, pushbackFrames, selfHitPushback, selfBlockPushback, selfPushbackFrames;
 	sf::Vector2f startupMove, activeMove, recoveryMove;
 	sf::RectangleShape activeHitbox, startupHurtbox, activeHurtbox, recoveryHurtbox;
-	//Texture2D txr;
-	//SoundEffect sound;
 	int attackNumber;
 };
 
+//Data relating to an actions animation
 struct Animation
 {
 	sf::Sprite* spriteSheet;
 	int framesPerStep;
 	int offsetX = 0;
 	int offsetY = 0;
-	//sf::Texture texture;
-	//std::vector<sf::Vector2i> animRect;
 
 	int frames;
 	int spriteWidth;
@@ -30,11 +28,13 @@ struct Animation
 	bool loop = false;
 };
 
+//All possible states for the fighter class
 enum PlayerState
 {
 	idle, attack1, attack2, hit, block, jumpU, jumpF, jumpB, jumpHit, walkF, walkB
 };
 
+//All action a fighter can perform and there animations
 struct CharacterStruct
 {
 	Action attack1;
@@ -71,8 +71,6 @@ public:
 	~CharacterData();
 
 	CharacterStruct LoadCharacter1();
-
-	//CharacterStruct GetCharacterStruct();
 	
 protected:
 	CharacterStruct m_characterStruct;

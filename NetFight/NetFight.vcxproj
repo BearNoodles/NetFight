@@ -164,7 +164,6 @@
     <ClCompile Include="HealthBar.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
-    <ClCompile Include="MessageHandlerRollback.cpp" />
     <ClCompile Include="NetFight.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -176,8 +175,6 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="MessageHandler.h" />
-    <ClInclude Include="MessageHandlerRollback.h" />
-    <ClInclude Include="nongamestate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

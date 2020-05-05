@@ -1,6 +1,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+//Structure of messages sent between clients
 struct Message {
 
 	bool pingSend;

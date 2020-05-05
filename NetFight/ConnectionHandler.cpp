@@ -3,6 +3,9 @@
 
 ConnectionHandler::ConnectionHandler()
 {
+	ID = 1;
+
+	//Set up socket
 	socket = new sf::UdpSocket();
 	socket->setBlocking(false);
 
@@ -14,11 +17,13 @@ ConnectionHandler::~ConnectionHandler()
 {
 }
 
+//Sets the local user to be a host or client, for connecting purposes
 int ConnectionHandler::HostOrClient()
 {
 
 	while (true)
 	{
+		//Choose whether to host or search for a host
 		std::string choice;
 		std::cout << "Type 1 to start a new game or enter IP of host (press 2 for default host)" << std::endl;
 		std::cin >> choice;
@@ -33,6 +38,7 @@ int ConnectionHandler::HostOrClient()
 				continue;
 			}
 
+			//Choose which type of netcode to use
 			while (true)
 			{
 				std::cout << "Type 1 to use rollback or press 2 to use delay" << std::endl;
@@ -55,8 +61,9 @@ int ConnectionHandler::HostOrClient()
 			}
 
 			return 1;
-			//break;
 		}
+
+		//Connect to local host
 		else if (choice == "2")
 		{
 			ID = 2;
@@ -69,8 +76,9 @@ int ConnectionHandler::HostOrClient()
 				continue;
 			}
 			return 2;
-			//break;
 		}
+
+		//Any other number will be taken as the IP address of a host to search for
 		else
 		{
 			ID = 2;
@@ -86,7 +94,6 @@ int ConnectionHandler::HostOrClient()
 				continue;
 			}
 			return 2;
-			//break;
 		}
 
 	}
@@ -94,13 +101,11 @@ int ConnectionHandler::HostOrClient()
 
 bool ConnectionHandler::InitHost()
 {
-
 	// bind the socket to a port
 	if (socket->bind(opponentPort) != sf::Socket::Done)
 	{
 		return false;
 	}
-
 
 	ID = 1;
 	return true;
@@ -108,15 +113,17 @@ bool ConnectionHandler::InitHost()
 
 bool ConnectionHandler::InitClient()
 {
+	
 	int counter = 0;
+
 	// bind the socket to a port
-	//TODO: find a way to get this anyport and pass it to messagehandler
 	if (socket->bind(sf::Socket::AnyPort) != sf::Socket::Done)
 	{
 		// error...
 		std::cout << "Bind Failed" << std::endl;
 	}
 
+	//Tries 10,000 times to connect to host
 	while (true)
 	{
 		if (counter > 10000)
@@ -183,16 +190,13 @@ bool ConnectionHandler::InitClient()
 }
 
 
-
 bool ConnectionHandler::WaitForPlayers()
 {
-	//TODO draw other players while waiting
 	if (ID == 1)
 	{
 		//start game if host presses space
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
-
 			std::string s;
 			if (rollback)
 			{
@@ -297,7 +301,6 @@ bool ConnectionHandler::WaitForPlayers()
 			{
 				rollback = false;
 			}
-			//socket->unbind();
 			return true;
 		}
 	}

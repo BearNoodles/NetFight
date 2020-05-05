@@ -36,9 +36,6 @@ public:
 
 	FrameInput GetNoInput(int frameNo);
 
-
-	FrameInput GetCurrentInput(int frame);
-
 	void UpdateAll();
 
 	void SetCurrentFrame(int frame);

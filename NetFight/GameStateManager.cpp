@@ -1,13 +1,16 @@
 #include "GameStateManager.h"
-
 #include <iostream>
 
 
 GameStateManager::GameStateManager()
 {
+	//Maximum number of gamestates to save
 	m_maxStateVectorSize = 500;
+
 	m_gameStateVector = new std::vector<GameState>();
 	m_emptyState.frame = -1; 
+
+	//Fill in a vector of empty gamestates, setting the correct frame number for each one
 	for (int i = 0; i < m_maxStateVectorSize; i++)
 	{
 		m_emptyState.frame = i;
@@ -17,6 +20,7 @@ GameStateManager::GameStateManager()
 	m_emptyState.frame = -1;
 }
 
+//Clears all saved gamestate for restarting the round
 void GameStateManager::Reset()
 {
 	m_gameStateVector->clear();
@@ -31,18 +35,16 @@ void GameStateManager::Reset()
 	m_emptyState.frame = -1;
 }
 
-//GameState GameStateManager::GetInitialState()
-//{
-//	
-//}
 
 GameStateManager::~GameStateManager()
 {
 	
 }
 
+//Saves a state to the vector
 void GameStateManager::SaveState(GameState state)
 {
+	//First checks the back state
 	if (m_gameStateVector->back().frame < state.frame)
 	{
 		if (m_gameStateVector->size() >= m_maxStateVectorSize)
@@ -53,7 +55,8 @@ void GameStateManager::SaveState(GameState state)
 		return;
 	}
 
-
+	//Reverse iterates through the state vector the find where the given state should be saved
+	//Uses a revers iterater since the stae is far more likely to be found at or near the end of the vector
 	for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
 	{
 		if (state.frame == it->frame)
@@ -66,6 +69,8 @@ void GameStateManager::SaveState(GameState state)
 	std::cout << "Not saved state error" << std::endl;
 }
 
+//Returns the state of a specific frame
+//Returns error and empty state if it cannot find the state 
 GameState GameStateManager::GetState(int frame)
 {
 	for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
@@ -89,11 +94,11 @@ void GameStateManager::TrimRolledbackStates(int frame)
 			return;
 		}
 		m_gameStateVector->pop_back();
-		//m_gameStateVector->insert(m_gameStateVector->begin(), m_emptyState);
 	}
 }
 
-
+//Uses information from both players and the not player related state variables to create a full gamestate
+//Need to make this smaller
 void GameStateManager::CreateNewGameState(GameState player1State, GameState player2State, GameState gameState)
 {
 	GameState newGameState;

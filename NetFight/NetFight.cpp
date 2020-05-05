@@ -13,25 +13,17 @@
 #include "MessageHandler.h"
 #include "MessageHandlerRollback.h"
 #include "ConnectionHandler.h"
-//#include "ggponet.h"
-//#include "nongamestate.h"
 
 #define FPS 60
-#define FRAME_DELAY 2
+//#define FRAME_DELAY 2
 
 int rollbackFrameCount;
-
-int myID;
 
 int framesInSecondMax = 60;
 int roundTimerInitial = 99;
 
 GameStateManager stateManager;
 GameState currentState;
-
-//NonGameState ngs = { 0 };
-
-//GGPOPlayer *players;
 Fighter* player1;
 Fighter* player2;
 
@@ -40,7 +32,6 @@ CharacterData* charData;
 int thisPlayer;
 
 bool focus = true;
-
 bool dontUpdateLocal = false;
 
 FrameInput player1Input;
@@ -48,7 +39,6 @@ FrameInput player2Input;
 
 HealthBar* healthBar1;
 HealthBar* healthBar2;
-
 
 Input inputHandler;
 
@@ -59,61 +49,28 @@ sf::Text roundTimeText;
 sf::Font timerFont;
 
 int currentDelay;
-//int nextDelay;
 sf::Text delayText;
 
 int delayLimit = 99;
 
 sf::Text frameText;
 
-
 sf::Time timeFromClock;
 sf::Time frameTime;
-//float timeUntilFrameUpdate;
 sf::Time timeUntilFrameUpdate;
 sf::Time timeSinceLastFrame = sf::Time::Zero;
 
-
 int frameCount = 0;
 sf::Clock frameClock;
-
 sf::Clock pingClock;
 sf::Time ping;
 
-//sf::Time messageTimer;
-//bool msgReady;
-
-void RunFrameDelay();
+void RunFrame();
 
 void Restart();
 
-//void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators);
-bool BeginGame();
-//void InitSpectator(int localport, int num_players, char *host_ip, int host_port);
 void DrawCurrentFrame();
-//void AdvanceFrame(int inputs[], int disconnect_flags);
 void AdvanceFrame(int frame);
-//void VectorWar_RunFrame(HWND hwnd);
-void Idle(int time);
-void DisconnectPlayer(int player);
-void Exit();
-
-
-bool __cdecl BeginGameCallback(const char *name);
-
-bool __cdecl AdvanceFrameCallback(int flags);
-
-bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len);
-
-bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checksum, int frame);
-
-void __cdecl FreeBuffer(void *buffer);
-
-//bool __cdecl OnEventCallback(GGPOEvent *info);
-
-bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len);
-
-int fletcher32_checksum(short *data, size_t len);
 
 bool HandleInputs();
 void SetLocalInputs();
@@ -121,14 +78,9 @@ void SendInputs();
 void UpdateInputs();
 void ReadInputs(int frame);
 
-//std::list<Message> messages;
-
 ConnectionHandler connectionHandler;
 
-//TODO: make delay and rollback message handler classes to inherit from the main one
 MessageHandler messageHandler;
-
-//MessageHandlerRollback messageRollback;
 
 bool rollbackOn;
 
@@ -136,14 +88,14 @@ int floorHeight = 500;
 sf::Vector2i p1StartPos(200, floorHeight);
 sf::Vector2i p2StartPos(700, floorHeight);
 
-//GGPOSession *ggpo = NULL;
-
 sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
 bool gameFinished = false;
 
+//Called at the start of the game and aftre each round to reset everything
 void Restart()
 {
+	//Bool to check if the game has ended or not
 	gameFinished = false;
 
 	messageHandler.Reset();
@@ -173,10 +125,10 @@ void Restart()
 
 int main()
 {
-
+	//Gets the data to represent the chosen character
 	charData = new CharacterData();
 
-	//gameFrames = 0;
+	//Initialize some variables
 	rollbackFrameCount = 0;
 
 	rollbackOn = false;
@@ -185,17 +137,15 @@ int main()
 
 	roundTimerInitial = 99;
 
-
-
+	//set 1 frame equal to 1/60th of a second
 	timeUntilFrameUpdate = sf::seconds(1.0f / 60.0f);
 
-
+	//load and set font
 	if (!timerFont.loadFromFile("font.ttf"))
 	{
 		// error...
 		std::cout << "Load font failed" << std::endl;
 	}
-
 	else
 	{
 		roundTimeText.setFont(timerFont);
@@ -203,6 +153,7 @@ int main()
 		frameText.setFont(timerFont);
 	}
 
+	//Set up required texts
 	roundTimeText.setCharacterSize(56);
 	roundTimeText.setFillColor(sf::Color::White);
 	roundTimeText.setPosition(sf::Vector2f(470, 10));
@@ -217,23 +168,21 @@ int main()
 
 	currentDelay = 0;
 
-	//socket.setBlocking(false);
-
-	//sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 	window.setKeyRepeatEnabled(false);
-	//window.setFramerateLimit(FPS);
 
-	//charData = new CharacterData();
-
+	//Initialise the 2 player objects
 	player1 = new Fighter(p1StartPos, 1, screenWidth, floorHeight);
 	player2 = new Fighter(p2StartPos, 2, screenWidth, floorHeight);
 
+	//Set the player characters (currently only 1 character)
 	player1->SetCharacterData(charData->LoadCharacter1());
 	player2->SetCharacterData(charData->LoadCharacter1());
 
+	//Set up health bars
 	healthBar1 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(75, 30));
 	healthBar2 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(550, 30));
 
+	//set up window display and get host and client connections
 	while (window.isOpen())
 	{
 		window.clear(sf::Color::Blue);
@@ -242,7 +191,6 @@ int main()
 		thisPlayer = connectionHandler.HostOrClient();
 		break;
 	}
-
 
 	while (true)
 	{
@@ -254,26 +202,26 @@ int main()
 		window.display();
 	}
 
+	//set the networking type, false for delay
 	rollbackOn = connectionHandler.IsRollBackOn();
 
+	//Pass local player number to the input handler
 	inputHandler.SetPlayerNumber(connectionHandler.GetLocalPlayerNumber());
 
-	//messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetOwnPort());
+	//Initialise message handler
 	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
-	//messageRollback.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
 
-
+	//Start the clock for timing the frames
 	frameClock.restart();
 	
+	//Set the round timer count and initialise how many frames are in each second
 	currentState.roundTimer = roundTimerInitial;
 	currentState.framesInSecond = 0;
 
-	//CHECK MESSAGE HANDLER PREDICTION
-
-	//stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
-
+	//Restart the timer which measures ping
 	pingClock.restart();
 
+	//Main game window loop
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -288,6 +236,8 @@ int main()
 				std::cout << "new height: " << event.size.height << std::endl;
 			}*/
 
+			//Focus is used to stop inputs if the window is not in focus
+			//Had to be turned off for local testing to allow both windows to be controlled at once
 			if (event.type == sf::Event::LostFocus)
 				//focus = false;
 
@@ -295,20 +245,19 @@ int main()
 				focus = true;
 		}
 
-
-		/*std::cout << "Frames: " << gameFrames << std::endl;
-		std::cout << "Rollback Frames: " << rollbackFrameCount << std::endl;*/
-
-		
+		//Skipped if using delay networking		
 		if (rollbackOn)
 		{
+			//Checks if theres is a rollback required and to which frame the game should be rolled back to
 			int rollbackFrame = messageHandler.ReceiveMessagesRollback(frameCount);
 			if (rollbackFrame != -1)
 			{
-				std::cout << "Frame; " << frameCount << "	Rollback: " << rollbackFrame << std::endl;
+				//std::cout << "Frame; " << frameCount << "	Rollback: " << rollbackFrame << std::endl;
+
 				int step = rollbackFrame - 1;
 
-				//stateManager.TrimRolledbackStates(step);
+				//Resets the game to the frame before the rollback frame, since thisis the last correct frame
+				//and then steps forward again to the rollback frame
 				player2->SetFighterState(stateManager.GetState(step));
 				player1->SetFighterState(stateManager.GetState(step));
 
@@ -317,6 +266,7 @@ int main()
 				currentState.roundTimer = stateManager.GetState(step).roundTimer;
 				step++;
 
+				//Simulates each frame with the noew inputs without drawing
 				while (step < frameCount)
 				{
 					UpdateInputs();
@@ -326,16 +276,17 @@ int main()
 				}
 			}
 		}
+		//Receives messages without checking for rollbacks
 		else
 		{
 			messageHandler.ReceiveMessagesDelay();
 		}
 
+		//Used in delay networking to set the current ping
 		if (!rollbackOn && messageHandler.CheckPing())
 		{
 			ping = pingClock.restart();
 			currentDelay = (ping.asSeconds() * 60) + 1;
-			//std::cout << "ping is: " << currentDelay << std::endl;
 		}
 
 		else if(rollbackOn)
@@ -343,7 +294,7 @@ int main()
 			currentDelay = 0;
 		}
 
-
+		//Send restart request to opponent and restarts the same if the opponent has also sent a restart request
 		if (gameFinished)
 		{
 			messageHandler.SendRestartMessage();
@@ -351,90 +302,61 @@ int main()
 			{
 				Restart();
 			}
-			//Check other players status
+			
+			//Dont advance past this point if the game needs restarted, just send request again
 			continue;
 		}
 
+		//timer to check if a new frame is ready
 		timeSinceLastFrame += frameClock.restart();
 
-		//Advance frame
-		//TODO:
 		//Make sure both players inputs are unchangable at this point to give the network some time to send and receive
+		//Runs frame when ready
 		if (timeSinceLastFrame > timeUntilFrameUpdate)
 		{
 			timeSinceLastFrame -= timeUntilFrameUpdate;
-			//timeSinceLastFrame = sf::Time::Zero;
-			RunFrameDelay();
+			RunFrame();
 		}
-		//std::cout << "Frametime is: " << frameTime.asSeconds() << std::endl;
-		
-
-		/*window.clear();
-
-
-		window.draw(player1->GetHurtbox());
-		window.draw(player2->GetHurtbox());
-		if (player1->IsHitboxActive())
-		{
-			window.draw(player1->GetActiveHitbox());
-		}
-
-		healthBar1->UpdateHealth(player1->GetHealth());
-		healthBar2->UpdateHealth(player2->GetHealth());
-
-		window.draw(healthBar1->GetHealthBarBack());
-		window.draw(healthBar1->GetHealthBar());
-		window.draw(healthBar2->GetHealthBarBack());
-		window.draw(healthBar2->GetHealthBar());
-
-		window.display();*/
-
-		/*if (frameCount == 100)
-		{
-			std::cout << "Final Position: " << player1->GetHurtbox().getPosition().x;
-			std::cout << "Final Position: " << player1->GetHurtbox().getPosition().x;
-		}*/
 	}
-
-
-	//return 0;
 }
 
-void RunFrameDelay()
+void RunFrame()
 {
+	//If the opponent inputs for this frame arent ready yet, return and restart until they are
+	//Inputs should always be ready for rollback
 	if (!HandleInputs())
 	{
+		//Local inputs for frame cannot be changed anymore, since they have been sent to the opponent
 		dontUpdateLocal = true;
 		return;
 	}
 
 	dontUpdateLocal = false;
 	
-	//gameFrames++;
+	//Advance frame forward by 1
 	AdvanceFrame(frameCount);
 	frameCount++;
 
+	//Render all sprites and text to the window
 	DrawCurrentFrame();
 
+	//Text for the current delay amount in frames
 	delayText.setString("delay: " + std::to_string(currentDelay));
 }
 
-void RunFrameRollback()
-{
-
-}
 
 bool HandleInputs()
 {
+	//Set local inputs if not already set
 	if (!dontUpdateLocal)
 	{
 		SetLocalInputs();
 	}
 
+	//Send to opponent
 	SendInputs();
 
-	//Receive inputs here?
-
+	//Recieves and sets opponent inputs
 	UpdateInputs();
 
 	//If delay is on and either input is not ready
@@ -443,6 +365,7 @@ bool HandleInputs()
 		return false;
 	}
 
+	//Reads inputs and send to player objects
 	ReadInputs(frameCount);
 
 	return true;
@@ -451,15 +374,20 @@ bool HandleInputs()
 void SetLocalInputs()
 {
 	inputHandler.SetCurrentFrame(frameCount);
+
+	//Wont handler local inputs if window is not in focus, the current delay is too large or the game is withing the first 100 frames
 	if (focus && currentDelay < delayLimit && frameCount >= 100)
 	{
 		inputHandler.SetLocalInput(inputHandler.ReadLocalInput(frameCount + currentDelay));
 	}
+	//Sets all input buttons as false
 	else
 	{
 		inputHandler.SetLocalInput(inputHandler.GetNoInput(frameCount + currentDelay));
 	}
 
+	//Not a rollback prediction
+	//Used for if theres is a spike in the delay causes some frames to miss inputs, and uses the nomral prediction to fill them
 	if (!rollbackOn)
 	{
 		for (int i = frameCount; i < frameCount + currentDelay; i++)
@@ -471,6 +399,7 @@ void SetLocalInputs()
 
 void SendInputs()
 {
+	//For rollback send the last 3 frames of inputs messages (increases if delay is used alongside rollback)
 	if (rollbackOn)
 	{
 		//how many previous messages to send
@@ -487,11 +416,11 @@ void SendInputs()
 		
 	}
 
+	//For delay send the last 3 plus current delay amount messages of input frames
 	else
 	{
 		for (int i = 0; i < 3 + currentDelay; i++)
 		{
-			//int previousFrames = i;
 
 			if (frameCount + currentDelay < i)
 			{
@@ -500,21 +429,17 @@ void SendInputs()
 			inputHandler.ForceSet(frameCount - i + currentDelay);
 			messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount - i + currentDelay));
 		}
-		//messageHandler.SendFrameInput(inputHandler.GetLocalInput(frameCount));
 	}
 }
 
 
-//TODO: fix this
-
-//ONLY NEEDED FOR ROLLBACK, MAKE 1 FOR DELAY
 void UpdateInputs()
 {
 	int setInputLimit = 1;
-	//if (rollBackOn)
 	if (rollbackOn)
 	{
 		//Maybe set limit of furthest possible rollback at top
+		//Stops the game rolling back to a non existent frame
 		if (frameCount < 20)
 		{
 			setInputLimit = frameCount + 1;
@@ -523,11 +448,15 @@ void UpdateInputs()
 		{
 			setInputLimit = 20;
 		}
+
+		//Checks if the last 20 frames of the opponents inputs are correct
 		for (int i = 0; i < setInputLimit; i++)
 		{
 			inputHandler.SetOpponentInput(messageHandler.GetFrameInput(frameCount - i));
 		}
 	}
+
+	//For rollback only need to set the inputs for the current frame
 	else
 	{
 		for (int i = 0; i < setInputLimit; i++)
@@ -552,6 +481,7 @@ void ReadInputs(int frame)
 			player1Input = inputHandler.GetNoInput(frame);
 		}*/
 
+		//Gets the inputs for local player
 		player1Input = inputHandler.GetLocalInput(frame);
 
 		//Get received input
@@ -568,25 +498,23 @@ void ReadInputs(int frame)
 		{
 			player2Input = inputHandler.GetNoInput(frame);
 		}*/
+
+		//Gets the inputs for local player
 		player2Input = inputHandler.GetLocalInput(frame);
 
 		//Get received input
 		player1Input = inputHandler.GetOpponentInput(frame);
 	}
 
+	//Sets both players inputs
 	player1->SetInput(player1Input);
 	player2->SetInput(player2Input);
 }
 
-//TODO::  WHY DOES THIS SEEM TO BE RUNNING SEVERAL TIMES
-////////////////////////////////////////////////////////
-//MAYBE PUT IN A RUNNING COUNT OF ADVANCED FRAMES VS ROLLBACK FRAMES
 
-//NOW WORK OUT WHY THEY ARE SLIGHTLY OUT OF SYNC
-
-//ROLLBACK WORKING! (99%) FIX DELAY AGAIN
 void AdvanceFrame(int frame)
 {
+	//Checks if either player has been hit and handles the collisions
 	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
 	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
 	if (player1Hit)
@@ -600,6 +528,7 @@ void AdvanceFrame(int frame)
 		player2->HandleCollision(player1->GetCurrentAction());
 	}
 
+	//Checks if players are walking into each other
 	if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
 	{
 		player1->WalkPush();
@@ -609,15 +538,17 @@ void AdvanceFrame(int frame)
 		player2->WalkPush();
 	}
 
+	//Update player logic
 	player1->UpdateFrame();
 	player2->UpdateFrame();
 
+	//Sets the gamestate frame if needed
 	if (rollbackOn)
 	{
 		currentState.frame = frame;
 	}
 	
-
+	//Updates the round timer
 	if (currentState.framesInSecond >= framesInSecondMax)
 	{
 		currentState.framesInSecond = 0;
@@ -629,53 +560,34 @@ void AdvanceFrame(int frame)
 
 	currentState.framesInSecond++;
 
-
+	//Saves the gamestate for rollbacks
 	if (rollbackOn)
 	{
 		stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 	}
 
+	//Ends the game if the timer is less than zero
 	if (currentState.roundTimer < 0)
 	{
 		gameFinished = true;
 	}
 
-	// update the checksums to display in the top of the window.  this
-	// helps to detect desyncs.
-	//ngs.now.framenumber = currentState.frame;
-	//ngs.now.checksum = fletcher32_checksum((short *)&currentState, sizeof(currentState) / 2);
-	/*if ((currentState.frame % 90) == 0) {
-		ngs.periodic = ngs.now;
-	}*/
-
-	// Notify ggpo that we've moved forward exactly 1 frame.
-	//ggpo_advance_frame(ggpo);
-
-	// Update the performance monitor display.
-	//GGPOPlayerHandle handles[MAX_PLAYERS];
-	/*int count = 0;
-	for (int i = 0; i < ngs.num_players; i++) {
-		if (ngs.players[i].type == GGPO_PLAYERTYPE_REMOTE) {
-			handles[count++] = ngs.players[i].handle;
-		}
-	}*/
 }
 
 
 
 void DrawCurrentFrame()
 {
+	//Clears window
 	window.clear(sf::Color::Blue);
 
-
-
-	
-
+	//Draws players and ther hurtboxes
 	window.draw(player1->GetAnimationFrame());
 	window.draw(player2->GetAnimationFrame());
 	window.draw(player1->GetHurtbox());
 	window.draw(player2->GetHurtbox());
 
+	//Only tries to draw player hitboxes if there is an active one
 	if (player1->IsHitboxActive())
 	{
 		window.draw(player1->GetActiveHitbox());
@@ -685,6 +597,7 @@ void DrawCurrentFrame()
 		window.draw(player2->GetActiveHitbox());
 	}
 
+	//Update and draw healthbars
 	healthBar1->UpdateHealth(player1->GetHealth());
 	healthBar2->UpdateHealth(player2->GetHealth());
 
@@ -693,185 +606,12 @@ void DrawCurrentFrame()
 	window.draw(healthBar2->GetHealthBarBack());
 	window.draw(healthBar2->GetHealthBar());
 
+	//Draw text
 	window.draw(roundTimeText);
 	window.draw(delayText);
-
 	window.draw(frameText);
-
-
 
 	window.display();
 }
 
-
-void Exit()
-{
-
-}
-
-//void Init(int localport, int num_players, GGPOPlayer *players, int num_spectators)
-//{
-//	GGPOErrorCode result;
-//
-//	// Fill in a ggpo callbacks structure to pass to start_session.
-//	GGPOSessionCallbacks cb = { 0 };
-//	cb.begin_game = BeginGameCallback;
-//	cb.advance_frame = AdvanceFrameCallback;
-//	cb.load_game_state = LoadGameStateCallback;
-//	cb.save_game_state = SaveGameStateCallback;
-//	cb.free_buffer = FreeBuffer;
-//	cb.on_event = OnEventCallback;
-//	cb.log_game_state = LogGameState;
-//
-//	/* Start a new session */
-//	result = ggpo_start_session(&ggpo,         // the new session object
-//		&cb,           // our callbacks
-//		"NetFight",    // application name
-//		2,             // 2 players
-//		sizeof(int),   // size of an input packet
-//		8001);         // our local udp port
-//
-//					   // automatically disconnect clients after 3000 ms and start our count-down timer
-//					   // for disconnects after 1000 ms.   To completely disable disconnects, simply use
-//					   // a value of 0 for ggpo_set_disconnect_timeout.
-//	ggpo_set_disconnect_timeout(ggpo, 3000);
-//	ggpo_set_disconnect_notify_start(ggpo, 1000);
-//
-//	int i;
-//	for (i = 0; i < num_players + num_spectators; i++) {
-//		GGPOPlayerHandle handle;
-//		result = ggpo_add_player(ggpo, players + i, &handle);
-//		ngs.players[i].handle = handle;
-//		ngs.players[i].type = players[i].type;
-//		if (players[i].type == GGPO_PLAYERTYPE_LOCAL) {
-//			ngs.players[i].connect_progress = 100;
-//			ngs.local_player_handle = handle;
-//			ngs.SetConnectState(handle, Connecting);
-//			ggpo_set_frame_delay(ggpo, handle, FRAME_DELAY);
-//		}
-//		else {
-//			ngs.players[i].connect_progress = 0;
-//		}
-//	}
-//}
-
-//bool __cdecl AdvanceFrameCallback(int flags)
-//{
-//	int inputs[2] = { 0 };
-//	int disconnect_flags;
-//
-//	// Make sure we fetch new inputs from GGPO and use those to update
-//	// the game state instead of reading from the keyboard.
-//	ggpo_synchronize_input(ggpo, (void *)inputs, sizeof(int) * 2, &disconnect_flags);
-//	AdvanceFrame(inputs, disconnect_flags);
-//	return true;
-//}
-
-
-
-//bool __cdecl OnEventCallback(GGPOEvent *info)
-//{
-//	int progress;
-//	switch (info->code) {
-//	case GGPO_EVENTCODE_CONNECTED_TO_PEER:
-//		ngs.SetConnectState(info->u.connected.player, Synchronizing);
-//		break;
-//	case GGPO_EVENTCODE_SYNCHRONIZING_WITH_PEER:
-//		progress = 100 * info->u.synchronizing.count / info->u.synchronizing.total;
-//		ngs.UpdateConnectProgress(info->u.synchronizing.player, progress);
-//		break;
-//	case GGPO_EVENTCODE_SYNCHRONIZED_WITH_PEER:
-//		ngs.UpdateConnectProgress(info->u.synchronizing.player, 100);
-//		break;
-//	case GGPO_EVENTCODE_RUNNING:
-//		ngs.SetConnectState(Running);
-//		//renderer->SetStatusText("");
-//		break;
-//	case GGPO_EVENTCODE_CONNECTION_INTERRUPTED:
-//		//ngs.SetDisconnectTimeout(info->u.connection_interrupted.player,
-//			//timeGetTime(),
-//			//info->u.connection_interrupted.disconnect_timeout);
-//		break;
-//	case GGPO_EVENTCODE_CONNECTION_RESUMED:
-//		ngs.SetConnectState(info->u.connection_resumed.player, Running);
-//		break;
-//	case GGPO_EVENTCODE_DISCONNECTED_FROM_PEER:
-//		ngs.SetConnectState(info->u.disconnected.player, Disconnected);
-//		break;
-//	case GGPO_EVENTCODE_TIMESYNC:
-//		//Sleep(1000 * info->u.timesync.frames_ahead / 60);
-//		break;
-//	}
-//	return true;
-//}
-
-
-
-
-
-bool __cdecl BeginGameCallback(const char *name)
-{
-	return true;
-}
-
-
-
-bool __cdecl LogGameState(char *filename, unsigned char *buffer, int len)
-{
-	return true;
-}
-
-void Idle(int time)
-{
-	//ggpo_idle(ggpo, time);
-}
-
-void DisconnectPlayer(int player)
-{
-
-}
-
-bool __cdecl LoadGameStateCallback(unsigned char *buffer, int len)
-{
-	memcpy(&currentState, buffer, len);
-	return true;
-}
-
-bool __cdecl SaveGameStateCallback(unsigned char **buffer, int *len, int *checksum, int frame)
-{
-	*len = sizeof(currentState);
-	*buffer = (unsigned char *)malloc(*len);
-	if (!*buffer) {
-		return false;
-	}
-	memcpy(*buffer, &currentState, *len);
-	*checksum = fletcher32_checksum((short *)*buffer, *len / 2);
-	return true;
-}
-
-void __cdecl FreeBuffer(void *buffer)
-{
-	free(buffer);
-}
-
-int fletcher32_checksum(short *data, size_t len)
-{
-	int sum1 = 0xffff, sum2 = 0xffff;
-
-	while (len) {
-		unsigned tlen = len > 360 ? 360 : len;
-		len -= tlen;
-		do {
-			sum1 += *data++;
-			sum2 += sum1;
-		} while (--tlen);
-		sum1 = (sum1 & 0xffff) + (sum1 >> 16);
-		sum2 = (sum2 & 0xffff) + (sum2 >> 16);
-	}
-
-	/* Second reduction step to reduce sums to 16 bits */
-	sum1 = (sum1 & 0xffff) + (sum1 >> 16);
-	sum2 = (sum2 & 0xffff) + (sum2 >> 16);
-	return sum2 << 16 | sum1;
-}
 

@@ -3,6 +3,7 @@
 #include "Input.h"
 #include "SFML/Graphics.hpp"
 
+//Everything included in a gamestate to be saved/loaded
 struct GameState
 {
 	int frame;
@@ -75,12 +76,10 @@ public:
 	void SaveState(GameState state);
 	GameState GetState(int frame);
 	void TrimRolledbackStates(int frame);
-	void LoadState(int frame);
 
 	void CreateNewGameState(GameState player1State, GameState player2State, GameState gameState);
 
 	void Reset();
-	GameState GetInitialState();
 
 protected:
 

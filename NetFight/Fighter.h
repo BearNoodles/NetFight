@@ -4,18 +4,6 @@
 #include "CharacterData.h"
 #include "GameStateManager.h"
 
-//struct fighterStruct
-//{
-//	sf::RectangleShape m_hurtBox;
-//	sf::RectangleShape m_hitBoxes[5];
-//
-//	sf::Vector2f m_position;
-//};
-
-//enum State
-//{
-//	idle, attacking, hit, block, jump
-//};
 
 class Fighter
 {
@@ -26,8 +14,6 @@ public:
 	void UpdateFrame();
 
 	sf::RectangleShape GetHurtbox();
-
-	void CreateHitbox();
 
 	sf::RectangleShape GetActiveHitbox();
 
@@ -68,7 +54,6 @@ protected:
 
 	sf::RectangleShape m_hurtbox;
 	sf::RectangleShape* m_activeHitbox;
-	//sf::RectangleShape m_hitboxes[5];
 
 	sf::RectangleShape m_healthBar;
 
@@ -103,11 +88,6 @@ protected:
 	sf::IntRect m_animRect;
 
 	void SetAnimRect();
-
-	/*enum State
-	{
-		idle, attacking, hit, block, jump
-	};*/
 
 	Action m_hitBy;
 

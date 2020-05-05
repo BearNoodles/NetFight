@@ -14,7 +14,7 @@ MessageHandler::~MessageHandler()
 
 void MessageHandler::Reset()
 {
-	//TODO WHEN INITIALISING SET ANOHTER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
+	//TODO WHEN INITIALISING SET ANOTHER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
 	for (int i = 0; i < MAXMESSAGE; i++)
 	{
 		messages[i] = new Message();
@@ -60,22 +60,11 @@ void MessageHandler::Reset()
 	}
 }
 
-//bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
 bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::UdpSocket* sock)
 {
 	socket = sock;
-	//socket.setBlocking(false);
 	opponentIP = ip;
 	opponentPort = oppPort;
-
-
-
-	//TODO: get client port from connectionhandler
-	/*if (socket.bind(ownPort) != sf::Socket::Done)
-	{
-	std::cout << "Message Handler socket not bound" << std::endl;
-	return false;
-	}*/
 
 	maxMessagesSize = 1000;
 
@@ -86,7 +75,7 @@ bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::Ud
 		b = false;
 	}
 
-	//TODO WHEN INITIALISING SET ANOHTER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
+	//TODO WHEN INITIALISING SET ANOTHER BOOL TO SAY WHETHER THE INPUT HAS BEEN SET REMOTELY OR ONLY INITIALISED
 	for (int i = 0; i < MAXMESSAGE; i++)
 	{
 		messages[i] = new Message();
@@ -132,8 +121,6 @@ void MessageHandler::SendNoInput(int frame)
 	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << true << frameSend;
 
 
-	//std::cout << "Send message failed" << std::endl;
-
 	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 	{
 		// error...
@@ -151,7 +138,6 @@ void MessageHandler::SendFrameInput(FrameInput input)
 {
 
 	sf::Int32 frameSend;
-	//bool inputSend[7];
 
 	bool pingSend = false;
 	bool pingReply = false;
@@ -163,12 +149,6 @@ void MessageHandler::SendFrameInput(FrameInput input)
 	bool inputSend5 = input.inputs[4];
 	bool inputSend6 = input.inputs[5];
 	bool inputSend7 = input.inputs[6];
-	//bool set = true;
-
-	/*for (int i = 0; i < 7; i++)
-	{
-	inputSend[i] = input.inputs[i];
-	}*/
 
 	frameSend = input.frameNumber;
 
@@ -184,8 +164,6 @@ void MessageHandler::SendFrameInput(FrameInput input)
 	packet << pingSend << pingReply << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << true << frameSend;
 
 
-	//std::cout << "Send message failed" << std::endl;
-
 	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 	{
 		// error...
@@ -194,10 +172,9 @@ void MessageHandler::SendFrameInput(FrameInput input)
 	}
 }
 
-
+//Reply to a ping message to let other client know it has been recieved
 void MessageHandler::SendPingReply(int frame)
 {
-
 	sf::Int32 frameSend;
 
 	bool pingReply = true;
@@ -209,8 +186,6 @@ void MessageHandler::SendPingReply(int frame)
 	packet << false << pingReply << false << false << false << false << false << false << false << false << frame;
 
 
-	//std::cout << "Send message failed" << std::endl;
-
 	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 	{
 		// error...
@@ -219,6 +194,7 @@ void MessageHandler::SendPingReply(int frame)
 	}
 }
 
+//Request that the game be restarted
 void MessageHandler::SendRestartMessage()
 {
 	sf::Int32 frameSend;
@@ -227,9 +203,6 @@ void MessageHandler::SendRestartMessage()
 
 	sf::Packet packet;
 	packet << false << false << false << false << false << false << false << false << false << false << frameSend;
-
-
-	//std::cout << "Send message failed" << std::endl;
 
 	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
 	{
@@ -244,6 +217,7 @@ bool MessageHandler::GetRestartReceived()
 	return restartRecieved;
 }
 
+//Add input message to the messages vector
 void MessageHandler::AddMessage(Message toAdd)
 {
 	Message* temp = &toAdd;
@@ -253,10 +227,6 @@ void MessageHandler::AddMessage(Message toAdd)
 		return;
 	}
 
-	/*if (messages.size() >= maxMessagesSize)
-	{
-	messages.erase(messages.begin());
-	}*/
 	messages[temp->frame]->input1 = temp->input1;
 	messages[temp->frame]->input2 = temp->input2;
 	messages[temp->frame]->input3 = temp->input3;
@@ -283,15 +253,11 @@ void MessageHandler::ReceiveMessagesDelay()
 {
 	bool check = true;
 
-	//Possibly time how long each new message takes to receive to calculate the delay required?
-	//Set some kind of limit on how long the function should read messages
 	int counter = 0;
 	while (counter < 100)
 	{
-		//std::cout << "Count: " << counter << std::endl;
-		
+		//set up message to be sent
 		sf::Int32 frame;
-		//bool inputs[7];
 		int pingFrame;
 		bool pingSend, pingReply, input1, input2, input3, input4, input5, input6, input7, set;
 		sf::Packet packet;
@@ -313,7 +279,6 @@ void MessageHandler::ReceiveMessagesDelay()
 			check = false;
 		}
 
-		//if ((packet >> inputs[7] >> frame) && check)
 		if ((packet >> pingSend >> pingReply >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
 			if (frame == -10)
@@ -352,10 +317,6 @@ void MessageHandler::ReceiveMessagesDelay()
 			msg.input5 = input5;
 			msg.input6 = input6;
 			msg.input7 = input7;
-			/*for (int i = 0; i < 7; i++)
-			{
-			msg.inputs[i] = inputs[i];
-			}*/
 
 			msg.frame = frame;
 			msg.set = true;
@@ -379,23 +340,17 @@ void MessageHandler::ReceiveMessagesDelay()
 	}
 }
 
-//FIX
-//This should be called by Input to update the list of inputs from the opposing player
 int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 {
 	int rollbackFrame = -1;
 
 	bool check = true;
 
-	//Possibly time how long each new message takes to receive to calculate the delay required?
-	//Set some kind of limit on how long the function should read messages
 	int counter = 0;
 	while (counter < 1000)
 	{
 
-
 		sf::Int32 frame;
-		//bool inputs[7];
 		int pingFrame;
 		bool pingSend, pingReply, input1, input2, input3, input4, input5, input6, input7, set;
 		sf::Packet packet;
@@ -417,7 +372,6 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 			check = false;
 		}
 
-		//if ((packet >> inputs[7] >> frame) && check)
 		if ((packet >> pingSend >> pingReply >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> set >> frame) && check)
 		{
 			if (frame == -10)
@@ -440,11 +394,6 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 					continue;
 				}
 			}
-			/*if (frame < minimumFrame)
-			{
-			counter++;
-			break;
-			}*/
 
 			//good
 			Message msg;
@@ -455,14 +404,11 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 			msg.input5 = input5;
 			msg.input6 = input6;
 			msg.input7 = input7;
-			/*for (int i = 0; i < 7; i++)
-			{
-			msg.inputs[i] = inputs[i];
-			}*/
 
 			msg.frame = frame;
 			msg.set = true;
 
+			//Checks whether the received messages corrects a previous frame and if it should be rollbacked to
 			if (frame < currentFrame && messages[frame]->set == false)
 			{
 				if (frame < rollbackFrame || rollbackFrame == -1)
@@ -486,7 +432,7 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 		counter++;
 	}
 
-
+	//Predicts messages from the last correct frame up until the current frame, only setting them if the have not been "set" by a received opponent message
 	if (!messages[currentFrame]->set && currentFrame > 0)
 	{
 		for (int i = currentFrame; i > 0; i--)
@@ -512,32 +458,11 @@ int MessageHandler::ReceiveMessagesRollback(int currentFrame)
 	return rollbackFrame;
 }
 
-//bool MessageHandlerRollback::CheckEarlyMessages()
-//{
-//	for (int i = 0; i < messagesEarly.size(); i++)
-//	{
-//		if (messagesEarly[i].frame == minimumFrame)
-//		{
-//			messages.push_back(messagesEarly[i]);
-//			messagesEarly.erase(messagesEarly.begin() + i);
-//			minimumFrame++;
-//			return true;
-//		}
-//	}
-//	return false;
-//}
 
 FrameInput MessageHandler::GetFrameInput(int frame)
 {
 
 	FrameInput newInput;
-	/*for (int i = 0; i < 7; i++)
-	{
-	newInput.inputs[i] = false;
-	}
-	newInput.frameNumber = -1;*/
-
-	//TODO: FIX RECIEVING UNINITIALIZED MESSAGES
 
 	newInput.inputs[0] = messages[frame]->input1;
 	newInput.inputs[1] = messages[frame]->input2;
@@ -559,6 +484,7 @@ int MessageHandler::CalculateDelay()
 	return lastSent - lastReceived;
 }
 
+//Checks if a ping message has been recieved from the opponent
 bool MessageHandler::CheckPing()
 {
 	if (pingReceived)
@@ -569,290 +495,3 @@ bool MessageHandler::CheckPing()
 	}
 	return pingReceived;
 }
-
-
-//#include "MessageHandler.h"
-//
-//MessageHandler::MessageHandler()
-//{
-//	
-//}
-//
-//MessageHandler::~MessageHandler()
-//{
-//
-//}
-//
-////bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, unsigned short ownPort)
-//bool MessageHandler::Initialise(sf::IpAddress ip, unsigned short oppPort, sf::UdpSocket* sock)
-//{
-//	socket = sock;
-//	//socket.setBlocking(false);
-//	opponentIP = ip;
-//	opponentPort = oppPort;
-//
-//	
-//
-//	//TODO: get client port from connectionhandler
-//	/*if (socket.bind(ownPort) != sf::Socket::Done)
-//	{
-//		std::cout << "Message Handler socket not bound" << std::endl;
-//		return false;
-//	}*/
-//
-//	maxMessagesSize = 1000;
-//
-//	FrameInput noInput;
-//	noInput.frameNumber = -1;
-//	for (bool b : noInput.inputs)
-//	{
-//		b = false;
-//	}
-//	for (int i = 0; i < 6000; i++)
-//	{
-//		messages[i] = new Message();
-//		messages[i]->input1 = false;
-//		messages[i]->input2 = false;
-//		messages[i]->input3 = false;
-//		messages[i]->input4 = false;
-//		messages[i]->input5 = false;
-//		messages[i]->input6 = false;
-//		messages[i]->input7 = false;
-//		messages[i]->set = false;
-//		messages[i]->frame = i;
-//	}
-//
-//	return true;
-//}
-//
-//void MessageHandler::SetMinimumFrame(int minFrame)
-//{
-//	minimumFrame = minFrame;
-//}
-//
-//void MessageHandler::SendNoInput(int frame)
-//{
-//	sf::Int32 frameSend;
-//	bool inputSend1 = false;
-//	bool inputSend2 = false;
-//	bool inputSend3 = false;
-//	bool inputSend4 = false;
-//	bool inputSend5 = false;
-//	bool inputSend6 = false;
-//	bool inputSend7 = false;
-//
-//	frameSend = frame;
-//
-//	sf::Packet packet;
-//	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << frameSend;
-//
-//
-//	//std::cout << "Send message failed" << std::endl;
-//
-//	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
-//	{
-//		// error...
-//		//send failed try it again
-//		std::cout << "Send message failed" << std::endl;
-//	}
-//}
-//
-//void MessageHandler::SendFrameInput(FrameInput input)
-//{
-//	sf::Int32 frameSend;
-//
-//	bool inputSend1 = input.inputs[0];
-//	bool inputSend2 = input.inputs[1];
-//	bool inputSend3 = input.inputs[2];
-//	bool inputSend4 = input.inputs[3];
-//	bool inputSend5 = input.inputs[4];
-//	bool inputSend6 = input.inputs[5];
-//	bool inputSend7 = input.inputs[6];
-//
-//	/*for (int i = 0; i < 7; i++)
-//	{
-//		inputSend[i] = input.inputs[i];
-//	}*/
-//
-//
-//
-//	frameSend = input.frameNumber;
-//
-//	sf::Packet packet;
-//	packet << inputSend1 << inputSend2 << inputSend3 << inputSend4 << inputSend5 << inputSend6 << inputSend7 << frameSend;
-//
-//
-//	//std::cout << "Send message failed" << std::endl;
-//
-//	if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
-//	{
-//		// error...
-//		//send failed try it again
-//		std::cout << "Send message failed" << std::endl;
-//	}
-//
-//}
-//
-//void MessageHandler::AddMessage(Message toAdd)
-//{
-//	Message* temp = &toAdd;
-//
-//	if (messages[temp->frame]->set)
-//	{
-//		return;
-//	}
-//
-//	/*if (messages.size() >= maxMessagesSize)
-//	{
-//	messages.erase(messages.begin());
-//	}*/
-//	messages[temp->frame]->input1 = temp->input1;
-//	messages[temp->frame]->input2 = temp->input2;
-//	messages[temp->frame]->input3 = temp->input3;
-//	messages[temp->frame]->input4 = temp->input4;
-//	messages[temp->frame]->input5 = temp->input5;
-//	messages[temp->frame]->input6 = temp->input6;
-//	messages[temp->frame]->input7 = temp->input7;
-//
-//	messages[temp->frame]->set = true;
-//}
-//
-//Message* MessageHandler::GetMessage(int frame)
-//{
-//	return messages[frame];
-//}
-//
-////FIX
-////This should be called by Input to update the list of inputs from the opposing player
-//
-////TODO: WRITE A NEW RECEIVE FUNCTION FOR ROLLBACK
-//void MessageHandler::ReceiveInputMessages()
-//{	
-//	bool check = true;
-//	
-//	//Possibly time how long each new message takes to receive to calculate the delay required?
-//	//Set some kind of limit on how long the function should read messages
-//	int counter = 0;
-//	while (counter < 1000)
-//	{
-//
-//
-//		sf::Int32 frame;
-//		//bool inputs[7];
-//		bool input1, input2, input3, input4, input5, input6, input7;
-//		sf::Packet packet;
-//		sf::IpAddress address;
-//		unsigned short port;
-//		if (socket->receive(packet, address, port) != sf::Socket::Done)
-//		{
-//			// error...
-//			//recieve failed send hello again
-//			//std::cout << "no messages yet" << std::endl;
-//			//counter++;
-//			break;
-//		}
-//
-//		std::cout << "MESSAGE RECIEVED" << std::endl;
-//
-//		if (address != opponentIP || port != opponentPort)
-//		{
-//			check = false;
-//		}
-//
-//		//if ((packet >> inputs[7] >> frame) && check)
-//		if ((packet >> input1 >> input2 >> input3 >> input4 >> input5 >> input6 >> input7 >> frame) && check)
-//		{
-//
-//			if (frame < minimumFrame)
-//			{
-//				counter++;
-//				break;
-//			}
-//			
-//			//good
-//			Message msg;
-//			msg.input1 = input1;
-//			msg.input2 = input2;
-//			msg.input3 = input3;
-//			msg.input4 = input4;
-//			msg.input5 = input5;
-//			msg.input6 = input6;
-//			msg.input7 = input7;
-//			/*for (int i = 0; i < 7; i++)
-//			{
-//				msg.inputs[i] = inputs[i];
-//			}*/
-//
-//			msg.frame = frame;
-//			msg.set = true;
-//
-//
-//			AddMessage(msg);
-//
-//
-//			if (frame == minimumFrame)
-//			{
-//				minimumFrame++;
-//			}
-//		}
-//		else if (check)
-//		{
-//			std::cout << "Couldnt receive message" << std::endl;
-//		}
-//
-//		counter++;
-//	}
-//
-//}
-//
-//
-////bool MessageHandler::CheckEarlyMessages()
-////{
-////	for (int i = 0; i < messagesEarly.size(); i++)
-////	{
-////		if (messagesEarly[i].frame == minimumFrame)
-////		{
-////			messages.push_back(messagesEarly[i]);
-////			messagesEarly.erase(messagesEarly.begin() + i);
-////			minimumFrame++;
-////			return true;
-////		}
-////	}
-////	return false;
-////}
-//
-//FrameInput MessageHandler::GetFrameInput(int frame)
-//{
-//
-//	FrameInput newInput;
-//
-//	newInput.inputs[0] = messages[frame]->input1;
-//	newInput.inputs[1] = messages[frame]->input2;
-//	newInput.inputs[2] = messages[frame]->input3;
-//	newInput.inputs[3] = messages[frame]->input4;
-//	newInput.inputs[4] = messages[frame]->input5;
-//	newInput.inputs[5] = messages[frame]->input6;
-//	newInput.inputs[6] = messages[frame]->input7;
-//
-//	newInput.frameNumber = messages[frame]->frame;
-//
-//	/*for (std::vector<Message>::reverse_iterator it = messages.rbegin(); it != messages.rend(); ++it)
-//	{
-//		if (it->frame == frame)
-//		{
-//			newInput.inputs[0] = it->input1;
-//			newInput.inputs[1] = it->input2;
-//			newInput.inputs[2] = it->input3;
-//			newInput.inputs[3] = it->input4;
-//			newInput.inputs[4] = it->input5;
-//			newInput.inputs[5] = it->input6;
-//			newInput.inputs[6] = it->input7;
-//
-//			newInput.frameNumber = it->frame;
-//
-//			break;
-//		}
-//	}*/
-//
-//	return newInput;
-//}

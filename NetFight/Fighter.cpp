@@ -1,12 +1,13 @@
 #include "Fighter.h"
 
 
-
+//Variables initialised in reset function
 Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth, int floorHeight)
 {
 
 	m_playerID = playerNumber;
 
+	//Changes player number to either 1 or -1, for calculating positions and facing direction
 	m_direction = (playerNumber * -2) + 3;
 
 	m_startPosition = position;
@@ -17,7 +18,6 @@ Fighter::Fighter(sf::Vector2i position, int playerNumber, int screenwidth, int f
 	m_jumpSpeedLossRate = 2;
 
 	m_floorPosition = floorHeight;
-	//m_landPosition = m_floorPosition;
 
 	m_maxHealth = 1000;
 
@@ -86,12 +86,8 @@ void Fighter::UpdateFrame()
 		}
 	}
 
-	//CHANGE UPDATE TO ITERATE THROUGH CURRENTATTACKFRAME IF NOT IDLE
-	//AND CHECK HOW MANY FRAMES THE CURRENT ATTACK STATE HAS FROM THE CHARACTRE DATA STRUCT
 	if (m_playerState == attack1 || m_playerState == attack2)
 	{
-		//m_actionFrame++;
-		
 		//TODO:
 		//Update this to push attacking player on block too
 		if (m_hitLanded && m_pushbackFrame < m_currentAction.selfHitPushback)
@@ -124,8 +120,6 @@ void Fighter::UpdateFrame()
 			RemoveActiveHitbox();
 		}
 
-		//m_actionFrame++;
-
 
 		if (!(IsCornered()) && m_pushbackFrame < m_hitBy.pushbackFrames)
 		{
@@ -155,7 +149,7 @@ void Fighter::UpdateFrame()
 	
 	else
 	{
-		if (m_currentInput.inputs[2])// && m_position.x > 0)
+		if (m_currentInput.inputs[2])
 		{
 			if (m_direction == 1 && m_playerState != walkB)
 			{
@@ -166,7 +160,7 @@ void Fighter::UpdateFrame()
 				ChangeState(walkF);
 			}
 		}
-		else if (m_currentInput.inputs[3])// && m_position.x < m_screenWidth - m_hurtbox.getSize().x)
+		else if (m_currentInput.inputs[3])
 		{
 			if (m_direction == 1 && m_playerState != walkF)
 			{
@@ -178,11 +172,9 @@ void Fighter::UpdateFrame()
 			}
 		}
 
-		//Change to jump state the nset start jump there
+		//Change to jump state then set start jump there
 		if (m_currentInput.inputs[0])
 		{
-			/*m_currentAction = m_characterActions.attack1;
-			ChangeState(attacking);*/
 			if (m_currentInput.inputs[2])
 			{
 				StartJump(-1);
@@ -232,8 +224,6 @@ void Fighter::UpdateFrame()
 			m_position.x += m_walkSpeed * m_direction;
 		}
 
-		//sf::Vector2f pos = m_position + m_hitboxPosition;
-		//m_activeHitbox->setPosition(pos);
 	}
 
 	offsetVec = sf::Vector2f(m_currentAnim.offsetX * m_direction, m_currentAnim.offsetY);
@@ -245,10 +235,12 @@ void Fighter::UpdateFrame()
 	}
 
 	m_spriteSheet->setPosition((sf::Vector2f)m_spritePosition - (sf::Vector2f)m_hurtboxOffset);
+
 	//updateanimation
 	SetAnimRect();
 }
 
+//Calculates the rectangle within the sprite sheet that should be drawn for the current animation frame
 void Fighter::SetAnimRect()
 {
 	int frames = m_currentAction.framesT;
@@ -335,16 +327,6 @@ sf::RectangleShape Fighter::GetActiveHitbox()
 	return  *m_activeHitbox;
 }
 
-//void Fighter::CreateHitbox()
-//{
-//	m_activeHitbox = new sf::RectangleShape();
-//	m_activeHitbox->setSize(sf::Vector2f(100, 50));
-//	m_activeHitbox->setFillColor(sf::Color::Red);
-//
-//	m_hitboxPosition = sf::Vector2f(100, 50);
-//
-//	m_activeHitbox->setPosition(m_position + m_hitboxPosition);
-//}
 
 bool Fighter::IsHitboxActive()
 {
@@ -353,10 +335,10 @@ bool Fighter::IsHitboxActive()
 
 bool Fighter::IsCornered()
 {
-	//return (m_position.x + m_hurtboxOffset.x <= 0 || m_position.x + m_hurtboxOffset.x >= m_screenWidth - m_hurtbox.getSize().x);
 	return (m_position.x <= 0 || m_position.x >= m_screenWidth - m_hurtbox.getSize().x);
 }
 
+//Switch to handle player switching between states
 void Fighter::ChangeState(PlayerState playerState)
 {
 	m_playerState = playerState;
@@ -441,6 +423,7 @@ void Fighter::ChangeState(PlayerState playerState)
 	m_spriteSheet->setScale(sf::Vector2f(m_direction, 1));
 }
 
+//Returns whether if players are walking into each other and pushes the local player
 bool Fighter::CheckPushing(sf::RectangleShape opponentHurtbox)
 {
 	if (m_hurtbox.getGlobalBounds().intersects(opponentHurtbox.getGlobalBounds()))
@@ -450,7 +433,7 @@ bool Fighter::CheckPushing(sf::RectangleShape opponentHurtbox)
 	}
 	return false;
 }
-
+//Moves players apart
 void Fighter::WalkPush()
 {
 	if (!IsCornered())
@@ -463,6 +446,7 @@ void Fighter::WalkPush()
 	}
 }
 
+//Changes to jump state setting direction and speed
 void Fighter::StartJump(int direction)
 {
 	if (direction == 0)
@@ -477,27 +461,24 @@ void Fighter::StartJump(int direction)
 	{
 		ChangeState(jumpB);
 	}
-	//m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * m_direction * direction, -m_initialJumpSpeed.y);
+
 	m_jumpSpeed = sf::Vector2i(m_initialJumpSpeed.x * direction, -m_initialJumpSpeed.y);
 
 	offsetVec = sf::Vector2f(m_currentAnim.offsetX * m_direction, m_currentAnim.offsetY);
 	m_spritePosition = sf::Vector2i((sf::Vector2f)m_position + offsetVec);
 }
 
+//Updates the current jump
 void Fighter::UpdateJump()
 {
 	if (m_actionFrame < m_characterActions.preJumpFrames)
 	{
 		return;
 	}
-	if (m_jumpSpeed.x != 0 && !IsCornered())// m_position.x < m_screenWidth - m_hurtbox.getSize().x))
+	if (m_jumpSpeed.x != 0 && !IsCornered())
 	{
 		m_position.x += m_jumpSpeed.x;
 	}
-	/*else if (m_jumpSpeed.x * m_direction > 0)
-	{
-		m_position.x += m_jumpSpeed.x;
-	}*/
 	else if (m_jumpSpeed.x * m_direction < 0 && IsCornered())
 	{
 		m_spritePosition.x -= m_jumpSpeed.x;
@@ -526,6 +507,7 @@ int Fighter::GetHealth()
 	return m_currentHealth;
 }
 
+//Loads a previously given state of the fighter
 void Fighter::SetFighterState(GameState gameState)
 {
 	if (m_playerID == 1)
@@ -592,6 +574,7 @@ void Fighter::SetFighterState(GameState gameState)
 	SetAnimRect();
 }
 
+//Returns the current state of the fighter for saving
 GameState Fighter::GetFighterState()
 {
 	GameState currentState;

@@ -32,6 +32,5 @@ private:
 	sf::UdpSocket* socket;
 	sf::IpAddress opponentIP;
 	unsigned short opponentPort = 54444;
-	//unsigned short ownPort = 54444;
 };
 

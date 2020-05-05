@@ -25,7 +25,6 @@
     <ClCompile Include="MessageHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MessageHandlerRollback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Message.h">
@@ -46,16 +45,12 @@
     <ClInclude Include="Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="nongamestate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MessageHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConnectionHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageHandlerRollback.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

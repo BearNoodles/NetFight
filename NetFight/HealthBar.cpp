@@ -13,8 +13,6 @@ HealthBar::HealthBar(sf::Vector2f healthBarSize, sf::Vector2f healthBarPosition)
 	m_healthBarBack.setFillColor(sf::Color(100, 100, 100));
 	m_healthBarBack.setOutlineColor(sf::Color::Blue);
 	m_healthBarBack.setOutlineThickness(5.0f);
-	//m_healthBarBack.setOutlineColor(sf::Color::Blue);
-	//m_healthBarBack.setOutlineThickness(5.0f);
 
 	
 	m_maxHealth = 1000.0f;

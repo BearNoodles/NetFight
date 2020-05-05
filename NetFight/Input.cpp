@@ -1,5 +1,6 @@
 #include "Input.h"
 
+//Member variables initialised in Init()  
 Input::Input()
 {
 	opponentInputs = new std::vector<FrameInput>();
@@ -10,6 +11,7 @@ Input::Input()
 
 void Input::Init()
 {
+	//Used for when no input is read
 	for (bool b : noInput.inputs)
 	{
 		b = false;
@@ -25,6 +27,7 @@ void Input::Init()
 	noInput.frameNumber = -1;
 	m_currentFrame = 0;
 
+	//How far the controller stick should be move for an input
 	deadZone = 20;
 }
 
@@ -99,25 +102,7 @@ void Input::SetInput(FrameInput frameInput)
 	//player1Inputs->insert(player1Inputs->at(frameInput.frameNumber), frameInput);
 }
 
-//void Input::SetOpponentInput(int frame)
-//{
-//	while (opponentInputs->back().frameNumber > frame)
-//	{
-//		if (opponentInputs->back().frameNumber == -1)
-//		{
-//			return;
-//		}
-//		opponentInputs->pop_back();
-//		opponentInputs->insert(opponentInputs->begin(), noInput);
-//	}
-//}
-
-//FrameInput Input::GetCurrentInput(int frame)
-//{
-//	return noInput;
-//}
-
-
+//Returns opponent input for a specific frame
 FrameInput Input::GetOpponentInput(int frameNo)
 {
 	for (std::vector<FrameInput>::reverse_iterator it = opponentInputs->rbegin(); it != opponentInputs->rend(); ++it)
@@ -128,6 +113,7 @@ FrameInput Input::GetOpponentInput(int frameNo)
 		}
 	}
 
+	//Should never not be able to find a requested input
 	std::cout << "THIS SHOULD NEVER HAPPEN" << std::endl;
 
 	FrameInput temp = noInput;
@@ -135,13 +121,15 @@ FrameInput Input::GetOpponentInput(int frameNo)
 	return temp;
 }
 
+
+//Returns local input for a specific frame
 FrameInput Input::GetLocalInput(int frameNo)
 {
 	for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
 	{
 		if (it->frameNumber == frameNo)
 		{
-			//it->set = true;
+			//
 			if (!it->set)
 			{
 				return *it;
@@ -149,6 +137,8 @@ FrameInput Input::GetLocalInput(int frameNo)
 			return *it;
 		}
 	}
+
+	//If no input found, create a noinput and insert into the vector
 	FrameInput temp = noInput;
 	temp.frameNumber = frameNo;
 
@@ -169,7 +159,7 @@ FrameInput Input::GetNoInput(int frameNo)
 	return tempInput;
 }
 
-//TODO: stop this from passing frame -1 in
+//Inserts an opponent input into the vector
 void Input::SetOpponentInput(FrameInput input)
 {
 	if (opponentInputs->back().frameNumber < input.frameNumber)
@@ -192,6 +182,7 @@ void Input::SetOpponentInput(FrameInput input)
 	}
 }
 
+//sets one of the local inputs
 void Input::SetLocalInput(FrameInput input)
 {
 	if (localInputs->back().frameNumber < input.frameNumber)
@@ -215,6 +206,7 @@ void Input::SetLocalInput(FrameInput input)
 		}
 	}
 	
+	//If the input is not already in place, insert it
 	InsertLocalInput(input);
 
 }
@@ -237,6 +229,7 @@ void Input::InsertLocalInput(FrameInput input)
 	localInputs->insert(it2, input);
 }
 
+//Used for when delay causes inputs to be skipped over and compensates
 void Input::PredictLocalInput(int frame)
 {
 	int i = 0;
@@ -282,14 +275,6 @@ void Input::ForceSet(int frame)
 
 	std::cout << "No input to force" << std::endl;
 
-	/*for (std::vector<FrameInput>::reverse_iterator it = localInputs->rbegin(); it != localInputs->rend(); ++it)
-	{
-		if (frame == it->frameNumber)
-		{
-			it->set = true;
-			return;
-		}
-	}*/
 }
 
 
@@ -304,27 +289,6 @@ std::vector<FrameInput>* Input::GetAllInputs(int player)
 		return localInputs;
 	}
 }
-//void Input::UpdateNoInputs(int frameNo)
-//{
-//	FrameInput tempInput = noInput;
-//	tempInput.frameNumber = frameNo;
-//
-//	if (player1Inputs->back().frameNumber < tempInput.frameNumber)
-//	{
-//		player1Inputs->erase(player1Inputs->begin());
-//		player1Inputs->push_back(tempInput);
-//		return;
-//	}
-//
-//	for (std::vector<FrameInput>::reverse_iterator it = player1Inputs->rbegin(); it != player1Inputs->rend(); ++it)
-//	{
-//		if (tempInput.frameNumber == it->frameNumber)
-//		{
-//			*it = tempInput;
-//			return;
-//		}
-//	}
-//}
 
 void Input::UpdateAll()
 {

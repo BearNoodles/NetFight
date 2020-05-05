@@ -8,7 +8,9 @@ CharacterData::CharacterData()
 }
 
 //TODO:
-//Add hurtboxes for each move
+//Add different hurtboxes for each move
+
+//Loads all of character 1's datat
 CharacterStruct CharacterData::LoadCharacter1()
 {
 	m_characterStruct.attack1.damage = 50;
@@ -45,6 +47,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.selfPushbackFrames = 2;
 	m_characterStruct.attack2.attackNumber = 2;
 
+	//Actions with no attack or hitbox data can just use framesT
 	m_characterStruct.idle.framesT = 10;
 	m_characterStruct.block.framesT = 1;
 	m_characterStruct.hit.framesT = 3;
@@ -60,7 +63,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.preJumpFrames = 4;
 
 
-	//Animation stuff
+	//Load animation spritesheets
 	if (!m_kenAttTexture1.loadFromFile("kenJab.png"))
 	{
 		// error...
@@ -265,10 +268,6 @@ CharacterStruct CharacterData::LoadCharacter1()
 	return m_characterStruct;
 }
 
-//CharacterStruct CharacterData::GetCharacterStruct()
-//{
-//	return m_characterStruct;
-//}
 
 
 CharacterData::~CharacterData()
