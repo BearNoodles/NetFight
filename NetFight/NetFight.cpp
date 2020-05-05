@@ -63,6 +63,7 @@ sf::Time timeSinceLastFrame = sf::Time::Zero;
 int frameCount = 0;
 sf::Clock frameClock;
 sf::Clock pingClock;
+float pingMaxWait = 10000.0f;
 sf::Time ping;
 
 void RunFrame();
@@ -286,7 +287,15 @@ int main()
 		if (!rollbackOn && messageHandler.CheckPing())
 		{
 			ping = pingClock.restart();
-			currentDelay = (ping.asSeconds() * 60) + 1;
+			if ((ping.asSeconds() * 60) + 1 < 99)
+			{
+				currentDelay = (ping.asSeconds() * 60) + 1;
+			}
+		}
+
+		else if (pingClock.getElapsedTime().asMilliseconds() > pingMaxWait)
+		{
+			messageHandler.ResetPing();
 		}
 
 		else if(rollbackOn)

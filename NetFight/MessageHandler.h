@@ -33,6 +33,7 @@ public:
 	int CalculateDelay();
 
 	bool CheckPing();
+	void ResetPing();
 
 	void Reset();
 

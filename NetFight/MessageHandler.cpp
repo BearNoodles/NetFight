@@ -495,3 +495,9 @@ bool MessageHandler::CheckPing()
 	}
 	return pingReceived;
 }
+
+void MessageHandler::ResetPing()
+{
+	pingChecked = true;
+	pingReceived = false;
+}

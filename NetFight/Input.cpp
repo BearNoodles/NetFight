@@ -93,6 +93,85 @@ FrameInput Input::ReadLocalInput(int frameNo)
 	{
 		tempInput.inputs[5] = true;
 	}
+
+
+	/////////////////////////////////////////////////////////////////////////////////
+	//KEYBOARD CONTROLS FOR TESTING WITHOUT CONTROLLER
+	//NOT IDEAL SINCE CONTROLS FOR BOTH PLAYER SHOULD BE THE SAME ON SEPERATE CONTROLLERS
+
+	if (playerNumber == 0)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			tempInput.inputs[1] = true;
+		}
+
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		{
+			tempInput.inputs[0] = true;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			tempInput.inputs[2] = false;
+			tempInput.inputs[3] = false;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			tempInput.inputs[2] = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			tempInput.inputs[3] = true;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+		{
+			tempInput.inputs[4] = true;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::G))
+		{
+			tempInput.inputs[5] = true;
+		}
+	}
+
+	else if (playerNumber == 1)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+		{
+			tempInput.inputs[1] = true;
+		}
+
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+		{
+			tempInput.inputs[0] = true;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		{
+			tempInput.inputs[2] = false;
+			tempInput.inputs[3] = false;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		{
+			tempInput.inputs[2] = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		{
+			tempInput.inputs[3] = true;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+		{
+			tempInput.inputs[4] = true;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::L))
+		{
+			tempInput.inputs[5] = true;
+		}
+	}
 	
 	return tempInput;
 }

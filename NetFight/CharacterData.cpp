@@ -37,7 +37,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.framesT = m_characterStruct.attack2.startupFrames + m_characterStruct.attack2.activeFrames + m_characterStruct.attack2.recoveryFrames;
 	m_characterStruct.attack2.blockstun = 30;
 	m_characterStruct.attack2.hitstun = 30;
-	m_characterStruct.attack2.activeHitbox.setSize(sf::Vector2f(150, 50));
+	m_characterStruct.attack2.activeHitbox.setSize(sf::Vector2f(220, 50));
 	m_characterStruct.attack2.activeHitbox.setPosition(sf::Vector2f(75, 50));
 	m_characterStruct.attack2.hitPushback = 7;
 	m_characterStruct.attack2.blockPushback = 20;
