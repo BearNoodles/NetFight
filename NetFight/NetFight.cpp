@@ -289,7 +289,7 @@ int main()
 			ping = pingClock.restart();
 			if ((ping.asSeconds() * 60) + 1 < 99)
 			{
-				currentDelay = (ping.asSeconds() * 60) + 1;
+				currentDelay = ((ping.asSeconds() * 60)/2) + 1;
 			}
 		}
 

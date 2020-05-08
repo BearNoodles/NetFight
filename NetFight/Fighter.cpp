@@ -257,7 +257,7 @@ void Fighter::HandleCollision(Action opponentAttack)
 {
 	m_hitBy = opponentAttack;
 
-	if ((m_playerState == idle || m_playerState == block) && ((m_direction == 1 && m_currentInput.inputs[2]) || (m_direction == -1 && m_currentInput.inputs[3])))
+	if ((m_playerState == idle || m_playerState == block || m_playerState == walkB) && ((m_direction == 1 && m_currentInput.inputs[2]) || (m_direction == -1 && m_currentInput.inputs[3])))
 	{
 		ChangeState(block);
 		m_stunFrames = opponentAttack.blockstun;

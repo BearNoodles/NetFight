@@ -18,8 +18,8 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack1.activeFrames = 1;
 	m_characterStruct.attack1.recoveryFrames = 2;
 	m_characterStruct.attack1.framesT = m_characterStruct.attack1.startupFrames + m_characterStruct.attack1.activeFrames + m_characterStruct.attack1.recoveryFrames;
-	m_characterStruct.attack1.blockstun = 3;
-	m_characterStruct.attack1.hitstun = 4;
+	m_characterStruct.attack1.blockstun = 8;
+	m_characterStruct.attack1.hitstun = 12;
 	m_characterStruct.attack1.activeHitbox.setSize(sf::Vector2f(100, 50));
 	m_characterStruct.attack1.activeHitbox.setPosition(sf::Vector2f(100, 0));
 	m_characterStruct.attack1.hitPushback = 4;
@@ -258,7 +258,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 
 	m_characterStruct.block.framesT *= m_characterStruct.blockAnim.framesPerStep;
 
-	m_characterStruct.blockAnim.offsetX = -100;
+	m_characterStruct.blockAnim.offsetX = 0;
 	m_characterStruct.blockAnim.offsetY = 0;
 	m_characterStruct.blockAnim.spriteSheet->setTexture(m_kenBlockTexture);
 
