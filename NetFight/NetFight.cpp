@@ -84,6 +84,7 @@ ConnectionHandler connectionHandler;
 MessageHandler messageHandler;
 
 bool rollbackOn;
+bool hitboxesOn;
 
 int floorHeight = 500;
 sf::Vector2i p1StartPos(200, floorHeight);
@@ -98,6 +99,7 @@ void Restart()
 {
 	//Bool to check if the game has ended or not
 	gameFinished = false;
+
 
 	messageHandler.Reset();
 	
@@ -128,6 +130,8 @@ int main()
 {
 	//Gets the data to represent the chosen character
 	charData = new CharacterData();
+
+	hitboxesOn = false;
 
 	//Initialize some variables
 	rollbackFrameCount = 0;
@@ -237,6 +241,16 @@ int main()
 				std::cout << "new height: " << event.size.height << std::endl;
 			}*/
 
+			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Return)
+			{
+				hitboxesOn = !hitboxesOn;
+			}
+
+			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::R)
+			{
+				gameFinished = true;;
+			}
+
 			//Focus is used to stop inputs if the window is not in focus
 			//Had to be turned off for local testing to allow both windows to be controlled at once
 			if (event.type == sf::Event::LostFocus)
@@ -303,6 +317,10 @@ int main()
 			currentDelay = 0;
 		}
 
+		if (!gameFinished && messageHandler.GetRestartReceived())
+		{
+			gameFinished = true;
+		}
 		//Send restart request to opponent and restarts the same if the opponent has also sent a restart request
 		if (gameFinished)
 		{
@@ -345,6 +363,7 @@ void RunFrame()
 	//Advance frame forward by 1
 	AdvanceFrame(frameCount);
 	frameCount++;
+
 
 	//Render all sprites and text to the window
 	DrawCurrentFrame();
@@ -593,18 +612,23 @@ void DrawCurrentFrame()
 	//Draws players and ther hurtboxes
 	window.draw(player1->GetAnimationFrame());
 	window.draw(player2->GetAnimationFrame());
-	window.draw(player1->GetHurtbox());
-	window.draw(player2->GetHurtbox());
 
-	//Only tries to draw player hitboxes if there is an active one
-	if (player1->IsHitboxActive())
+	if (hitboxesOn)
 	{
-		window.draw(player1->GetActiveHitbox());
+		window.draw(player1->GetHurtbox());
+		window.draw(player2->GetHurtbox());
+
+		//Only tries to draw player hitboxes if there is an active one
+		if (player1->IsHitboxActive())
+		{
+			window.draw(player1->GetActiveHitbox());
+		}
+		if (player2->IsHitboxActive())
+		{
+			window.draw(player2->GetActiveHitbox());
+		}
 	}
-	if (player2->IsHitboxActive())
-	{
-		window.draw(player2->GetActiveHitbox());
-	}
+	
 
 	//Update and draw healthbars
 	healthBar1->UpdateHealth(player1->GetHealth());
