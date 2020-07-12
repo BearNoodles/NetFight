@@ -13,6 +13,7 @@
 #include "MessageHandler.h"
 #include "MessageHandlerRollback.h"
 #include "ConnectionHandler.h"
+#include "Menu.h"
 
 #define FPS 60
 //#define FRAME_DELAY 2
@@ -94,6 +95,11 @@ sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Fight");
 
 bool gameFinished = false;
 
+enum PlayState{menu, playing};
+PlayState state = menu;
+
+Menu* menuScreen;
+
 //Called at the start of the game and aftre each round to reset everything
 void Restart()
 {
@@ -128,6 +134,53 @@ void Restart()
 
 int main()
 {
+	menuScreen = new Menu(&window);
+	//Start with menu screen
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+
+			/*if (event.type == sf::Event::Resized)
+			{
+				std::cout << "new width: " << event.size.width << std::endl;
+				std::cout << "new height: " << event.size.height << std::endl;
+			}*/
+
+			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Return)
+			{
+				hitboxesOn = !hitboxesOn;
+			}
+
+			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::R)
+			{
+				gameFinished = true;;
+			}
+
+			//Focus is used to stop inputs if the window is not in focus
+			//Had to be turned off for local testing to allow both windows to be controlled at once
+			if (event.type == sf::Event::LostFocus)
+				//focus = false;
+
+				if (event.type == sf::Event::GainedFocus)
+					focus = true;
+		}
+
+		menuScreen->UpdateMenu();
+
+
+		window.clear(sf::Color::Blue);
+
+		menuScreen->DrawButton();
+
+		window.display();
+	}
+
+
+
 	//Gets the data to represent the chosen character
 	charData = new CharacterData();
 
