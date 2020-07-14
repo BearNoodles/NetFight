@@ -172,9 +172,9 @@ int main()
 		menuScreen->UpdateMenu();
 
 
-		window.clear(sf::Color::Blue);
+		window.clear(sf::Color::Yellow);
 
-		menuScreen->DrawButton();
+		menuScreen->DrawMenu();
 
 		window.display();
 	}

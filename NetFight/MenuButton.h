@@ -13,12 +13,15 @@ public:
 
 	void UpdateButton();
 	void SetButtonDown();
+	bool Pressed();
+
+	void SetButtonPosition(sf::Vector2f position);
 
 	sf::Sprite GetCurrentSprite();
-	sf::RectangleShape* GetRect();
+
+
 
 private:
-	sf::RectangleShape* m_rect;
 
 	sf::Sprite m_currentSprite;
 	sf::Sprite m_downSprite;
@@ -28,7 +31,7 @@ private:
 
 	bool m_isDown;
 
-
+	bool pressed;
 
 };
 

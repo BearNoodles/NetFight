@@ -7,29 +7,32 @@ MenuButton::MenuButton(sf::Sprite uSprite, sf::Sprite dSprite, sf::RenderWindow*
 
 	m_currentSprite = m_upSprite;
 
-	m_rect = new sf::RectangleShape();
-	m_rect->setSize(sf::Vector2f(100.0f, 100.0f));
-	m_rect->setFillColor(sf::Color::Black);
-	//m_rect->setTexture(uSprite.getTexture());
-
 	m_wind = wind;
 
 	m_isDown = false;
+
+	pressed = false;
 }
 
 void MenuButton::UpdateButton()
 {
 	sf::Vector2f pixelPos = static_cast<sf::Vector2f>(sf::Mouse::getPosition(*m_wind));
 	
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && m_rect->getGlobalBounds().contains(pixelPos))
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 	{
-		std::cout << "button down" << std::endl;
-		m_currentSprite = m_downSprite;
+		if (m_currentSprite.getGlobalBounds().contains(pixelPos) && !m_isDown)// m_rect->getGlobalBounds().contains(pixelPos))
+		{
+			m_currentSprite = m_downSprite;
+			m_isDown = true;
+			std::cout << "button down" << std::endl;
+		}
 	}
-	else
+	else if(m_isDown)
 	{
-		//std::cout << "button up" << std::endl;
 		m_currentSprite = m_upSprite;
+		m_isDown = false;
+		std::cout << "button up" << std::endl;
+		pressed = true;
 	}
 }
 
@@ -39,11 +42,18 @@ sf::Sprite MenuButton::GetCurrentSprite()
 	return m_currentSprite;
 }
 
-
-sf::RectangleShape* MenuButton::GetRect()
+void MenuButton::SetButtonPosition(sf::Vector2f position)
 {
+	m_upSprite.setPosition(position);
+	m_downSprite.setPosition(position);
+	m_currentSprite.setPosition(position);
+}
 
-	return m_rect;
+bool MenuButton::Pressed()
+{
+	bool isPressed = pressed;
+	pressed = false;
+	return isPressed;
 }
 
 
