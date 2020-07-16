@@ -17,86 +17,117 @@ ConnectionHandler::~ConnectionHandler()
 {
 }
 
-//Sets the local user to be a host or client, for connecting purposes
-int ConnectionHandler::HostOrClient()
-{
+//CHANGE THIS TO USE THE MENU TO SET HOST CLIENT AND NETCODE TYPE, 
+//CREATE NEW FUNCTION TO WAIT FOR AND MATCH PLAYERS
+//MAYBE EVEN A LOBBY ONCE THATS ALL DONE
 
+//Sets the local user to be a host or client, for connecting purposes
+//int ConnectionHandler::HostOrClient()
+//{
+//
+//	while (true)
+//	{
+//		//Choose whether to host or search for a host
+//		std::string choice;
+//		std::cout << "Type 1 to start a new game or enter IP of host (press 2 for default host)" << std::endl;
+//		std::cin >> choice;
+//
+//		if (choice == "1")
+//		{
+//			
+//
+//			//Choose which type of netcode to use
+//			while (true)
+//			{
+//				std::cout << "Type 1 to use rollback or press 2 to use delay" << std::endl;
+//				std::cin >> choice;
+//				if (choice == "1")
+//				{
+//					rollback = true;
+//					break;
+//				}
+//				else if (choice == "2")
+//				{
+//					rollback = false;
+//					break;
+//				}
+//				else
+//				{
+//					std::cout << "Enter a valid choice" << std::endl;
+//					continue;
+//				}
+//			}
+//
+//			return 1;
+//		}
+//
+//		//Connect to local host
+//		else if (choice == "2")
+//		{
+//			
+//			return 2;
+//		}
+//
+//		//Any other number will be taken as the IP address of a host to search for
+//		else
+//		{
+//			ID = 2;
+//			opponentIP = choice;
+//
+//			std::cout << "Enter port number of host" << std::endl;
+//			unsigned short portChoice;
+//			std::cin >> portChoice;
+//			opponentPort = portChoice;
+//			if (!InitClient())
+//			{
+//				std::cout << "Error connecting to host, try again" << std::endl;
+//				continue;
+//			}
+//			return 2;
+//		}
+//
+//	}
+//}
+
+bool ConnectionHandler::SetupHost()
+{
+	ID = 1;
 	while (true)
 	{
-		//Choose whether to host or search for a host
-		std::string choice;
-		std::cout << "Type 1 to start a new game or enter IP of host (press 2 for default host)" << std::endl;
-		std::cin >> choice;
-
-		if (choice == "1")
+		if (!InitHost())
 		{
-			ID = 1;
-
-			if (!InitHost())
-			{
-				std::cout << "Error starting as host, try again" << std::endl;
-				continue;
-			}
-
-			//Choose which type of netcode to use
-			while (true)
-			{
-				std::cout << "Type 1 to use rollback or press 2 to use delay" << std::endl;
-				std::cin >> choice;
-				if (choice == "1")
-				{
-					rollback = true;
-					break;
-				}
-				else if (choice == "2")
-				{
-					rollback = false;
-					break;
-				}
-				else
-				{
-					std::cout << "Enter a valid choice" << std::endl;
-					continue;
-				}
-			}
-
-			return 1;
+			std::cout << "Error starting as host, try again" << std::endl;
+			continue;
 		}
-
-		//Connect to local host
-		else if (choice == "2")
-		{
-			ID = 2;
-
-			opponentIP = "127.0.0.1";
-			opponentPort = 54444;
-			if (!InitClient())
-			{
-				std::cout << "Error connecting to host, try again" << std::endl;
-				continue;
-			}
-			return 2;
-		}
-
-		//Any other number will be taken as the IP address of a host to search for
-		else
-		{
-			ID = 2;
-			opponentIP = choice;
-
-			std::cout << "Enter port number of host" << std::endl;
-			unsigned short portChoice;
-			std::cin >> portChoice;
-			opponentPort = portChoice;
-			if (!InitClient())
-			{
-				std::cout << "Error connecting to host, try again" << std::endl;
-				continue;
-			}
-			return 2;
-		}
-
 	}
+
+	return true;
+}
+
+bool ConnectionHandler::SetupClient()
+{
+	ID = 2;
+
+	opponentIP = "127.0.0.1";
+	opponentPort = 54444;
+	while (true)
+	{
+		if (!InitClient())
+		{
+			std::cout << "Error connecting to host, try again" << std::endl;
+			continue;
+		}
+	}
+}
+
+void ConnectionHandler::SetRollback(bool value)
+{
+	rollback = value;
+}
+
+bool ConnectionHandler::GetRollback()
+{
+	return rollback;
 }
 
 bool ConnectionHandler::InitHost()

@@ -171,6 +171,10 @@ int main()
 
 		menuScreen->UpdateMenu();
 
+		if (menuScreen->GetSearching())
+		{
+
+		}
 
 		window.clear(sf::Color::Yellow);
 

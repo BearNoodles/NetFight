@@ -7,7 +7,7 @@
 class MenuButton
 {
 public:
-	MenuButton(sf::Sprite uSPrite, sf::Sprite dSprite, sf::RenderWindow* wind);
+	MenuButton(sf::Sprite uSPrite, sf::Sprite dSprite, sf::Text text, sf::RenderWindow* wind);
 	~MenuButton();
 
 
@@ -18,6 +18,7 @@ public:
 	void SetButtonPosition(sf::Vector2f position);
 
 	sf::Sprite GetCurrentSprite();
+	sf::Text GetButtonText();
 
 
 
@@ -26,6 +27,9 @@ private:
 	sf::Sprite m_currentSprite;
 	sf::Sprite m_downSprite;
 	sf::Sprite m_upSprite;
+
+	sf::Font m_font;
+	sf::Text m_text;
 
 	sf::RenderWindow* m_wind;
 

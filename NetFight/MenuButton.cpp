@@ -1,9 +1,11 @@
 #include "MenuButton.h"
 
-MenuButton::MenuButton(sf::Sprite uSprite, sf::Sprite dSprite, sf::RenderWindow* wind)
+MenuButton::MenuButton(sf::Sprite uSprite, sf::Sprite dSprite, sf::Text text, sf::RenderWindow* wind)
 {
 	m_upSprite = uSprite;
 	m_downSprite = dSprite;
+
+	m_text = text;
 
 	m_currentSprite = m_upSprite;
 
@@ -42,11 +44,21 @@ sf::Sprite MenuButton::GetCurrentSprite()
 	return m_currentSprite;
 }
 
+sf::Text MenuButton::GetButtonText()
+{
+	return m_text;
+}
+
 void MenuButton::SetButtonPosition(sf::Vector2f position)
 {
 	m_upSprite.setPosition(position);
 	m_downSprite.setPosition(position);
 	m_currentSprite.setPosition(position);
+
+	float textXPos = position.x + (m_currentSprite.getGlobalBounds().width / 2) - (m_text.getGlobalBounds().width / 2);
+	float textYPos = position.y + (m_currentSprite.getGlobalBounds().height / 2) - (m_text.getGlobalBounds().height);
+	sf::Vector2f textPos = sf::Vector2f(textXPos, textYPos);
+	m_text.setPosition(textPos);
 }
 
 bool MenuButton::Pressed()

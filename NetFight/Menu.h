@@ -13,12 +13,16 @@ public:
 
 	int GetHostOrClient();
 
+	bool GetSearching();
+	bool GetReady();
 
 private:
 	//Menu button
 	MenuButton* m_startButton;
 	MenuButton* m_hostButton;
 	MenuButton* m_clientButton;
+
+	sf::Text startText, hostText, clientText;
 
 	sf::RenderWindow* m_wind;
 
@@ -27,9 +31,13 @@ private:
 	sf::Sprite sp1;
 	sf::Sprite sp2;
 
-	bool isMenuFinsiehd;
+	sf::Font buttonFont;
 
-	enum MenuState{start, hostClient};
+	bool isMenuFinsiehd;
+	bool isReadyToMatch;
+	bool isReadyToPlay;
+
+	enum MenuState{start, hostClient, searching, ready};
 	MenuState state;
 
 	int player;

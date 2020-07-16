@@ -21,6 +21,13 @@ public:
 	sf::UdpSocket* GetSocket();
 
 	int GetLocalPlayerNumber();
+
+
+	bool SetupHost();
+	bool SetupClient();
+
+	void SetRollback(bool value);
+	bool GetRollback();
 private:
 	bool InitHost();
 	bool InitClient();
