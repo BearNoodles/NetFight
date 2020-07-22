@@ -68,4 +68,9 @@ bool MenuButton::Pressed()
 	return isPressed;
 }
 
+void MenuButton::SetTextPosition(sf::Vector2f pos)
+{
+	m_text.setPosition(m_currentSprite.getPosition() + pos);
+}
+
 

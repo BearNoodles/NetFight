@@ -28,6 +28,10 @@ public:
 
 	void SetRollback(bool value);
 	bool GetRollback();
+
+	bool StartGame();
+
+	void SetID(int val);
 private:
 	bool InitHost();
 	bool InitClient();

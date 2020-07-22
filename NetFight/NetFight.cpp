@@ -100,6 +100,9 @@ PlayState state = menu;
 
 Menu* menuScreen;
 
+
+bool playersSet = false;
+
 //Called at the start of the game and aftre each round to reset everything
 void Restart()
 {
@@ -173,7 +176,40 @@ int main()
 
 		if (menuScreen->GetSearching())
 		{
+			if (!playersSet)
+			{
+				if (menuScreen->GetPlayer() == 1)
+				{
+					thisPlayer = 1;
+					connectionHandler.SetupHost();
+				}
+				else
+				{
+					thisPlayer = 2;
+					connectionHandler.SetupClient();
+				}
+				playersSet = true;
+			}
 
+			else if (connectionHandler.WaitForPlayers())
+			{
+				menuScreen->SetReady();
+			}
+		}
+
+		else if (menuScreen->GetReady())
+		{
+			if (menuScreen->StartGame())
+			{
+				if (thisPlayer == 1)
+				{
+					connectionHandler.SetRollback(menuScreen->GetRollback());
+				}
+				if (connectionHandler.StartGame())
+				{
+					break;
+				}
+			}
 		}
 
 		window.clear(sf::Color::Yellow);
@@ -245,24 +281,24 @@ int main()
 	healthBar2 = new HealthBar(sf::Vector2f(375.0f, 50.0f), sf::Vector2f(550, 30));
 
 	//set up window display and get host and client connections
-	while (window.isOpen())
-	{
-		window.clear(sf::Color::Blue);
-		window.display();
-		//Setup or join a game
-		thisPlayer = connectionHandler.HostOrClient();
-		break;
-	}
+	//while (window.isOpen())
+	//{
+	//	window.clear(sf::Color::Blue);
+	//	window.display();
+	//	//Setup or join a game
+	//	thisPlayer = connectionHandler.HostOrClient();
+	//	break;
+	//}
 
-	while (true)
-	{
-		if (connectionHandler.WaitForPlayers())
-		{
-			break;
-		}
-		window.clear();
-		window.display();
-	}
+	//while (true)
+	//{
+	//	if (connectionHandler.WaitForPlayers())
+	//	{
+	//		break;
+	//	}
+	//	window.clear();
+	//	window.display();
+	//}
 
 	//set the networking type, false for delay
 	rollbackOn = connectionHandler.IsRollBackOn();

@@ -20,6 +20,7 @@ public:
 	sf::Sprite GetCurrentSprite();
 	sf::Text GetButtonText();
 
+	void SetTextPosition(sf::Vector2f pos);
 
 
 private:

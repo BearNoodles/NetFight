@@ -99,6 +99,7 @@ bool ConnectionHandler::SetupHost()
 			std::cout << "Error starting as host, try again" << std::endl;
 			continue;
 		}
+		break;
 	}
 
 	return true;
@@ -117,7 +118,10 @@ bool ConnectionHandler::SetupClient()
 			std::cout << "Error connecting to host, try again" << std::endl;
 			continue;
 		}
+		break;
 	}
+
+	return true;
 }
 
 void ConnectionHandler::SetRollback(bool value)
@@ -208,7 +212,7 @@ bool ConnectionHandler::InitClient()
 
 		if (std::stoi(r) > 1)
 		{
-			ID = std::stoi(r);
+			ID = 2; //std::stoi(r);
 			break;
 		}
 		else
@@ -226,31 +230,7 @@ bool ConnectionHandler::WaitForPlayers()
 	if (ID == 1)
 	{
 		//start game if host presses space
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-		{
-			std::string s;
-			if (rollback)
-			{
-				s = "rollback";
-			}
-			else
-			{
-				s = "delay";
-			}
-			sf::Packet packet;
-			packet << s;
-
-			if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
-			{
-				// error...
-				//send failed try it again
-				std::cout << "Send begin failed, try again" << std::endl;
-				return false;
-			}
-
-			//socket->unbind();
-			return true;
-		}
+		
 		sf::IpAddress senderIP;
 		unsigned short senderPort;
 		sf::Packet packet;
@@ -301,7 +281,7 @@ bool ConnectionHandler::WaitForPlayers()
 				}
 				std::cout << "Player has joined, press space to begin" << std::endl;
 
-				break;
+				return true;
 			}
 
 		}
@@ -309,31 +289,34 @@ bool ConnectionHandler::WaitForPlayers()
 
 	else
 	{
-		sf::IpAddress hostIP;
-		unsigned short hostPort;
-		sf::Packet packet;
-		std::string beginMessage;
-		if (socket->receive(packet, hostIP, hostPort) != sf::Socket::Done)
-		{
-			// error...
-			//recieve failed send hello again
-			//std::cout << "no messages yet" << std::endl;
-			return false;
-		}
+		return true; 
 
-		packet >> beginMessage;
-		if (beginMessage == "rollback" || beginMessage == "delay")
-		{
-			if (beginMessage == "rollback")
-			{
-				rollback = true;
-			}
-			else
-			{
-				rollback = false;
-			}
-			return true;
-		}
+
+		//sf::IpAddress hostIP;
+		//unsigned short hostPort;
+		//sf::Packet packet;
+		//std::string beginMessage;
+		//if (socket->receive(packet, hostIP, hostPort) != sf::Socket::Done)
+		//{
+		//	// error...
+		//	//recieve failed send hello again
+		//	//std::cout << "no messages yet" << std::endl;
+		//	return false;
+		//}
+
+		//packet >> beginMessage;
+		//if (beginMessage == "rollback" || beginMessage == "delay")
+		//{
+		//	if (beginMessage == "rollback")
+		//	{
+		//		rollback = true;
+		//	}
+		//	else
+		//	{
+		//		rollback = false;
+		//	}
+		//	return true;
+		//}
 	}
 	return false;
 }
@@ -367,4 +350,75 @@ int ConnectionHandler::GetLocalPlayerNumber()
 {
 	return ID - 1;
 }
+
+bool ConnectionHandler::StartGame()
+{
+	if (ID == 1)
+	{
+		std::string s;
+
+		if (rollback)
+		{
+			s = "rollback";
+		}
+		else
+		{
+			s = "delay";
+		}
+		sf::Packet packet;
+		packet << s;
+
+		int i = 0;
+		while (i < 1000)
+		{
+			if (socket->send(packet, opponentIP, opponentPort) != sf::Socket::Done)
+			{
+				// error...
+				//send failed try it again
+				std::cout << "Send begin failed, try again" << std::endl;
+				continue;
+			}
+			break;
+		}
+
+		if (i == 1000)
+		{
+			return false;
+		}
+
+		//socket->unbind();
+		return true;
+	}
+	
+
+	else
+	{
+		sf::IpAddress hostIP;
+		unsigned short hostPort;
+		sf::Packet packet;
+		std::string beginMessage;
+		if (socket->receive(packet, hostIP, hostPort) != sf::Socket::Done)
+		{
+			// error...
+			//recieve failed send hello again
+			//std::cout << "no messages yet" << std::endl;
+			return false;
+		}
+
+		packet >> beginMessage;
+		if (beginMessage == "rollback" || beginMessage == "delay")
+		{
+			if (beginMessage == "rollback")
+			{
+				rollback = true;
+			}
+			else
+			{
+				rollback = false;
+			}
+			return true;
+		}
+	}
+}
+
 
