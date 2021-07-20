@@ -55,12 +55,16 @@ void Fighter::Reset()
 	m_actionFrame = 0;
 	m_animFrame = 0;
 	m_animRect = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, 0));
+
+	m_currentAction = m_characterActions.idle;
+	m_currentAnim = m_characterActions.idleAnim;
+	m_spriteSheet = m_currentAnim.spriteSheet;
 }
 
 void Fighter::SetCharacterData(CharacterStruct data)
 {
 	m_characterActions = data;
-	m_currentAnim = m_characterActions.idleAnim;
+	//m_currentAnim = m_characterActions.idleAnim;
 
 	m_currentAction = m_characterActions.idle;
 	m_currentAnim = m_characterActions.idleAnim;
@@ -387,7 +391,7 @@ void Fighter::ChangeState(PlayerState playerState)
 			m_hurtbox.setFillColor(yellowish);
 			break;
 		case block:
-			m_currentAction = m_characterActions.block;
+			//m_currentAction = m_characterActions.block;
 			m_currentAnim = m_characterActions.blockAnim;
 			m_hurtbox.setFillColor(blueish);
 			break; 
@@ -631,6 +635,23 @@ GameState Fighter::GetFighterState()
 int Fighter::GetDirection()
 {
 	return m_direction;
+}
+
+bool Fighter::IsPlayerDead()
+{
+	if (m_currentHealth <= 0)
+		return true;
+	
+	return false;
+}
+
+bool Fighter::IsBlocking()
+{
+	if (m_playerState == block)
+	{
+		return true;
+	}
+	return false;
 }
 
 Fighter::~Fighter()

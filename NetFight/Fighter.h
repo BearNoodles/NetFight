@@ -48,6 +48,10 @@ public:
 
 	int GetDirection();
 
+	bool IsPlayerDead();
+
+	bool IsBlocking();
+
 	void Reset();
 
 protected:

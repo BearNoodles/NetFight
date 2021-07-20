@@ -87,6 +87,8 @@ MessageHandler messageHandler;
 bool rollbackOn;
 bool hitboxesOn;
 
+int screenFreeze;
+
 int floorHeight = 500;
 sf::Vector2i p1StartPos(200, floorHeight);
 sf::Vector2i p2StartPos(700, floorHeight);
@@ -109,7 +111,6 @@ void Restart()
 	//Bool to check if the game has ended or not
 	gameFinished = false;
 
-
 	messageHandler.Reset();
 	
 	player1->Reset();
@@ -120,6 +121,7 @@ void Restart()
 	currentState.framesInSecond = 0;
 	currentState.roundTimer = roundTimerInitial;
 	frameCount = 0;
+	screenFreeze = 0;
 
 	inputHandler.Reset();
 
@@ -341,7 +343,7 @@ int main()
 
 			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::R)
 			{
-				gameFinished = true;;
+				gameFinished = true;
 			}
 
 			//Focus is used to stop inputs if the window is not in focus
@@ -635,34 +637,60 @@ void ReadInputs(int frame)
 
 void AdvanceFrame(int frame)
 {
-	//Checks if either player has been hit and handles the collisions
-	bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
-	bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
-	if (player1Hit)
+	if (screenFreeze > 0)
 	{
-		player2->HitLanded();
-		player1->HandleCollision(player2->GetCurrentAction());
-	}
-	if (player2Hit)
-	{
-		player1->HitLanded();
-		player2->HandleCollision(player1->GetCurrentAction());
+		screenFreeze--;
+
 	}
 
-	//Checks if players are walking into each other
-	if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
+	else
 	{
-		player1->WalkPush();
-	}
-	if (player2->CheckPushing(player1->GetHurtbox()) && player1->IsCornered())
-	{
-		player2->WalkPush();
-	}
 
-	//Update player logic
-	player1->UpdateFrame();
-	player2->UpdateFrame();
 
+		//Checks if either player has been hit and handles the collisions
+		bool player1Hit = player2->IsHitboxActive() && player1->CheckForHit(&player2->GetActiveHitbox());
+		bool player2Hit = player1->IsHitboxActive() && player2->CheckForHit(&player1->GetActiveHitbox());
+
+		Action player1Action = player1->GetCurrentAction();
+		Action player2Action = player2->GetCurrentAction();
+		if (player1Hit)
+		{
+			player2->HitLanded();
+			player1->HandleCollision(player2Action);
+
+			if(player1->IsBlocking())
+				screenFreeze += player2Action.blockStop;
+			else
+				screenFreeze += player2Action.hitStop;
+
+		}
+		if (player2Hit)
+		{
+			player1->HitLanded();
+			player2->HandleCollision(player1Action);
+
+			if (player2->IsBlocking())
+				screenFreeze += player1Action.blockStop;
+			else
+				screenFreeze += player1Action.hitStop;
+
+		}
+
+		//Checks if players are walking into each other
+		if (player1->CheckPushing(player2->GetHurtbox()) && player2->IsCornered())
+		{
+			player1->WalkPush();
+		}
+		if (player2->CheckPushing(player1->GetHurtbox()) && player1->IsCornered())
+		{
+			player2->WalkPush();
+		}
+
+		//Update player logic
+		player1->UpdateFrame();
+		player2->UpdateFrame();
+
+	}
 	//Sets the gamestate frame if needed
 	if (rollbackOn)
 	{
@@ -687,8 +715,8 @@ void AdvanceFrame(int frame)
 		stateManager.CreateNewGameState(player1->GetFighterState(), player2->GetFighterState(), currentState);
 	}
 
-	//Ends the game if the timer is less than zero
-	if (currentState.roundTimer < 0)
+	//Ends the game if the timer is less than zero or either player is dead
+	if (currentState.roundTimer < 0 || player1->IsPlayerDead() || player2->IsPlayerDead())
 	{
 		gameFinished = true;
 	}

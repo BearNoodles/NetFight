@@ -8,6 +8,7 @@ struct Action
 	int blockstun, hitstun;
 	int startupFrames, activeFrames, recoveryFrames, framesX, framesY, framesT;
 	int blockPushback, hitPushback, pushbackFrames, selfHitPushback, selfBlockPushback, selfPushbackFrames;
+	int hitStop, blockStop;
 	sf::Vector2f startupMove, activeMove, recoveryMove;
 	sf::RectangleShape activeHitbox, startupHurtbox, activeHurtbox, recoveryHurtbox;
 	int attackNumber;

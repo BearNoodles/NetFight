@@ -1,2 +1,43 @@
-﻿  Menu.cpp
+﻿  CharacterData.cpp
+  Fighter.cpp
+c:\users\daryl\desktop\projects\netfight\netfight\fighter.cpp(41): warning C4244: '=': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+          and
+          [
+              T=int
+          ]
+c:\users\daryl\desktop\projects\netfight\netfight\fighter.cpp(233): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+c:\users\daryl\desktop\projects\netfight\netfight\fighter.cpp(427): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+c:\users\daryl\desktop\projects\netfight\netfight\fighter.cpp(471): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+c:\users\daryl\desktop\projects\netfight\netfight\fighter.cpp(504): warning C4244: '=': conversion from 'T' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+          and
+          [
+              T=int
+          ]
+  GameStateManager.cpp
+c:\users\daryl\desktop\projects\netfight\netfight\gamestatemanager.cpp(50): warning C4018: '>=': signed/unsigned mismatch
+  NetFight.cpp
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(401): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(755): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(756): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Generating Code...
   NetFight.vcxproj -> C:\Users\Daryl\Desktop\Projects\NetFight\Debug\NetFight.exe

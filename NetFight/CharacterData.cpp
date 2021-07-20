@@ -28,6 +28,8 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack1.selfHitPushback = 4;
 	m_characterStruct.attack1.selfBlockPushback = 10;
 	m_characterStruct.attack1.selfPushbackFrames = 2;
+	m_characterStruct.attack1.hitStop = 10;
+	m_characterStruct.attack1.blockStop = 10;
 	m_characterStruct.attack1.attackNumber = 1;
 
 	m_characterStruct.attack2.damage = 200;
@@ -45,6 +47,8 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.selfHitPushback = 4;
 	m_characterStruct.attack2.selfBlockPushback = 10;
 	m_characterStruct.attack2.selfPushbackFrames = 2;
+	m_characterStruct.attack2.hitStop = 100;
+	m_characterStruct.attack2.blockStop = 10;
 	m_characterStruct.attack2.attackNumber = 2;
 
 	//Actions with no attack or hitbox data can just use framesT
@@ -64,57 +68,57 @@ CharacterStruct CharacterData::LoadCharacter1()
 
 
 	//Load animation spritesheets
-	if (!m_kenAttTexture1.loadFromFile("kenJab.png"))
+	if (!m_kenAttTexture1.loadFromFile("images/kenJab.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenAttTexture2.loadFromFile("kenHK2.png"))
+	if (!m_kenAttTexture2.loadFromFile("images/kenHK2.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenIdleTexture.loadFromFile("kenIdle.png"))
+	if (!m_kenIdleTexture.loadFromFile("images/kenIdle.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenWalkFTexture.loadFromFile("kenWalkF.png"))
+	if (!m_kenWalkFTexture.loadFromFile("images/kenWalkF.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenWalkBTexture.loadFromFile("kenWalkB.png"))
+	if (!m_kenWalkBTexture.loadFromFile("images/kenWalkB.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenJUTexture.loadFromFile("kenJU.png"))
+	if (!m_kenJUTexture.loadFromFile("images/kenJU.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenJFTexture.loadFromFile("kenJF.png"))
+	if (!m_kenJFTexture.loadFromFile("images/kenJF.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenJBTexture.loadFromFile("kenJB.png"))
+	if (!m_kenJBTexture.loadFromFile("images/kenJB.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenJHitTexture.loadFromFile("kenHit.png"))
+	if (!m_kenJHitTexture.loadFromFile("images/kenHit.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenHitTexture.loadFromFile("kenHit.png"))
+	if (!m_kenHitTexture.loadFromFile("images/kenHit.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
-	if (!m_kenBlockTexture.loadFromFile("kenBlock.png"))
+	if (!m_kenBlockTexture.loadFromFile("images/kenBlock.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;

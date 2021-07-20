@@ -4,25 +4,25 @@ Menu::Menu(sf::RenderWindow* wind)
 {
 	m_wind = wind;
 
-	if (!tx1.loadFromFile("buttup.png"))
+	if (!tx1.loadFromFile("images/buttup.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
 
-	if (!tx2.loadFromFile("buttdown.png"))
+	if (!tx2.loadFromFile("images/buttdown.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
 
-	if (!tx3.loadFromFile("box.png"))
+	if (!tx3.loadFromFile("images/box.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
 	}
 
-	if (!tickTexture.loadFromFile("tick.png"))
+	if (!tickTexture.loadFromFile("images/tick.png"))
 	{
 		// error...
 		std::cout << "error loading image.png" << std::endl;
