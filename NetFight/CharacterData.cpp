@@ -28,8 +28,8 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack1.selfHitPushback = 4;
 	m_characterStruct.attack1.selfBlockPushback = 10;
 	m_characterStruct.attack1.selfPushbackFrames = 2;
-	m_characterStruct.attack1.hitStop = 10;
-	m_characterStruct.attack1.blockStop = 10;
+	m_characterStruct.attack1.hitStop = 5;
+	m_characterStruct.attack1.blockStop = 5;
 	m_characterStruct.attack1.attackNumber = 1;
 
 	m_characterStruct.attack2.damage = 200;
@@ -47,7 +47,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 	m_characterStruct.attack2.selfHitPushback = 4;
 	m_characterStruct.attack2.selfBlockPushback = 10;
 	m_characterStruct.attack2.selfPushbackFrames = 2;
-	m_characterStruct.attack2.hitStop = 100;
+	m_characterStruct.attack2.hitStop = 10;
 	m_characterStruct.attack2.blockStop = 10;
 	m_characterStruct.attack2.attackNumber = 2;
 
@@ -167,7 +167,7 @@ CharacterStruct CharacterData::LoadCharacter1()
 
 	m_characterStruct.idleAnim.spriteWidth = 1560;
 	m_characterStruct.idleAnim.spriteHeight = 222;
-	m_characterStruct.idleAnim.framesPerStep = 4;
+	m_characterStruct.idleAnim.framesPerStep = 3;
 	m_characterStruct.idleAnim.loop = true;
 
 	m_characterStruct.idle.framesT *= m_characterStruct.idleAnim.framesPerStep;

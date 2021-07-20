@@ -391,7 +391,7 @@ void Fighter::ChangeState(PlayerState playerState)
 			m_hurtbox.setFillColor(yellowish);
 			break;
 		case block:
-			//m_currentAction = m_characterActions.block;
+			m_currentAction = m_characterActions.block;
 			m_currentAnim = m_characterActions.blockAnim;
 			m_hurtbox.setFillColor(blueish);
 			break; 
