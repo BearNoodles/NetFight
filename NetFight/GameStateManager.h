@@ -81,6 +81,8 @@ public:
 
 	void Reset();
 
+	std::vector<GameState>* GetAllInputs();
+
 protected:
 
 	std::vector<GameState>* m_gameStateVector;

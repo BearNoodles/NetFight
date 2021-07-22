@@ -5,7 +5,7 @@
 GameStateManager::GameStateManager()
 {
 	//Maximum number of gamestates to save
-	m_maxStateVectorSize = 500;
+	m_maxStateVectorSize = 2500;
 
 	m_gameStateVector = new std::vector<GameState>();
 	m_emptyState.frame = -1; 
@@ -56,7 +56,7 @@ void GameStateManager::SaveState(GameState state)
 	}
 
 	//Reverse iterates through the state vector the find where the given state should be saved
-	//Uses a revers iterater since the stae is far more likely to be found at or near the end of the vector
+	//Uses a revers iterater since the state is far more likely to be found at or near the end of the vector
 	for (std::vector<GameState>::reverse_iterator it = m_gameStateVector->rbegin(); it != m_gameStateVector->rend(); ++it)
 	{
 		if (state.frame == it->frame)
@@ -153,4 +153,10 @@ void GameStateManager::CreateNewGameState(GameState player1State, GameState play
 	newGameState.framesInSecond = gameState.framesInSecond;
 
 	SaveState(newGameState);
+}
+
+std::vector<GameState>* GameStateManager::GetAllInputs()
+{
+	return m_gameStateVector;
+
 }

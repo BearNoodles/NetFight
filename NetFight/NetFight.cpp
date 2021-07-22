@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <SFML/Network.hpp>
 #include <list>
 #include <string>
@@ -51,6 +52,8 @@ sf::Font timerFont;
 
 int currentDelay;
 sf::Text delayText;
+sf::Text rollbackText;
+bool rollbackTextSet = false;
 
 int delayLimit = 99;
 
@@ -79,6 +82,8 @@ void SetLocalInputs();
 void SendInputs();
 void UpdateInputs();
 void ReadInputs(int frame);
+
+void RecordInputs(std::vector<GameState> inputState);
 
 ConnectionHandler connectionHandler;
 
@@ -147,7 +152,9 @@ int main()
 		while (window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
+			{
 				window.close();
+			}
 
 			/*if (event.type == sf::Event::Resized)
 			{
@@ -162,7 +169,7 @@ int main()
 
 			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::R)
 			{
-				gameFinished = true;;
+				gameFinished = true; 
 			}
 
 			//Focus is used to stop inputs if the window is not in focus
@@ -251,6 +258,7 @@ int main()
 		roundTimeText.setFont(timerFont);
 		delayText.setFont(timerFont);
 		frameText.setFont(timerFont);
+		rollbackText.setFont(timerFont);
 	}
 
 	//Set up required texts
@@ -265,6 +273,10 @@ int main()
 	frameText.setCharacterSize(28);
 	frameText.setFillColor(sf::Color::White);
 	frameText.setPosition(sf::Vector2f(50, 100));
+
+	rollbackText.setCharacterSize(28);
+	rollbackText.setFillColor(sf::Color::White);
+	rollbackText.setPosition(sf::Vector2f(200, 100));
 
 	currentDelay = 0;
 
@@ -346,6 +358,12 @@ int main()
 				gameFinished = true;
 			}
 
+			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Escape)
+			{
+				RecordInputs(*stateManager.GetAllInputs());
+				window.close();
+			}
+
 			//Focus is used to stop inputs if the window is not in focus
 			//Had to be turned off for local testing to allow both windows to be controlled at once
 			if (event.type == sf::Event::LostFocus)
@@ -355,9 +373,20 @@ int main()
 				focus = true;
 		}
 
+		if (frameCount == 2499)
+		{
+			RecordInputs(*stateManager.GetAllInputs());
+			window.close();
+		}
 		//Skipped if using delay networking		
 		if (rollbackOn)
 		{
+			if (!rollbackTextSet)
+			{
+				rollbackText.setString("ROLLBACK");
+				rollbackTextSet = true;
+			}
+
 			//Checks if theres is a rollback required and to which frame the game should be rolled back to
 			int rollbackFrame = messageHandler.ReceiveMessagesRollback(frameCount);
 			if (rollbackFrame != -1)
@@ -366,7 +395,7 @@ int main()
 
 				int step = rollbackFrame - 1;
 
-				//Resets the game to the frame before the rollback frame, since thisis the last correct frame
+				//Resets the game to the frame before the rollback frame, since this is the last correct frame
 				//and then steps forward again to the rollback frame
 				player2->SetFighterState(stateManager.GetState(step));
 				player1->SetFighterState(stateManager.GetState(step));
@@ -764,8 +793,34 @@ void DrawCurrentFrame()
 	window.draw(roundTimeText);
 	window.draw(delayText);
 	window.draw(frameText);
+	window.draw(rollbackText);
 
 	window.display();
+}
+
+void RecordInputs(std::vector<GameState> inputState)
+{
+	
+	std::ofstream inputFile("inputs.txt");
+
+	
+	for (int i = 0; i < inputState.size(); i++)
+	{
+		inputFile << i << " ";
+		for (int j = 0; j < 7; j++)
+		{
+			inputFile << (int)inputState[i].player1CurrentInput.inputs[j];
+		}
+		inputFile << " ";
+
+		for (int j = 0; j < 7; j++)
+		{
+			inputFile << (int)inputState[i].player2CurrentInput.inputs[j];
+		}
+		inputFile << "\n";
+	}
+
+	inputFile.close();
 }
 
 
