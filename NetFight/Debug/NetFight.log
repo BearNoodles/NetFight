@@ -1,6 +1,6 @@
 ﻿  NetFight.cpp
-c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(430): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(784): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(785): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(807): warning C4018: '<': signed/unsigned mismatch
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(455): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(855): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(856): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\daryl\desktop\projects\netfight\netfight\netfight.cpp(878): warning C4018: '<': signed/unsigned mismatch
   NetFight.vcxproj -> C:\Users\Daryl\Desktop\Projects\NetFight\Debug\NetFight.exe

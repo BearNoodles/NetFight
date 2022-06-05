@@ -21,8 +21,12 @@
 
 int rollbackFrameCount;
 
+int framesInSecond = 0;
 int framesInSecondMax = 60;
+int currentFramesInSecond = 0;
 int roundTimerInitial = 99;
+int roundTimer = roundTimerInitial;
+int currentFrame = 0;
 
 GameStateManager stateManager;
 GameState currentState;
@@ -71,6 +75,7 @@ float pingMaxWait = 10000.0f;
 sf::Time ping;
 
 void RunFrame();
+void RunFrameOffline();
 
 void Restart();
 
@@ -107,8 +112,9 @@ PlayState state = menu;
 
 Menu* menuScreen;
 
-
 bool playersSet = false;
+
+bool offlineMode = true;
 
 //Called at the start of the game and aftre each round to reset everything
 void Restart()
@@ -221,6 +227,12 @@ int main()
 			}
 		}
 
+		else if (menuScreen->GetStartOffline())
+		{
+			offlineMode = true;
+			break;
+		}
+
 		window.clear(sf::Color::Yellow);
 
 		menuScreen->DrawMenu();
@@ -245,7 +257,8 @@ int main()
 	roundTimerInitial = 99;
 
 	//set 1 frame equal to 1/60th of a second
-	timeUntilFrameUpdate = sf::seconds(1.0f / 60.0f);
+	//timeUntilFrameUpdate = sf::seconds(1.0f / 60.0f);
+	timeUntilFrameUpdate = sf::microseconds(16667);
 
 	//load and set font
 	if (!timerFont.loadFromFile("font.ttf"))
@@ -314,24 +327,32 @@ int main()
 	//	window.display();
 	//}
 
-	//set the networking type, false for delay
-	rollbackOn = connectionHandler.IsRollBackOn();
+	if (!offlineMode)
+	{
+		//set the networking type, false for delay
+		rollbackOn = connectionHandler.IsRollBackOn();
 
-	//Pass local player number to the input handler
-	inputHandler.SetPlayerNumber(connectionHandler.GetLocalPlayerNumber());
+		//Pass local player number to the input handler
+		inputHandler.SetPlayerNumber(connectionHandler.GetLocalPlayerNumber());
 
-	//Initialise message handler
-	messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
+		//Initialise message handler
+		messageHandler.Initialise(connectionHandler.GetOpponentIP(), connectionHandler.GetOpponentPort(), connectionHandler.GetSocket());
+
+		//Set the round timer count and initialise how many frames are in each second
+		currentState.roundTimer = roundTimerInitial;
+		currentState.framesInSecond = 0;
+
+		//Restart the timer which measures ping
+		pingClock.restart();
+	}
+	else 
+	{
+		roundTimer = roundTimerInitial;
+		framesInSecond = 0;
+	}
 
 	//Start the clock for timing the frames
 	frameClock.restart();
-	
-	//Set the round timer count and initialise how many frames are in each second
-	currentState.roundTimer = roundTimerInitial;
-	currentState.framesInSecond = 0;
-
-	//Restart the timer which measures ping
-	pingClock.restart();
 
 	//Main game window loop
 	while (window.isOpen())
@@ -360,7 +381,7 @@ int main()
 
 			if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Escape)
 			{
-				RecordInputs(*stateManager.GetAllInputs());
+				//RecordInputs(*stateManager.GetAllInputs());
 				window.close();
 			}
 
@@ -373,9 +394,9 @@ int main()
 				focus = true;
 		}
 
-		if (frameCount == 2499)
+		if (!offlineMode && frameCount == 2499)
 		{
-			RecordInputs(*stateManager.GetAllInputs());
+			//RecordInputs(*stateManager.GetAllInputs());
 			window.close();
 		}
 		//Skipped if using delay networking		
@@ -416,38 +437,49 @@ int main()
 			}
 		}
 		//Receives messages without checking for rollbacks
-		else
+		else if (!offlineMode)
 		{
 			messageHandler.ReceiveMessagesDelay();
 		}
 
-		//Used in delay networking to set the current ping
-		if (!rollbackOn && messageHandler.CheckPing())
+		if (!offlineMode)
 		{
-			ping = pingClock.restart();
-			if ((ping.asSeconds() * 60) + 1 < 99)
+
+
+			//Used in delay networking to set the current ping
+			if (!rollbackOn && messageHandler.CheckPing())
 			{
-				currentDelay = ((ping.asSeconds() * 60)/2) + 1;
+				ping = pingClock.restart();
+				if ((ping.asSeconds() * 60) + 1 < 99)
+				{
+					currentDelay = ((ping.asSeconds() * 60) / 2) + 1;
+				}
 			}
-		}
 
-		else if (pingClock.getElapsedTime().asMilliseconds() > pingMaxWait)
-		{
-			messageHandler.ResetPing();
-		}
+			else if (pingClock.getElapsedTime().asMilliseconds() > pingMaxWait)
+			{
+				messageHandler.ResetPing();
+			}
 
-		else if(rollbackOn)
-		{
-			currentDelay = 0;
-		}
+			else if (rollbackOn)
+			{
+				currentDelay = 0;
+			}
 
-		if (!gameFinished && messageHandler.GetRestartReceived())
-		{
-			gameFinished = true;
+			if (!gameFinished && messageHandler.GetRestartReceived())
+			{
+				gameFinished = true;
+			}
+
 		}
 		//Send restart request to opponent and restarts the same if the opponent has also sent a restart request
 		if (gameFinished)
 		{
+			if (offlineMode)
+			{
+				Restart();
+				continue;
+			}
 			messageHandler.SendRestartMessage();
 			if (messageHandler.GetRestartReceived())
 			{
@@ -466,7 +498,14 @@ int main()
 		if (timeSinceLastFrame > timeUntilFrameUpdate)
 		{
 			timeSinceLastFrame -= timeUntilFrameUpdate;
-			RunFrame();
+			if (offlineMode)
+			{
+				RunFrameOffline();
+			}
+			else
+			{
+				RunFrame();
+			}
 		}
 	}
 }
@@ -494,6 +533,19 @@ void RunFrame()
 
 	//Text for the current delay amount in frames
 	delayText.setString("delay: " + std::to_string(currentDelay));
+}
+
+void RunFrameOffline()
+{
+	//TODO HANDLE LOCAL INPUTS FOR BOTH PLAYERS
+
+	//Advance frame forward by 1
+	AdvanceFrame(frameCount);
+	frameCount++;
+
+
+	//Render all sprites and text to the window
+	DrawCurrentFrame();
 }
 
 
@@ -608,7 +660,7 @@ void UpdateInputs()
 		}
 	}
 
-	//For rollback only need to set the inputs for the current frame
+	//For delay only need to set the inputs for the current frame
 	else
 	{
 		for (int i = 0; i < setInputLimit; i++)
@@ -727,16 +779,35 @@ void AdvanceFrame(int frame)
 	}
 	
 	//Updates the round timer
-	if (currentState.framesInSecond >= framesInSecondMax)
+	if (!offlineMode)
 	{
-		currentState.framesInSecond = 0;
-		currentState.roundTimer--;
+		if (currentState.framesInSecond >= framesInSecondMax)
+		{
+			currentState.framesInSecond = 0;
+			currentState.roundTimer--;
+		}
+		roundTimeText.setString(std::to_string(currentState.roundTimer));
 	}
-	roundTimeText.setString(std::to_string(currentState.roundTimer));
+	else
+	{
+		if (framesInSecond >= framesInSecondMax)
+		{
+			framesInSecond = 0;
+			roundTimer--;
+		}
+		roundTimeText.setString(std::to_string(roundTimer));
+	}
 
 	frameText.setString("frame: " + std::to_string(frame));
 
-	currentState.framesInSecond++;
+	if (!offlineMode)
+	{
+		currentState.framesInSecond++;
+	}
+	else
+	{
+		framesInSecond++;
+	}
 
 	//Saves the gamestate for rollbacks
 	if (rollbackOn)

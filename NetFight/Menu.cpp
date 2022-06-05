@@ -22,6 +22,12 @@ Menu::Menu(sf::RenderWindow* wind)
 		std::cout << "error loading image.png" << std::endl;
 	}
 
+	//if (!tx3.loadFromFile("images/box.png"))
+	//{
+	//	// error...
+	//	std::cout << "error loading image.png" << std::endl;
+	//}
+
 	if (!tickTexture.loadFromFile("images/tick.png"))
 	{
 		// error...
@@ -68,6 +74,10 @@ Menu::Menu(sf::RenderWindow* wind)
 		rollbackText.setString("Use Rollback");
 		rollbackText.setOutlineColor(sf::Color::Black);
 		rollbackText.setOutlineThickness(5.0f);
+
+		offlineText.setFont(buttonFont);
+		offlineText.setCharacterSize(26);
+		offlineText.setString("Offline");
 	}
 
 	
@@ -75,7 +85,8 @@ Menu::Menu(sf::RenderWindow* wind)
 	m_hostButton = new MenuButton(sp1, sp2, hostText, m_wind);
 	m_clientButton = new MenuButton(sp1, sp2, clientText, m_wind);
 	m_readyButton = new MenuButton(sp1, sp2, readyText, m_wind);
-	m_rollbackButton = new MenuButton(sp3, sp3, rollbackText, m_wind);
+	m_rollbackButton = new MenuButton(sp1, sp2, rollbackText, m_wind);
+	m_offlineButton = new MenuButton(sp1, sp2, offlineText, m_wind);
 	
 
 	m_startButton->SetButtonPosition(sf::Vector2f(100.0f, 100.0f));
@@ -83,6 +94,7 @@ Menu::Menu(sf::RenderWindow* wind)
 	m_clientButton->SetButtonPosition(sf::Vector2f(600.0f, 200.0f));
 	m_readyButton->SetButtonPosition(sf::Vector2f(300.0f, 200.0f));
 	m_rollbackButton->SetButtonPosition(sf::Vector2f(600.0f, 50.0f));
+	m_offlineButton->SetButtonPosition(sf::Vector2f(400.0f, 100.0f));
 
 	m_rollbackButton->SetTextPosition(sf::Vector2f(-150, 10));
 
@@ -104,9 +116,14 @@ void Menu::UpdateMenu()
 	if (state == start)
 	{
 		m_startButton->UpdateButton();
+		m_offlineButton->UpdateButton();
 		if (m_startButton->Pressed())
 		{
 			state = hostClient;
+		}
+		else if (m_offlineButton->Pressed())
+		{
+			startOffline = true;
 		}
 	}
 	else if (state == hostClient)
@@ -168,6 +185,9 @@ void Menu::DrawMenu()
 	{
 		m_wind->draw(m_startButton->GetCurrentSprite());
 		m_wind->draw(m_startButton->GetButtonText());
+
+		m_wind->draw(m_offlineButton->GetCurrentSprite());
+		m_wind->draw(m_offlineButton->GetButtonText());
 	}
 
 	if (state == hostClient)
@@ -244,3 +264,9 @@ bool Menu::GetRollback()
 {
 	return rollBackOn;
 }
+
+bool Menu::GetStartOffline()
+{
+	return startOffline;
+}
+
